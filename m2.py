@@ -483,7 +483,7 @@ class M2File:
 			temp = struct.unpack("h",f.read(2))
 			self.anim_lookup.append(temp)
 			
-		f.seek(hdr.bones.offset):
+		f.seek(hdr.bones.offset)
 		self.bones = []
 		for i in range(hdr.bones.count):
 			temp = Bone(f)
