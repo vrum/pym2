@@ -1,3 +1,4 @@
+#This file contains some helpers for the files
 import struct
 
 SEEK_SET	= 0
@@ -6,9 +7,9 @@ SEEK_END	= 2
 
 def FillLine(f):
 	i = f.tell()
-	n = (16 - ((i) % 16))
+	n = (16 - ((i) % 16))#Calculate the bytes needed to fill up the 0x10 ( == 16)
 	for i in range(n):		
-		f.write("\0")
+		f.write("\0")#write 0-Byte
 		
 	return f
 	

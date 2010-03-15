@@ -15,6 +15,7 @@ DATA_VEC2 = 4
 DATA_FLOAT= 5
 DATA_VEC9 = 6
 
+#Classes for the different structs
 class M2Header:
 	def __init__(self,f):
 		self.magic,         = struct.unpack("i",f.read(4))
@@ -337,7 +338,123 @@ class Light:
 		self.AttStart	= AnimBlock(f,DATA_FLOAT)
 		self.AttEnd	= AnimBlock(f,DATA_FLOAT)
 		self.Enabled	= AnimBlock(f,DATA_INT)
-	
+	def pack(self):
+		pass
+
+class FakeAnim:
+	def __init__(self,f,type):
+		self.nTimes,	= struct.unpack("i",f.read(4))
+		self.ofsTimes,	= struct.unpack("i",f.read(4))
+		
+		oldpos = f.tell()
+		f.seek(self.ofsTimes)
+		self.Times = []
+		for i in range(self.nTimes):
+			temp = struct.unpack("h",f.read(2))
+			self.Times.append(temp)
+		f.seek(oldpos)
+		
+		self.nKeys,	= struct.unpack("i",f.read(4))
+		self.ofsKeys,	= struct.unpack("i",f.read(4))
+		
+		oldpos = f.tell()
+		f.seek(self.ofsKeys)
+		self.Keys = []
+		for i in range(self.nKeys):
+			if (type == DATA_SHORT):
+				temp = struct.unpack("h",f.read(2))
+				self.Keys.append(temp)
+			elif ( type == DATA_VEC3):
+				temp = Vec3(f)
+				self.Keys.append(temp)
+			elif ( type == DATA_VEC2):
+				temp = Vec2(f)
+				self.Keys.append(temp)
+			else:
+				pass
+		f.seek(oldpos)
+			
+	def pack(self):
+		ret = struct.pack("i",self.nTimes)
+		ret += struct.pack("i",self.ofsTimes)
+		ret += struct.pack("i",self.nKeys)
+		ret += struct.pack("i",self.ofsKeys)
+		return ret
+
+class Particle:
+	def __init__(self,f):
+		self.Id,	= struct.unpack("i",f.read(4))
+		self.flags1,	= struct.unpack("h",f.read(2))
+		self.flags2,	= struct.unpack("h",f.read(2))
+		self.Pos,	= Vec3(f)
+		self.bone,	= struct.unpack("h",f.read(2))
+		self.texture,	= struct.unpack("h",f.read(2))
+		
+		self.lenModel,	= struct.unpack("i",f.read(4))
+		self.ofsModel,	= struct.unpack("i",f.read(4))
+		oldpos	= f.tell()
+		f.seek(self.ofsModel)
+		self.ModelName = f.read(self.lenModel)
+		f.seek(oldpos)
+		
+		self.lenParticle,	= struct.unpack("i",f.read(4))
+		self.ofsParticle,	= struct.unpack("i",f.read(4))
+		oldpos	= f.tell()
+		f.seek(self.ofsParticle)
+		self.ParticleName = f.read(self.lenParticle)
+		f.seek(oldpos)
+		
+		self.blend,	= struct.unpack("b",f.read(1))
+		self.emitter,	= struct.unpack("b",f.read(1))
+		self.color_dbc,	= struct.unpack("h",f.read(2))
+		self.particletype, = struct.unpack("b",f.read(1))
+		self.head_or_tail, = struct.unpack("b",f.read(1))
+		self.tex_tile_rot, = struct.unpack("h",f.read(2))
+		self.tex_rows,	= struct.unpack("h",f.read(2))
+		self.tex_cols,	= struct.unpack("h",f.read(2))
+		self.emission_speed, = AnimBlock(f,DATA_FLOAT)
+		self.speed_var, = AnimBlock(f,DATA_FLOAT)
+		self.vert_range, = AnimBlock(f,DATA_FLOAT)
+		self.hor_range, = AnimBlock(f,DATA_FLOAT)
+		self.gravity, = AnimBlock(f,DATA_FLOAT)
+		self.lifespan, = AnimBlock(f,DATA_FLOAT)
+		self.pad1,	= struct.unpack("i",f.read(4))
+		self.emission_rate, = AnimBlock(f,DATA_FLOAT)
+		self.pad2,	= struct.unpack("i",f.read(4))
+		self.emission_area_len, = AnimBlock(f,DATA_FLOAT)
+		self.emission_area_width, = AnimBlock(f,DATA_FLOAT)
+		self.gravity2, = AnimBlock(f,DATA_FLOAT)
+		self.color,	= FakeAnim(f,DATA_VEC3)
+		self.opacity,	= FakeAnim(f,DATA_SHORT)
+		self.size,	= FakeAnim(f,DATA_VEC2)
+		self.pad3	= struct.unpack("2i",f.read(8))
+		self.intensity,	= FakeAnim(f,DATA_SHORT)
+		self.unkfake,	= FakeAnim(f,DATA_SHORT)
+		self.unk1,	= Vec3(f)
+		self.scale,	= Vec3(f)
+		self.slowdown,	= struct.unpack("f",f.read(4))
+		self.unk2	= struct.unpack("5f",f.read(20))
+		self.rot1,	= Vec3(f)
+		self.rot2,	= Vec3(f)
+		self.translation,= Vec3(f)
+		self.unk3	= struct.unpack("4f",f.read(16))
+		
+		self.nUnk,	= struct.unpack("i",f.read(4))
+		self.ofsUnk,	= struct.unpack("i",f.read(4))
+		oldpos = f.tell()
+		self.UnkRef = []
+		f.seek(self.ofsUnk)
+		for i in range(self.nUnk):
+			temp = Vec3(f)
+			self.UnkRef.append(temp)
+		f.seek(oldpos)
+		
+		self.Enabled, = AnimBlock(f,DATA_INT)
+		
+	def pack(self):#todo
+		pass
+		
+		
 class M2File:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
