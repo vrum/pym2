@@ -45,6 +45,30 @@ class Vec2:
 		ret += struct.pack("f",self.y)
 		return ret
 		
+class Vec9:
+	def __init__(self,f):
+		self.x1, = struct.unpack("f",f.read(4))
+		self.x2, = struct.unpack("f",f.read(4))
+		self.x3, = struct.unpack("f",f.read(4))
+		self.y1, = struct.unpack("f",f.read(4))
+		self.y2, = struct.unpack("f",f.read(4))
+		self.y3, = struct.unpack("f",f.read(4))
+		self.z1, = struct.unpack("f",f.read(4))
+		self.z2, = struct.unpack("f",f.read(4))
+		self.z3, = struct.unpack("f",f.read(4))
+		
+	def pack(self):
+		ret = struct.pack("f",self.x1)
+		ret += struct.pack("f",self.x2)
+		ret += struct.pack("f",self.x3)
+		ret += struct.pack("f",self.y1)
+		ret += struct.pack("f",self.y2)
+		ret += struct.pack("f",self.y3)
+		ret += struct.pack("f",self.z1)
+		ret += struct.pack("f",self.z2)
+		ret += struct.pack("f",self.z3)
+		return ret
+		
 class Quat:
 	def __init__(self,f):
 		self.x, = struct.unpack("h",f.read(2))

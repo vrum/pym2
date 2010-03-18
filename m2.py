@@ -168,6 +168,9 @@ class AnimSub:
 			elif(type == DATA_VEC2):
 				temp = Vec2(f)
 				self.values.append(temp)
+			elif(type == DATA_VEC9):
+				temp = Vec9(f)
+				self.values.append(temp)
 			elif(type == DATA_FLOAT):
 				temp = struct.unpack("f",f.read(4))
 				self.values.append(temp)
@@ -339,7 +342,17 @@ class Light:
 		self.AttEnd	= AnimBlock(f,DATA_FLOAT)
 		self.Enabled	= AnimBlock(f,DATA_INT)
 	def pack(self):
-		pass
+		ret = struct.pack("h",self.Type)
+		ret += struct.pack("h",self.Bone)
+		ret += self.Pos.pack()
+		ret += self.AmbientCol.pack()
+		ret += self.AmbientInt.pack()
+		ret += self.DiffuseCol.pack()
+		ret += self.DiffuseInt.pack()
+		ret += self.AttStart.pack()
+		ret += self.AttEnd.pack()
+		ret += self.Enabled.pack()
+		return ret
 
 class FakeAnim:
 	def __init__(self,f,type):
@@ -454,6 +467,65 @@ class Particle:
 	def pack(self):#todo
 		pass
 		
+class Ribbon:
+	def __init__(self,f):
+		self.Id,	= struct.unpack("i",f.read(4))
+		self.Bone,	= struct.unpack("i",f.read(4))
+		self.Pos	= Vec3(f)
+		self.nTexRefs,	= struct.unpack("i",f.read(4))
+		self.ofsTexRefs,= struct.unpack("i",f.read(4))
+		oldpos = f.tell()
+		f.seek(self.ofsTexRefs)
+		self.TexRefs = []
+		for i in range(self.nTexRefs):
+			temp = struct.unpack("i",f.read(4))
+			self.TexRefs.append(temp)
+		f.seek(oldpos)
+		
+		self.nBlendRef,	= struct.unpack("i",f.read(4))
+		self.ofsBlendRef,= struct.unpack("i",f.read(4))
+		oldpos = f.tell()
+		f.seek(self.ofsBlendRef)
+		self.BlendRef = []
+		for i in range(self.nBlendRef):
+			temp = struct.unpack("i",f.read(4))
+			self.BlendRef.append(temp)
+		f.seek(oldpos)
+		
+		self.Color	= AnimBlock(f,DATA_VEC3)
+		self.Opacity	= AnimBlock(f,DATA_SHORT)
+		self.Above	= AnimBlock(f,DATA_FLOAT)
+		self.Below	= AnimBlock(f,DATA_FLOAT)
+		
+		self.Resolution	= struct.unpack("f",f.read(4))
+		self.Length	= struct.unpack("f",f.read(4))
+		self.Angle	= struct.unpack("f",f.read(4))
+		self.Flags	= struct.unpack("h",f.read(2))
+		self.Blend	= struct.unpack("h",f.read(2))
+		
+		self.Unk1	= AnimBlock(f,DATA_SHORT)
+		self.Unk2	= AnimBlock(f,DATA_INT)
+		
+		self.pad	= struct.unpack("i",f.read(4))
+		
+	def pack(self):#todo
+		pass
+		
+		
+class Camera:
+	def __init__(self,f):
+		self.Type,	= struct.unpack("i",f.read(4))
+		self.FOV,	= struct.unpack("f",f.read(4))
+		self.FarClip,	= struct.unpack("f",f.read(4))
+		self.NearClip,	= struct.unpack("f",f.read(4))
+		self.TransPos,	= AnimBlock(f,DATA_VEC9)
+		self.Pos,	= Vec3(f)
+		self.TransTar,	= AnimBlock(f,DATA_VEC9)
+		self.Target,	= Vec3(f)
+		self.Scaling,	= AnimBlock(f,DATA_VEC3)
+		
+	def pack(self):
+		pass
 		
 class M2File:
 	def __init__(self,filename):
@@ -598,5 +670,35 @@ class M2File:
 			temp = struct.unpack("h",f.read(2))
 			self.attach_lookup.append(temp)
 			
+		f.seek(hdr.cameras.offset)
+		self.cameras = []
+		for i in range(hdr.cameras.count):
+			temp = Camera(f)
+			self.cameras.append(temp)
+			
+		f.seek(hdr.camera_lookup.offset)
+		self.camera_lookup = []
+		for i in range(hdr.camera_lookup.count):
+			temp = struct.unpack("h",f.read(2))
+			self.camera_lookup.append(temp)
+			
+		f.seek(hdr.ribbon_emitters.offset)
+		self.ribbon_emitters = []
+		for i in range(hdr.ribbon_emitters.count):
+			temp = Ribbon(f)
+			self.ribbon_emitters.append(temp)
+			
+		f.seek(hdr.particle_emitters.offset)
+		self.particle_emitters = []
+		for i in range(hdr.particle_emitters.count):
+			temp = Particle(f)
+			self.particle_emitters.append(temp)
+			
+		f.close()
+		
+	def write(self,filename):
+		f = open(filename,"w+b")
+		
+		f.close()
 
 		
