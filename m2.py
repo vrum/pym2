@@ -241,7 +241,7 @@ class Bone:
 		return ret
 		
 class Attachment:
-	def __init_(self,f):
+	def __init__(self,f):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.bone,	= struct.unpack("i",f.read(4))
 		self.pos	= Vec3(f)
@@ -299,6 +299,14 @@ class Color:
 	def pack(self):
 		ret = self.color.pack()
 		ret += self.alpha.pack()
+		return ret
+		
+class Transparency:
+	def __init__(self,f):
+		self.alpha = AnimBlock(f,DATA_SHORT)
+		
+	def pack(self):
+		return self.alpha.pack()
 	
 class Event:
 	def __init__(self,f):
@@ -425,31 +433,31 @@ class Particle:
 		self.tex_tile_rot, = struct.unpack("h",f.read(2))
 		self.tex_rows,	= struct.unpack("h",f.read(2))
 		self.tex_cols,	= struct.unpack("h",f.read(2))
-		self.emission_speed, = AnimBlock(f,DATA_FLOAT)
-		self.speed_var, = AnimBlock(f,DATA_FLOAT)
-		self.vert_range, = AnimBlock(f,DATA_FLOAT)
-		self.hor_range, = AnimBlock(f,DATA_FLOAT)
-		self.gravity, = AnimBlock(f,DATA_FLOAT)
-		self.lifespan, = AnimBlock(f,DATA_FLOAT)
+		self.emission_speed = AnimBlock(f,DATA_FLOAT)
+		self.speed_var = AnimBlock(f,DATA_FLOAT)
+		self.vert_range = AnimBlock(f,DATA_FLOAT)
+		self.hor_range = AnimBlock(f,DATA_FLOAT)
+		self.gravity = AnimBlock(f,DATA_FLOAT)
+		self.lifespan = AnimBlock(f,DATA_FLOAT)
 		self.pad1,	= struct.unpack("i",f.read(4))
-		self.emission_rate, = AnimBlock(f,DATA_FLOAT)
+		self.emission_rate = AnimBlock(f,DATA_FLOAT)
 		self.pad2,	= struct.unpack("i",f.read(4))
-		self.emission_area_len, = AnimBlock(f,DATA_FLOAT)
-		self.emission_area_width, = AnimBlock(f,DATA_FLOAT)
-		self.gravity2, = AnimBlock(f,DATA_FLOAT)
-		self.color,	= FakeAnim(f,DATA_VEC3)
-		self.opacity,	= FakeAnim(f,DATA_SHORT)
-		self.size,	= FakeAnim(f,DATA_VEC2)
+		self.emission_area_len = AnimBlock(f,DATA_FLOAT)
+		self.emission_area_width = AnimBlock(f,DATA_FLOAT)
+		self.gravity2 = AnimBlock(f,DATA_FLOAT)
+		self.color	= FakeAnim(f,DATA_VEC3)
+		self.opacity	= FakeAnim(f,DATA_SHORT)
+		self.size	= FakeAnim(f,DATA_VEC2)
 		self.pad3	= struct.unpack("2i",f.read(8))
-		self.intensity,	= FakeAnim(f,DATA_SHORT)
-		self.unkfake,	= FakeAnim(f,DATA_SHORT)
-		self.unk1,	= Vec3(f)
-		self.scale,	= Vec3(f)
+		self.intensity	= FakeAnim(f,DATA_SHORT)
+		self.unkfake	= FakeAnim(f,DATA_SHORT)
+		self.unk1	= Vec3(f)
+		self.scale	= Vec3(f)
 		self.slowdown,	= struct.unpack("f",f.read(4))
 		self.unk2	= struct.unpack("5f",f.read(20))
-		self.rot1,	= Vec3(f)
-		self.rot2,	= Vec3(f)
-		self.translation,= Vec3(f)
+		self.rot1	= Vec3(f)
+		self.rot2	= Vec3(f)
+		self.translation= Vec3(f)
 		self.unk3	= struct.unpack("4f",f.read(16))
 		
 		self.nUnk,	= struct.unpack("i",f.read(4))
@@ -497,16 +505,16 @@ class Ribbon:
 		self.Above	= AnimBlock(f,DATA_FLOAT)
 		self.Below	= AnimBlock(f,DATA_FLOAT)
 		
-		self.Resolution	= struct.unpack("f",f.read(4))
-		self.Length	= struct.unpack("f",f.read(4))
-		self.Angle	= struct.unpack("f",f.read(4))
-		self.Flags	= struct.unpack("h",f.read(2))
-		self.Blend	= struct.unpack("h",f.read(2))
+		self.Resolution,= struct.unpack("f",f.read(4))
+		self.Length,	= struct.unpack("f",f.read(4))
+		self.Angle,	= struct.unpack("f",f.read(4))
+		self.Flags,	= struct.unpack("h",f.read(2))
+		self.Blend,	= struct.unpack("h",f.read(2))
 		
 		self.Unk1	= AnimBlock(f,DATA_SHORT)
 		self.Unk2	= AnimBlock(f,DATA_INT)
 		
-		self.pad	= struct.unpack("i",f.read(4))
+		self.pad,	= struct.unpack("i",f.read(4))
 		
 	def pack(self):#todo
 		pass
@@ -518,14 +526,21 @@ class Camera:
 		self.FOV,	= struct.unpack("f",f.read(4))
 		self.FarClip,	= struct.unpack("f",f.read(4))
 		self.NearClip,	= struct.unpack("f",f.read(4))
-		self.TransPos,	= AnimBlock(f,DATA_VEC9)
-		self.Pos,	= Vec3(f)
-		self.TransTar,	= AnimBlock(f,DATA_VEC9)
-		self.Target,	= Vec3(f)
-		self.Scaling,	= AnimBlock(f,DATA_VEC3)
+		self.TransPos	= AnimBlock(f,DATA_VEC9)
+		self.Pos	= Vec3(f)
+		self.TransTar	= AnimBlock(f,DATA_VEC9)
+		self.Target	= Vec3(f)
+		self.Scaling	= AnimBlock(f,DATA_VEC3)
 		
 	def pack(self):
 		pass
+		
+
+
+def GlobalSequence(f):
+	return struct.unpack("i",f.read(4))
+	
+
 		
 class M2File:
 	def __init__(self,filename):
@@ -535,169 +550,46 @@ class M2File:
 		
 		f.seek(hdr.name.offset)#Go to the name
 		self.name = f.read(hdr.name.count)#Read the name
-		
-		f.seek(hdr.global_sequences.offset)#go to Global Sequences
-		self.gSequ = []#Create Array for Global Sequences
-		for i in range(hdr.global_sequences.count):#Loop to read all Sequences
-			temp = struct.unpack("i",f.read(4))
-			self.gSequ.append(temp)
-			
-			
-		f.seek(hdr.animations.offset)
-		self.animations = [] # Animations or Sequences
-		for i in range(hdr.animations.count):
-			temp = Sequ(f)
-			self.animations.append(temp)
-			
-		f.seek(hdr.anim_lookup.offset)
-		self.anim_lookup = []
-		for i in range(hdr.anim_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.anim_lookup.append(temp)
-			
-		f.seek(hdr.bones.offset)
-		self.bones = []
-		for i in range(hdr.bones.count):
-			temp = Bone(f)
-			self.bones.append(temp)
-			
-		f.seek(hdr.key_bones.offset)
-		self.key_bones = []
-		for i in range(hdr.key_bones.count):
-			temp = struct.unpack("h",f.read(2))
-			self.key_bones.append(temp)
-			
-		f.seek(hdr.vertices.offset)
-		self.vertices = []
-		for i in range(hdr.vertices.count):
-			temp = Vertex(f)
-			self.vertices.append(temp)
-			
-		f.seek(hdr.colors.offset)
-		self.colors = []
-		for i in range(hdr.colors.count):
-			temp = Color(f)
-			self.color.append(temp)
-			
-		f.seek(hdr.textures.offset)
-		self.textures = []
-		for i in range(hdr.textures.count):
-			temp = Texture(f)
-			self.textures.append(temp)
-			
-		f.seek(hdr.transparency.offset)
-		self.transparency = []
-		for i in range(hdr.transparency.count):
-			temp = AnimBlock(f,DATA_SHORT)
-			self.transparency.append(temp)
-		
-		f.seek(hdr.uv_anim.offset)
-		self.uv_anim = []
-		for i in range(hdr.uv_anim.count):
-			temp = UVAnimation(f)
-			self.uv_anim.append(temp)
-		
-		
-		f.seek(hdr.tex_replace.offset)
-		self.tex_replace = []
-		for i in range(hdr.tex_replace.count):
-			temp = struct.unpack("h",f.read(2))
-			self.tex_replace.append(temp)
-		
-		f.seek(hdr.render_flags.offset)
-		self.renderflags = []
-		for i in range(hdr.render_flags.count):
-			temp = Renderflags(f)
-			self.renderflags.append(temp)
-
-		f.seek(hdr.bone_lookup.offset)
-		self.bone_lookup = []
-		for i in range(hdr.bone_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.bone_lookup.append(temp)
-			
-		f.seek(hdr.tex_lookup.offset)
-		self.tex_lookup = []
-		for i in range(hdr.tex_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.tex_lookup.append(temp)
-			
-		f.seek(hdr.tex_units.offset)
-		self.tex_units = []
-		for i in range(hdr.tex_units.count):
-			temp = struct.unpack("h",f.read(2))
-			self.tex_units.append(temp)	
-		
-		f.seek(hdr.trans_lookup.offset)
-		self.trans_lookup = []
-		for i in range(hdr.trans_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.trans_lookup.append(temp)
-		
-		f.seek(hdr.uv_anim_lookup.offset)
-		self.uv_anim_lookup = []
-		for i in range(hdr.uv_anim_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.uv_anim_lookup.append(temp)
-
-		f.seek(hdr.bounding_triangles.offset)
-		self.bounding_triangles = []
-		for i in range(hdr.bounding_triangles.count / 3):
-			temp = struct.unpack("3H",f.read(6))
-			self.bounding_triangles.append(temp)
-			
-		f.seek(hdr.bounding_vertices.offset)
-		self.bounding_vertices = []
-		for i in range(hdr.bounding_vertices.count):
-			temp = Vec3(f)
-			self.bounding_vertices.append(temp)
-			
-		f.seek(hdr.bounding_normals.offset)
-		self.bounding_normals = []
-		for i in range(hdr.bounding_normals.count):
-			temp = Vec3(f)
-			self.bounding_normals.append(temp)
-			
-		f.seek(hdr.attachments.offset)
-		self.attachments = []
-		for i in range(hdr.attachments.count):
-			temp = Attachment(f)
-			self.attachments.append(temp)
-			
-		f.seek(hdr.attach_lookup.offset)
-		self.attach_lookup = []
-		for i in range(hdr.attach_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.attach_lookup.append(temp)
-			
-		f.seek(hdr.cameras.offset)
-		self.cameras = []
-		for i in range(hdr.cameras.count):
-			temp = Camera(f)
-			self.cameras.append(temp)
-			
-		f.seek(hdr.camera_lookup.offset)
-		self.camera_lookup = []
-		for i in range(hdr.camera_lookup.count):
-			temp = struct.unpack("h",f.read(2))
-			self.camera_lookup.append(temp)
-			
-		f.seek(hdr.ribbon_emitters.offset)
-		self.ribbon_emitters = []
-		for i in range(hdr.ribbon_emitters.count):
-			temp = Ribbon(f)
-			self.ribbon_emitters.append(temp)
-			
-		f.seek(hdr.particle_emitters.offset)
-		self.particle_emitters = []
-		for i in range(hdr.particle_emitters.count):
-			temp = Particle(f)
-			self.particle_emitters.append(temp)
+		#Read Blocks
+		self.gSequ		= ReadBlock(f,hdr.global_sequences,GlobalSequence)			
+		self.animations		= ReadBlock(f,hdr.animations,Sequ)		
+		self.anim_lookup	= ReadBlock(f,hdr.anim_lookup,Lookup)
+		self.bones 		= ReadBlock(f,hdr.bones,Bone)
+		self.key_bones 		= ReadBlock(f,hdr.key_bones,Lookup)
+		self.vertices 		= ReadBlock(f,hdr.vertices,Vertex)
+		self.colors		= ReadBlock(f,hdr.colors,Color)
+		self.textures 		= ReadBlock(f,hdr.textures,Texture)	
+		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency)
+		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation)
+		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
+		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
+		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
+		self.tex_lookup 	= ReadBlock(f,hdr.tex_lookup,Lookup)
+		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
+		self.trans_lookup 	= ReadBlock(f,hdr.trans_lookup,Lookup)
+		self.uv_anim_lookup 	= ReadBlock(f,hdr.uv_anim_lookup,Lookup)
+		self.bounding_triangles = ReadBlock(f,hdr.bounding_triangles,Triangle)
+		self.bounding_vertices	= ReadBlock(f,hdr.bounding_vertices,Vec3)
+		self.bounding_normals	= ReadBlock(f,hdr.bounding_normals,Vec3)
+		self.attachments	= ReadBlock(f,hdr.attachments,Attachment)
+		self.attach_lookup	= ReadBlock(f,hdr.attach_lookup,Lookup)
+		self.cameras		= ReadBlock(f,hdr.cameras,Camera)
+		self.camera_lookup 	= ReadBlock(f,hdr.camera_lookup,Lookup)
+		self.ribbon_emitters	= ReadBlock(f,hdr.ribbon_emitters,Ribbon)
+		self.particle_emitters	= ReadBlock(f,hdr.particle_emitters,Particle)
 			
 		f.close()
 		
 	def write(self,filename):
 		f = open(filename,"w+b")
+		
+		f.seek(0)
+		f.write(self.hdr.pack())
+		FillLine(f)
+		
+		self.hdr.name.offset = f.tell()
+		f.write(self.name)
+		FillLine(f)
 		
 		f.close()
 

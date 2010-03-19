@@ -79,40 +79,21 @@ class Material:
 		ret += struct.pack("H",self.animation)
 		return ret
 
+class Propertie:
+	def __init__(self,f):
+		self.Bones = struct.unpack("4b",f.read(4))
+	def pack(self):
+		return struct.pack("4b",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
+	
 class Skin:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
 		self.header	= SkinHeader(f)
-		self.indices	= []
-		self.tri	= []
-		self.prop	= []
-		self.mesh	= []
-		self.texunit	= []
-		
-		f.seek(self.header.Indices.offset)
-		for i in range(self.header.Indices.count):
-			temp	= struct.unpack("h",f.read(2))
-			self.indices.append(temp)
-		
-		f.seek(self.header.Triangles.offset)		
-		for i in range(self.header.Triangles.count / 3):
-			temp	= struct.unpack("3H",f.read(6))
-			self.tri.append(temp)
-			
-		f.seek(self.header.Properties.offset)
-		for i in range(self.header.Properties.count):
-			temp	= struct.unpack("4b",f.read(4))
-			self.prop.append(temp)
-			
-		f.seek(self.header.Submeshes.offset)
-		for i in range(self.header.Submeshes.count):
-			temp	= Mesh(f)
-			self.mesh.append(temp)
-			
-		f.seek(self.header.TextureUnits.offset)
-		for i in range(self.header.TextureUnits.count):
-			temp	= Material(f)
-			self.texunit.append(temp)
+		self.indices	= ReadBlock(f,self.header.Indices,Lookup)
+		self.tri	= ReadBlock(f,self.header.Triangles,Triangle)
+		self.prop	= ReadBlock(f,self.header.Properties,ReadProp)
+		self.mesh	= ReadBlock(f,self.header.Submeshes,Mesh)
+		self.texunit	= ReadBlock(f,self.header.TextureUnits,Material)		
 			
 		
 	def write(self,filename):

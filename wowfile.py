@@ -13,6 +13,20 @@ def FillLine(f):
 		
 	return f
 	
+def ReadBlock(f,chunk,func):
+	f.seek(chunk.offset)
+	ret = []
+	for i in range(chunk.count):
+		temp = func(f)
+		ret.append(temp)
+	return ret
+	
+class Lookup:
+	def __init__(self,f):
+		self.Id, = struct.unpack("h",f.read(2))
+	def pack(self):
+		return struct.pack("h",self.Id)
+	
 
 class Chunk:
 	def __init__(self,f):
@@ -22,6 +36,12 @@ class Chunk:
 	def pack(self):
 		ret = struct.pack("2i",self.count,self.offset)
 		return ret
+		
+class Triangle:
+	def __init__(self,f):
+		self.indices	= struct.unpack("3H",f.read(6))
+	def pack(self):
+		return struct.pack("3H",self.indices[0],self.indices[1],self.indices[2])
 		
 class Vec3:
 	def __init__(self,f):

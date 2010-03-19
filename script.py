@@ -1,16 +1,14 @@
 #example script
 from m2 import *
 
+m2 = M2File("HumanMale.m2")#open m2
+for i in m2.textures:#iterate through textures
+	print i.name#print each texture name
+
+
 f = open("HumanMale.m2","r+b")#open HumanMale.m2 with binary read and write support
 hdr = M2Header(f)#read header
 
-tex = []#create array for textures
-f.seek(hdr.textures.offset,SEEK_SET)#go to the position in the files
-for i in range(hdr.textures.count):#iterate through the textures
-	temp = Texture(f)#read texture
-	print temp.name#print texture name
-	tex.append(temp)#add to array
-	
 
 anims = []
 f.seek(hdr.animations.offset,SEEK_SET)
