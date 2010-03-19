@@ -1,4 +1,3 @@
 ToDo-List:
-	*Writing of M2
-	*Packing of Particles,Lights,Ribbons,Cameras
+	*Writing of Particles,Ribbons
 	*Support of *.anim files

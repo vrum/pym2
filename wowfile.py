@@ -21,6 +21,17 @@ def ReadBlock(f,chunk,func):
 		ret.append(temp)
 	return ret
 	
+def WriteBlock(f,chunk,block):
+	if(chunk.count != 0):
+		chunk.offset = f.tell()
+		for i in range(chunk.count):
+			temp = block[i].pack()
+			f.write(temp)
+		FillLine(f)
+	else:
+		chunk.offset = 0
+	
+	
 class Lookup:
 	def __init__(self,f):
 		self.Id, = struct.unpack("h",f.read(2))

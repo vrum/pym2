@@ -5,11 +5,11 @@ from wowfile import *
 class SkinHeader:
 	def __init__(self,f):
 		self.magic,         = struct.unpack("4s",f.read(4))
-		self.Indices,        = Chunk(f)
-		self.Triangles,      = Chunk(f)
-		self.Properties,     = Chunk(f)
-		self.Submeshes,      = Chunk(f)
-		self.TextureUnits,   = Chunk(f)
+		self.Indices        = Chunk(f)
+		self.Triangles      = Chunk(f)
+		self.Properties     = Chunk(f)
+		self.Submeshes      = Chunk(f)
+		self.TextureUnits   = Chunk(f)
 		self.lod,	    = struct.unpack("i",f.read(4))
 		
 	def pack(self):
@@ -33,7 +33,7 @@ class Mesh:
 		self.start_bone,	= struct.unpack("H",f.read(2))
 		self.unknown,		= struct.unpack("H",f.read(2))
 		self.rootbone,		= struct.unpack("H",f.read(2))
-		self.bound,		= Bounds(f)
+		self.bound		= Bounds(f)
 		
 	def pack(self):
 		ret = struct.pack("i",self.mesh_id)
@@ -85,58 +85,34 @@ class Propertie:
 	def pack(self):
 		return struct.pack("4b",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
 	
-class Skin:
+class SkinFile:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
+		
 		self.header	= SkinHeader(f)
 		self.indices	= ReadBlock(f,self.header.Indices,Lookup)
 		self.tri	= ReadBlock(f,self.header.Triangles,Triangle)
-		self.prop	= ReadBlock(f,self.header.Properties,ReadProp)
+		self.prop	= ReadBlock(f,self.header.Properties,Propertie)
 		self.mesh	= ReadBlock(f,self.header.Submeshes,Mesh)
 		self.texunit	= ReadBlock(f,self.header.TextureUnits,Material)		
 			
+		f.close()
 		
 	def write(self,filename):
 		f = open(filename,"wb")
+		
 		f.write(self.header.pack())
 		
-		ofs = f.tell()
-		self.header.Indices.offset = ofs
-		for i in range(self.header.Indices.count):
-			temp = struct.pack("h",self.indices[i][0])
-			f.write(temp)
-		FillLine(f)
-		
-		ofs = f.tell()
-		self.header.Triangles.offset = ofs
-		for i in range(self.header.Triangles.count / 3):
-			temp = struct.pack("3H",self.tri[i][0],self.tri[i][1],self.tri[i][2])
-			f.write(temp)
-		FillLine(f)
-		
-		ofs = f.tell()
-		self.header.Properties.offset = ofs
-		for i in range(self.header.Properties.count):
-			temp = struct.pack("4b",self.prop[i][0],self.prop[i][1],self.prop[i][2],self.prop[i][3])
-			f.write(temp)
-		FillLine(f)
-		
-		ofs = f.tell()
-		self.header.Submeshes.offset = ofs
-		for i in range(self.header.Submeshes.count):
-			temp = self.mesh[i].pack()
-			f.write(temp)
-		FillLine(f)
-		
-		ofs = f.tell()
-		self.header.TextureUnits.offset = ofs
-		for i in range(self.header.TextureUnits.count):
-			temp = self.texunit[i].pack()
-			f.write(temp)
-		FillLine(f)
+		WriteBlock(f,self.header.Indices,self.indices)
+		WriteBlock(f,self.header.Triangles,self.tri)
+		WriteBlock(f,self.header.Properties,self.prop)
+		WriteBlock(f,self.header.Submeshes,self.mesh)
+		WriteBlock(f,self.header.TextureUnits,self.texunit)
 		
 		f.seek(0,SEEK_SET)
 		f.write(self.header.pack())
+		
+		f.close()
 	
 
 

@@ -147,6 +147,7 @@ class Sequ:
 
 class AnimSub:
 	def __init__(self,f,type):
+		self.type = type
 		self.nEntries,	= struct.unpack("i",f.read(4))
 		self.ofsEntries,= struct.unpack("i",f.read(4))
 		oldpos = f.tell()
@@ -160,10 +161,10 @@ class AnimSub:
 				temp = Vec3(f)
 				self.values.append(temp)
 			elif(type == DATA_INT):
-				temp = struct.unpack("i",f.read(4))
+				temp, = struct.unpack("i",f.read(4))
 				self.values.append(temp)
 			elif(type == DATA_SHORT):
-				temp = struct.unpack("h",f.read(2))
+				temp, = struct.unpack("h",f.read(2))
 				self.values.append(temp)
 			elif(type == DATA_VEC2):
 				temp = Vec2(f)
@@ -172,13 +173,13 @@ class AnimSub:
 				temp = Vec9(f)
 				self.values.append(temp)
 			elif(type == DATA_FLOAT):
-				temp = struct.unpack("f",f.read(4))
+				temp, = struct.unpack("f",f.read(4))
 				self.values.append(temp)
 			else:
 				pass
 		f.seek(oldpos)
 		
-	def pack(self,type):
+	def pack(self):
 		ret = struct.pack("i",self.nEntries)
 		ret += struct.pack("i",self.ofsEntries)
 		return ret
@@ -473,7 +474,7 @@ class Particle:
 		self.Enabled, = AnimBlock(f,DATA_INT)
 		
 	def pack(self):#todo
-		pass
+		return ""
 		
 class Ribbon:
 	def __init__(self,f):
@@ -517,7 +518,7 @@ class Ribbon:
 		self.pad,	= struct.unpack("i",f.read(4))
 		
 	def pack(self):#todo
-		pass
+		return ""
 		
 		
 class Camera:
@@ -533,13 +534,95 @@ class Camera:
 		self.Scaling	= AnimBlock(f,DATA_VEC3)
 		
 	def pack(self):
-		pass
+		ret = struct.pack("i",self.Type)
+		ret += struct.pack("f",self.FOV)
+		ret += struct.pack("f",self.FarClip)
+		ret += struct.pack("f",self.NearClip)
+		ret += self.TransPos.pack()
+		ret += self.Pos.pack()
+		ret += self.TransTar.pack()
+		ret += self.Target.pack()
+		ret += self.Scaling.pack()
+		return ret
 		
 
 
-def GlobalSequence(f):
-	return struct.unpack("i",f.read(4))
+class GlobalSequence:
+	def __init__(self,f):
+		self.Timestamp, = struct.unpack("i",f.read(4))
+	def pack(self):
+		return struct.pack("i",self.Timestamp)
 	
+
+def WriteAnimBlock(f,block):
+	block.ofsTimes = f.tell()
+	for i in block.TimeSubs:
+		f.write(i.pack())
+	FillLine(f)
+	for i in range(block.nTimes):
+		block.TimeSubs[i].ofsEntries = f.tell()	
+		for j in block.TimeSubs[i].values:
+			if(block.TimeSubs[i].type == DATA_QUAT):
+				f.write(j.pack())
+			elif(block.TimeSubs[i].type == DATA_VEC3):
+				f.write(j.pack())
+			elif(block.TimeSubs[i].type == DATA_INT):
+				f.write(struct.pack("i",j))
+			elif(block.TimeSubs[i].type == DATA_SHORT):
+				f.write(struct.pack("h",j))
+			elif(block.TimeSubs[i].type == DATA_VEC2):
+				f.write(j.pack())
+			elif(block.TimeSubs[i].type == DATA_VEC9):
+				f.write(j.pack())
+			elif(block.TimeSubs[i].type == DATA_FLOAT):
+				f.write(struct.pack("f",j))
+			else:
+				pass
+		FillLine(f)
+			
+	FillLine(f)
+	
+	
+	block.ofsKeys = f.tell()
+	for i in block.KeySubs:
+		f.write(i.pack())
+	FillLine(f)
+	for i in range(block.nKeys):
+		block.KeySubs[i].ofsEntries = f.tell()
+		for j in block.KeySubs[i].values:
+			if(block.KeySubs[i].type == DATA_QUAT):
+				f.write(j.pack())
+			elif(block.KeySubs[i].type == DATA_VEC3):
+				f.write(j.pack())
+			elif(block.KeySubs[i].type == DATA_INT):
+				f.write(struct.pack("i",j))
+			elif(block.KeySubs[i].type == DATA_SHORT):
+				f.write(struct.pack("h",j))
+			elif(block.KeySubs[i].type == DATA_VEC2):
+				f.write(j.pack())
+			elif(block.KeySubs[i].type == DATA_VEC9):
+				f.write(j.pack())
+			elif(block.KeySubs[i].type == DATA_FLOAT):
+				f.write(struct.pack("f",j))
+			else:
+				pass
+	FillLine(f)
+	
+	oldpos = f.tell()
+	
+	f.seek(block.ofsTimes)
+	for i in block.TimeSubs:
+		f.write(i.pack())
+		
+	f.seek(block.ofsKeys)
+	for i in block.KeySubs:
+		f.write(i.pack())
+		
+	f.seek(oldpos)
+	
+		
+				
+		
 
 		
 class M2File:
@@ -590,6 +673,103 @@ class M2File:
 		self.hdr.name.offset = f.tell()
 		f.write(self.name)
 		FillLine(f)
+		
+		WriteBlock(f,self.hdr.global_sequences,self.gSequ)			
+		WriteBlock(f,self.hdr.animations,self.animations)		
+		WriteBlock(f,self.hdr.anim_lookup,self.anim_lookup)
+		
+		WriteBlock(f,self.hdr.bones,self.bones)
+		for i in self.bones:
+			WriteAnimBlock(f,i.translation)
+			WriteAnimBlock(f,i.rotation)
+			WriteAnimBlock(f,i.scaling)
+		oldpos = f.tell()
+		f.seek(self.hdr.bones.offset)
+		WriteBlock(f,self.hdr.bones,self.bones)
+		f.seek(oldpos)
+		
+		
+		WriteBlock(f,self.hdr.key_bones,self.key_bones)
+		WriteBlock(f,self.hdr.vertices,self.vertices )
+		
+		WriteBlock(f,self.hdr.colors,self.colors)
+		for i in self.colors:
+			WriteAnimBlock(f,i.color)
+			WriteAnimBlock(f,i.alpha)
+		oldpos = f.tell()
+		f.seek(self.hdr.colors.offset)
+		WriteBlock(f,self.hdr.colors,self.colors)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.textures,self.textures )	
+		for i in self.textures:
+			i.ofs_name = f.tell()
+			f.write(i.name)
+			FillLine(f)
+		oldpos = f.tell()
+		f.seek(self.hdr.textures.offset)
+		WriteBlock(f,self.hdr.textures,self.textures)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.transparency,self.transparency)
+		for i in self.transparency:
+			WriteAnimBlock(f,i.alpha)
+		oldpos = f.tell()
+		f.seek(self.hdr.transparency.offset)
+		WriteBlock(f,self.hdr.transparency,self.transparency)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.uv_anim,self.uv_anim )
+		for i in self.uv_anim:
+			WriteAnimBlock(f,i.translation)
+			WriteAnimBlock(f,i.rotation)
+			WriteAnimBlock(f,i.scaling)
+		oldpos = f.tell()
+		f.seek(self.hdr.uv_anim.offset)
+		WriteBlock(f,self.hdr.uv_anim,self.uv_anim)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.tex_replace,self.tex_replace)
+		WriteBlock(f,self.hdr.render_flags,self.renderflags )
+		WriteBlock(f,self.hdr.bone_lookup,self.bone_lookup)
+		WriteBlock(f,self.hdr.tex_lookup,self.tex_lookup)
+		WriteBlock(f,self.hdr.tex_units,self.tex_units)
+		WriteBlock(f,self.hdr.trans_lookup,self.trans_lookup)
+		WriteBlock(f,self.hdr.uv_anim_lookup,self.uv_anim_lookup)
+		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)
+		WriteBlock(f,self.hdr.bounding_vertices,self.bounding_vertices)
+		WriteBlock(f,self.hdr.bounding_normals,self.bounding_normals)
+		
+		WriteBlock(f,self.hdr.attachments,self.attachments)
+		for i in self.attachments:
+			WriteAnimBlock(f,i.Enabled)
+		oldpos = f.tell()
+		f.seek(self.hdr.attachments.offset)
+		WriteBlock(f,self.hdr.attachments,self.attachments)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.attach_lookup,self.attach_lookup)
+		
+		WriteBlock(f,self.hdr.cameras,self.cameras)
+		for i in self.cameras:
+			WriteAnimBlock(f,i.TransPos)
+			WriteAnimBlock(f,i.TransTar)
+			WriteAnimBlock(f,i.Scaling)
+		oldpos = f.tell()
+		f.seek(self.hdr.cameras.offset)
+		WriteBlock(f,self.hdr.cameras,self.cameras)
+		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.camera_lookup,self.camera_lookup)
+		
+		WriteBlock(f,self.hdr.ribbon_emitters,self.ribbon_emitters)
+		
+		WriteBlock(f,self.hdr.particle_emitters,self.particle_emitters)
+		
+		
+		
+		f.seek(0,SEEK_SET)
+		f.write(self.hdr.pack())
 		
 		f.close()
 
