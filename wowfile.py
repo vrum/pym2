@@ -8,7 +8,7 @@ SEEK_END	= 2
 def FillLine(f):
 	i = f.tell()
 	n = (16 - ((i) % 16))#Calculate the bytes needed to fill up the 0x10 ( == 16)
-	for i in range(n):		
+	for i in xrange(n):		
 		f.write("\0")#write 0-Byte
 		
 	return f
@@ -16,7 +16,7 @@ def FillLine(f):
 def ReadBlock(f,chunk,func):
 	f.seek(chunk.offset)
 	ret = []
-	for i in range(chunk.count):
+	for i in xrange(chunk.count):
 		temp = func(f)
 		ret.append(temp)
 	return ret
@@ -24,7 +24,7 @@ def ReadBlock(f,chunk,func):
 def WriteBlock(f,chunk,block):
 	if(chunk.count != 0):
 		chunk.offset = f.tell()
-		for i in range(chunk.count):
+		for i in xrange(chunk.count):
 			temp = block[i].pack()
 			f.write(temp)
 		FillLine(f)

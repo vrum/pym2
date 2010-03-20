@@ -2,15 +2,12 @@
 from m2 import *
 from skin import *
 
-m2 = M2File("HumanMale2.m2")#open m2
+m2 = M2File("Wisp.m2")#open m2
 for i in m2.textures:#iterate through textures
 	print i.name#print each texture name
 	
-m2.write("HumanMale2.m2")
+m2.write("Wisp.m2")
 	
-skin = SkinFile("HumanMale00.skin")
-	
-skin.write("HumanMale00.skin")
 
 
 f = open("HumanMale.m2","r+b")#open HumanMale.m2 with binary read and write support
