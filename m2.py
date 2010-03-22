@@ -17,44 +17,83 @@ DATA_VEC9 = 6
 
 #Classes for the different structs
 class M2Header:
-	def __init__(self,f):
+	def __init__(self):
+		self.magic         = 808600653
+		self.version        = 264
+		self.name          = Chunk()
+		self.model_type    = 0
+		self.global_sequences = Chunk()
+		self.animations     = Chunk()
+		self.anim_lookup    = Chunk()
+		self.bones          = Chunk()
+		self.key_bones      = Chunk()
+		self.vertices       = Chunk()
+		self.nviews        = 1
+		self.colors         = Chunk()
+		self.textures       = Chunk()
+		self.transparency   = Chunk()
+		self.uv_anim        = Chunk()
+		self.tex_replace    = Chunk()
+		self.render_flags   = Chunk()
+		self.bone_lookup    = Chunk()
+		self.tex_lookup     = Chunk()
+		self.tex_units      = Chunk()
+		self.trans_lookup   = Chunk()
+		self.uv_anim_lookup = Chunk()
+		self.bound	= Bounds()
+		self.vbox	= Bounds()
+		self.bounding_triangles = Chunk()
+		self.bounding_vertices = Chunk()
+		self.bounding_normals = Chunk()
+		self.attachments    = Chunk()
+		self.attach_lookup  = Chunk()
+		self.events         = Chunk()
+		self.lights         = Chunk()
+		self.cameras        = Chunk()
+		self.camera_lookup  = Chunk()
+		self.ribbon_emitters = Chunk()
+		self.particle_emitters = Chunk()	
+		if(self.model_type&8):
+			self.unknown = Chunk()
+			
+	def unpack(self,f):
 		self.magic,         = struct.unpack("i",f.read(4))
 		self.version,        = struct.unpack("i",f.read(4))
-		self.name          = Chunk(f)
+		self.name.unpack(f)
 		self.model_type,    = struct.unpack("i",f.read(4))
-		self.global_sequences = Chunk(f)
-		self.animations     = Chunk(f)
-		self.anim_lookup    = Chunk(f)
-		self.bones          = Chunk(f)
-		self.key_bones      = Chunk(f)
-		self.vertices       = Chunk(f)
+		self.global_sequences.unpack(f)
+		self.animations.unpack(f)
+		self.anim_lookup.unpack(f)
+		self.bones.unpack(f)
+		self.key_bones.unpack(f)
+		self.vertices.unpack(f)
 		self.nviews,        = struct.unpack("i",f.read(4))
-		self.colors         = Chunk(f)
-		self.textures       = Chunk(f)
-		self.transparency   = Chunk(f)
-		self.uv_anim        = Chunk(f)
-		self.tex_replace    = Chunk(f)
-		self.render_flags   = Chunk(f)
-		self.bone_lookup    = Chunk(f)
-		self.tex_lookup     = Chunk(f)
-		self.tex_units      = Chunk(f)
-		self.trans_lookup   = Chunk(f)
-		self.uv_anim_lookup = Chunk(f)
-		self.bound	= Bounds(f)
-		self.vbox	= Bounds(f)
-		self.bounding_triangles = Chunk(f)
-		self.bounding_vertices = Chunk(f)
-		self.bounding_normals = Chunk(f)
-		self.attachments    = Chunk(f)
-		self.attach_lookup  = Chunk(f)
-		self.events         = Chunk(f)
-		self.lights         = Chunk(f)
-		self.cameras        = Chunk(f)
-		self.camera_lookup  = Chunk(f)
-		self.ribbon_emitters = Chunk(f)
-		self.particle_emitters = Chunk(f)	
+		self.colors.unpack(f)
+		self.textures.unpack(f)
+		self.transparency.unpack(f)
+		self.uv_anim.unpack(f)
+		self.tex_replace.unpack(f)
+		self.render_flags.unpack(f)
+		self.bone_lookup.unpack(f)
+		self.tex_lookup.unpack(f)
+		self.tex_units.unpack(f)
+		self.trans_lookup.unpack(f)
+		self.uv_anim_lookup.unpack(f)
+		self.bound.unpack(f)
+		self.vbox.unpack(f)
+		self.bounding_triangles.unpack(f)
+		self.bounding_vertices.unpack(f)
+		self.bounding_normals.unpack(f)
+		self.attachments.unpack(f)
+		self.attach_lookup.unpack(f)
+		self.events.unpack(f)
+		self.lights.unpack(f)
+		self.cameras.unpack(f)
+		self.camera_lookup.unpack(f)
+		self.ribbon_emitters.unpack(f)
+		self.particle_emitters.unpack(f)	
 		if(self.model_type&8):
-			self.unknown = Chunk(f)
+			self.unknown.unpack(f)
 		
 	def pack(self):
 		ret = struct.pack("i",self.magic)
@@ -97,14 +136,22 @@ class M2Header:
 		return ret
 
 class Vertex:
-	def __init__(self,f):
+	def __init__(self):
+		self.pos        = (0,0,0)
+		self.bweights   = (0,0,0,0)
+		self.bindices   = (0,0,0,0)
+		self.normal     = (0,0,0)
+		self.uv         = (0,0)
+		self.unk         = (0,0)
+		
+	def unpack(self,f):
 		self.pos        = struct.unpack("3f",f.read(12))
 		self.bweights   = struct.unpack("4B",f.read(4))
 		self.bindices   = struct.unpack("4B",f.read(4))
 		self.normal     = struct.unpack("3f",f.read(12))
 		self.uv         = struct.unpack("2f",f.read(8))
 		self.unk         = struct.unpack("2f",f.read(8))
-		
+		return self
 	def pack(self):
 		ret = struct.pack("3f",self.pos[0],self.pos[1],self.pos[2])
 		ret += struct.pack("4B",self.bweights[0],self.bweights[1],self.bweights[2],self.bweights[3])
@@ -115,7 +162,21 @@ class Vertex:
 		return ret
 		
 class Sequ:
-	def __init__(self,f):
+	def __init__(self):
+		self.animId	= 0
+		self.subId	= 0
+		self.len	= 0
+		self.moveSpeed	= 0
+		self.flags	= 0
+		self.prob	= 0
+		self.pad	= 0
+		self.unk	= 0
+		self.playSpeed	= 0
+		self.bound	= Bounds()
+		self.next	= 0
+		self.index	= 0
+		
+	def unpack(self,f):
 		self.animId,	= struct.unpack("H",f.read(2))
 		self.subId,	= struct.unpack("H",f.read(2))
 		self.len,	= struct.unpack("i",f.read(4))
@@ -125,10 +186,10 @@ class Sequ:
 		self.pad,	= struct.unpack("h",f.read(2))
 		self.unk	= struct.unpack("2i",f.read(8))
 		self.playSpeed,	= struct.unpack("i",f.read(4))
-		self.bound	= Bounds(f)
+		self.bound.unpack(f)
 		self.next,	= struct.unpack("h",f.read(2))
 		self.index,	= struct.unpack("H",f.read(2))
-		
+		return self
 	def pack(self):
 		ret = struct.pack("H",self.animId)
 		ret += struct.pack("H",self.subId)
@@ -146,7 +207,14 @@ class Sequ:
 	
 
 class AnimSub:
-	def __init__(self,f,type):
+	def __init__(self):
+		self.type = 0
+		self.nEntries	= 0
+		self.ofsEntries= 0
+		self.values = []
+
+		
+	def unpack(self,f,type):
 		self.type = type
 		self.nEntries,	= struct.unpack("i",f.read(4))
 		self.ofsEntries,= struct.unpack("i",f.read(4))
@@ -155,10 +223,10 @@ class AnimSub:
 		self.values = []
 		for i in xrange(self.nEntries):
 			if(type == DATA_QUAT):
-				temp = Quat(f)
+				temp = Quat().unpack(f)
 				self.values.append(temp)
 			elif(type == DATA_VEC3):
-				temp = Vec3(f)
+				temp = Vec3().unpack(f)
 				self.values.append(temp)
 			elif(type == DATA_INT):
 				temp, = struct.unpack("i",f.read(4))
@@ -167,10 +235,10 @@ class AnimSub:
 				temp, = struct.unpack("h",f.read(2))
 				self.values.append(temp)
 			elif(type == DATA_VEC2):
-				temp = Vec2(f)
+				temp = Vec2().unpack(f)
 				self.values.append(temp)
 			elif(type == DATA_VEC9):
-				temp = Vec9(f)
+				temp = Vec9().unpack(f)
 				self.values.append(temp)
 			elif(type == DATA_FLOAT):
 				temp, = struct.unpack("f",f.read(4))
@@ -178,14 +246,25 @@ class AnimSub:
 			else:
 				pass
 		f.seek(oldpos)
-		
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.nEntries)
 		ret += struct.pack("i",self.ofsEntries)
 		return ret
 	
 class AnimBlock:
-	def __init__(self,f,type):
+	def __init__(self):
+		self.interpolation= 0
+		self.gsequ	= 0
+		self.nTimes	= 0
+		self.ofsTimes	= 0
+		self.TimeSubs = []		
+		self.nKeys	= 0
+		self.ofsKeys	= 0		
+		self.KeySubs = []
+
+		
+	def unpack(self,f,type):
 		self.interpolation,= struct.unpack("h",f.read(2))
 		self.gsequ,	= struct.unpack("h",f.read(2))
 		self.nTimes,	= struct.unpack("i",f.read(4))
@@ -195,7 +274,7 @@ class AnimBlock:
 		f.seek(self.ofsTimes)
 		self.TimeSubs = []
 		for i in xrange(self.nTimes):
-			temp = AnimSub(f,DATA_INT)
+			temp = AnimSub().unpack(f,DATA_INT)
 			self.TimeSubs.append(temp)
 		f.seek(oldpos)
 		
@@ -206,10 +285,10 @@ class AnimBlock:
 		f.seek(self.ofsKeys)
 		self.KeySubs = []
 		for i in xrange(self.nKeys):
-			temp = AnimSub(f,type)
+			temp = AnimSub().unpack(f,type)
 			self.KeySubs.append(temp)
 		f.seek(oldpos)
-		
+		return self
 	def pack(self):
 		ret = struct.pack("h",self.interpolation)
 		ret += struct.pack("h",self.gsequ)
@@ -221,15 +300,25 @@ class AnimBlock:
 		
 	
 class Bone:
-	def __init__(self,f):
+	def __init__(self):
+		self.KeyBoneId	= 0
+		self.flags	= 0
+		self.parent	= 0
+		self.unk	= (0,0,0)
+		self.translation= AnimBlock()
+		self.rotation	= AnimBlock()
+		self.scaling	= AnimBlock()
+		self.pivot	= Vec3()
+	def unpack(self,f):
 		self.KeyBoneId,	= struct.unpack("i",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
 		self.parent,	= struct.unpack("h",f.read(2))
 		self.unk	= struct.unpack("3h",f.read(6))
-		self.translation= AnimBlock(f,DATA_VEC3)
-		self.rotation	= AnimBlock(f,DATA_QUAT)
-		self.scaling	= AnimBlock(f,DATA_VEC3)
-		self.pivot	= Vec3(f)
+		self.translation= AnimBlock().unpack(f,DATA_VEC3)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3)
+		self.pivot	= Vec3().unpack(f)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.KeyBoneId)
 		ret += struct.pack("i",self.flags)
@@ -242,11 +331,17 @@ class Bone:
 		return ret
 		
 class Attachment:
-	def __init__(self,f):
+	def __init__(self):
+		self.Id	= 0
+		self.bone	= 0
+		self.pos	= Vec3()
+		self.Enabled	= AnimBlock()
+	def unpack(self,f):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.bone,	= struct.unpack("i",f.read(4))
-		self.pos	= Vec3(f)
+		self.pos	= Vec3().unpack(f)
 		self.Enabled	= AnimBlock(f,DATA_INT)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
 		ret += struct.pack("i",self.bone)
@@ -255,7 +350,14 @@ class Attachment:
 		return ret
 		
 class Texture:
-	def __init__(self,f):
+	def __init__(self):
+		self.type	= 0
+		self.flags	=0
+		self.len_name	= 0
+		self.ofs_name	= 0
+		self.name = ""
+		
+	def unpack(self,f):
 		self.type,	= struct.unpack("i",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
 		self.len_name,	= struct.unpack("i",f.read(4))
@@ -264,6 +366,7 @@ class Texture:
 		f.seek(self.ofs_name)
 		self.name = f.read(self.len_name)
 		f.seek(oldpos)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.type)
 		ret += struct.pack("i",self.flags)
@@ -272,20 +375,28 @@ class Texture:
 		return ret
 		
 class Renderflags:
-	def __init__(self,f):
+	def __init__(self):
+		self.flags	= 0
+		self.blend	= 0
+	def unpack(self,f):
 		self.flags,	= struct.unpack("h",f.read(2))
 		self.blend,	= struct.unpack("h",f.read(2))
+		return self
 	def pack(self):
 		ret = struct.pack("h",self.flags)
 		ret += struct.pack("h",self.blend)
 		return ret
 		
 class UVAnimation:
-	def __init__(self,f):
-		self.translation= AnimBlock(f,DATA_VEC3)
-		self.rotation	= AnimBlock(f,DATA_QUAT)
-		self.scaling	= AnimBlock(f,DATA_VEC3)
-		
+	def __init__(self):
+		self.translation= AnimBlock()
+		self.rotation	= AnimBlock()
+		self.scaling	= AnimBlock()
+	def unpack(self,f):
+		self.translation= AnimBlock().unpack(f,DATA_VEC3)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3)	
+		return self
 	def pack(self):
 		ret = self.translation.pack()
 		ret += self.rotation.pack()
@@ -293,28 +404,46 @@ class UVAnimation:
 		return ret
 
 class Color:
-	def __init__(self,f):
-		self.color = AnimBlock(f,DATA_VEC3)
-		self.alpha = AnimBlock(f,DATA_SHORT)
-		
+	def __init__(self):
+		self.color = AnimBlock()
+		self.alpha = AnimBlock()
+	def unpack(self,f):
+		self.color = AnimBlock().unpack(f,DATA_VEC3)
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT)	
+		return self
 	def pack(self):
 		ret = self.color.pack()
 		ret += self.alpha.pack()
 		return ret
 		
 class Transparency:
-	def __init__(self,f):
-		self.alpha = AnimBlock(f,DATA_SHORT)
-		
+	def __init__(self):
+		self.alpha = AnimBlock()
+	def unpack(self,f):
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT)	
+		return self
 	def pack(self):
 		return self.alpha.pack()
 	
 class Event:
-	def __init__(self,f):
+	def __init__(self):
+		self.Id	= 0
+		self.Data	= 0
+		self.Bone	= 0
+		self.Pos	= Vec3()
+		self.interpolation= 0
+		self.gsequ	= 0
+		self.nTimes	= 0
+		self.ofsTimes	= 0
+
+		self.TimeSubs = []
+
+		
+	def unpack(self,f):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.Data,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
-		self.Pos	= Vec3(f)
+		self.Pos	= Vec3().unpack(f)
 		self.interpolation,= struct.unpack("h",f.read(2))
 		self.gsequ,	= struct.unpack("h",f.read(2))
 		self.nTimes,	= struct.unpack("i",f.read(4))
@@ -324,10 +453,10 @@ class Event:
 		f.seek(self.ofsTimes)
 		self.TimeSubs = []
 		for i in xrange(self.nTimes):
-			temp = AnimSub(f,DATA_INT)
+			temp = AnimSub().unpack(f,DATA_INT)
 			self.TimeSubs.append(temp)
 		f.seek(oldpos)
-	
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
 		ret += struct.pack("i",self.Data)
@@ -340,17 +469,29 @@ class Event:
 		return ret
 	
 class Light:
-	def __init__(self,f):
+	def __init__(self):
+		self.Type	= 0
+		self.Bone	= 0
+		self.Pos	= Vec3()
+		self.AmbientCol	= AnimBlock()
+		self.AmbientInt	= AnimBlock()
+		self.DiffuseCol	= AnimBlock()
+		self.DiffuseInt	= AnimBlock()
+		self.AttStart	= AnimBlock()
+		self.AttEnd	= AnimBlock()
+		self.Enabled	= AnimBlock()
+	def unpack(self,f):
 		self.Type,	= struct.unpack("h",f.read(2))
 		self.Bone,	= struct.unpack("h",f.read(2))
-		self.Pos	= Vec3(f)
-		self.AmbientCol	= AnimBlock(f,DATA_VEC3)
-		self.AmbientInt	= AnimBlock(f,DATA_FLOAT)
-		self.DiffuseCol	= AnimBlock(f,DATA_VEC3)
-		self.DiffuseInt	= AnimBlock(f,DATA_FLOAT)
-		self.AttStart	= AnimBlock(f,DATA_FLOAT)
-		self.AttEnd	= AnimBlock(f,DATA_FLOAT)
-		self.Enabled	= AnimBlock(f,DATA_INT)
+		self.Pos	= Vec3().unpack(f)
+		self.AmbientCol	= AnimBlock().unpack(f,DATA_VEC3)
+		self.AmbientInt	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.DiffuseCol	= AnimBlock().unpack(f,DATA_VEC3)
+		self.DiffuseInt	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.AttStart	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.AttEnd	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.Enabled	= AnimBlock().unpack(f,DATA_INT)
+		return self
 	def pack(self):
 		ret = struct.pack("h",self.Type)
 		ret += struct.pack("h",self.Bone)
@@ -365,7 +506,17 @@ class Light:
 		return ret
 
 class FakeAnim:
-	def __init__(self,f,type):
+	def __init__(self):
+		self.nTimes	= 0
+		self.ofsTimes	= 0
+		self.type = 0
+		self.Times = []		
+		self.nKeys	= 0
+		self.ofsKeys= 0
+		self.Keys = []
+
+		
+	def unpack(self,f,type):
 		self.nTimes,	= struct.unpack("i",f.read(4))
 		self.ofsTimes,	= struct.unpack("i",f.read(4))
 		self.type = type
@@ -389,15 +540,15 @@ class FakeAnim:
 				temp, = struct.unpack("h",f.read(2))
 				self.Keys.append(temp)
 			elif ( type == DATA_VEC3):
-				temp = Vec3(f)
+				temp = Vec3().unpack(f)
 				self.Keys.append(temp)
 			elif ( type == DATA_VEC2):
-				temp = Vec2(f)
+				temp = Vec2().unpack(f)
 				self.Keys.append(temp)
 			else:
 				pass
 		f.seek(oldpos)
-			
+		return self	
 	def pack(self):
 		ret = struct.pack("i",self.nTimes)
 		ret += struct.pack("i",self.ofsTimes)
@@ -406,11 +557,69 @@ class FakeAnim:
 		return ret
 
 class Particle:
-	def __init__(self,f):
+	def __init__(self):
+		self.Id	= 0
+		self.flags1	= 0
+		self.flags2	= 0
+		self.Pos	= Vec3()
+		self.bone	= 0
+		self.texture	= 0
+		
+		self.lenModel	= 0
+		self.ofsModel	= 0
+		self.ModelName = ""
+		
+		self.lenParticle	= 0
+		self.ofsParticle	= 0
+		self.ParticleName = ""
+
+		
+		self.blend	= 0
+		self.emitter	= 0
+		self.color_dbc	= 0
+		self.particletype = 0
+		self.head_or_tail = 0
+		self.tex_tile_rot = 0
+		self.tex_rows	= 0
+		self.tex_cols = 0
+		self.emission_speed = AnimBlock()
+		self.speed_var = AnimBlock()
+		self.vert_range = AnimBlock()
+		self.hor_range = AnimBlock()
+		self.gravity = AnimBlock()
+		self.lifespan = AnimBlock()
+		self.pad1	= 0
+		self.emission_rate = AnimBlock()
+		self.pad2	= 0
+		self.emission_area_len = AnimBlock()
+		self.emission_area_width = AnimBlock()
+		self.gravity2 = AnimBlock()
+		self.color	= FakeAnim()
+		self.opacity	= FakeAnim()
+		self.size	= FakeAnim()
+		self.pad3	= (0,0)
+		self.intensity	= FakeAnim()
+		self.unkfake	= FakeAnim()
+		self.unk1	= Vec3()
+		self.scale	= Vec3()
+		self.slowdown	= 0
+		self.unk2	= (0,0,0,0,0)
+		self.rot1	= Vec3()
+		self.rot2	= Vec3()
+		self.translation= Vec3()
+		self.unk3	= (0,0,0,0)
+		
+		self.nUnk	=0
+		self.ofsUnk	=0
+		self.UnkRef = []
+		
+		self.Enabled = AnimBlock()
+		
+	def unpack(self,f):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.flags1,	= struct.unpack("h",f.read(2))
 		self.flags2,	= struct.unpack("h",f.read(2))
-		self.Pos	= Vec3(f)
+		self.Pos	= Vec3().unpack(f)
 		self.bone,	= struct.unpack("h",f.read(2))
 		self.texture,	= struct.unpack("h",f.read(2))
 		
@@ -436,31 +645,31 @@ class Particle:
 		self.tex_tile_rot, = struct.unpack("h",f.read(2))
 		self.tex_rows,	= struct.unpack("h",f.read(2))
 		self.tex_cols,	= struct.unpack("h",f.read(2))
-		self.emission_speed = AnimBlock(f,DATA_FLOAT)
-		self.speed_var = AnimBlock(f,DATA_FLOAT)
-		self.vert_range = AnimBlock(f,DATA_FLOAT)
-		self.hor_range = AnimBlock(f,DATA_FLOAT)
-		self.gravity = AnimBlock(f,DATA_FLOAT)
-		self.lifespan = AnimBlock(f,DATA_FLOAT)
+		self.emission_speed = AnimBlock().unpack(f,DATA_FLOAT)
+		self.speed_var = AnimBlock().unpack(f,DATA_FLOAT)
+		self.vert_range = AnimBlock().unpack(f,DATA_FLOAT)
+		self.hor_range = AnimBlock().unpack(f,DATA_FLOAT)
+		self.gravity = AnimBlock().unpack(f,DATA_FLOAT)
+		self.lifespan = AnimBlock().unpack(f,DATA_FLOAT)
 		self.pad1,	= struct.unpack("i",f.read(4))
-		self.emission_rate = AnimBlock(f,DATA_FLOAT)
+		self.emission_rate = AnimBlock().unpack(f,DATA_FLOAT)
 		self.pad2,	= struct.unpack("i",f.read(4))
-		self.emission_area_len = AnimBlock(f,DATA_FLOAT)
-		self.emission_area_width = AnimBlock(f,DATA_FLOAT)
-		self.gravity2 = AnimBlock(f,DATA_FLOAT)
-		self.color	= FakeAnim(f,DATA_VEC3)
-		self.opacity	= FakeAnim(f,DATA_SHORT)
-		self.size	= FakeAnim(f,DATA_VEC2)
+		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT)
+		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT)
+		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT)
+		self.color	= FakeAnim().unpack(f,DATA_VEC3)
+		self.opacity	= FakeAnim().unpack(f,DATA_SHORT)
+		self.size	= FakeAnim().unpack(f,DATA_VEC2)
 		self.pad3	= struct.unpack("2i",f.read(8))
-		self.intensity	= FakeAnim(f,DATA_SHORT)
-		self.unkfake	= FakeAnim(f,DATA_SHORT)
-		self.unk1	= Vec3(f)
-		self.scale	= Vec3(f)
+		self.intensity	= FakeAnim().unpack(f,DATA_SHORT)
+		self.unkfake	= FakeAnim().unpack(f,DATA_SHORT)
+		self.unk1	= Vec3().unpack(f)
+		self.scale	= Vec3().unpack(f)
 		self.slowdown,	= struct.unpack("f",f.read(4))
 		self.unk2	= struct.unpack("5f",f.read(20))
-		self.rot1	= Vec3(f)
-		self.rot2	= Vec3(f)
-		self.translation= Vec3(f)
+		self.rot1	= Vec3().unpack(f)
+		self.rot2	= Vec3().unpack(f)
+		self.translation= Vec3().unpack(f)
 		self.unk3	= struct.unpack("4f",f.read(16))
 		
 		self.nUnk,	= struct.unpack("i",f.read(4))
@@ -469,12 +678,12 @@ class Particle:
 		self.UnkRef = []
 		f.seek(self.ofsUnk)
 		for i in xrange(self.nUnk):
-			temp = Vec3(f)
+			temp = Vec3().unpack(f)
 			self.UnkRef.append(temp)
 		f.seek(oldpos)
 		
-		self.Enabled = AnimBlock(f,DATA_INT)
-		
+		self.Enabled = AnimBlock().unpack(f,DATA_INT)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
 		ret += struct.pack("h",self.flags1)
@@ -529,10 +738,39 @@ class Particle:
 		return ret
 		
 class Ribbon:
-	def __init__(self,f):
+	def __init__(self):
+		self.Id	= 0
+		self.Bone	= 0
+		self.Pos	= Vec3()
+		self.nTexRefs,	= 0
+		self.ofsTexRefs= 0
+		self.TexRefs = []
+		
+		self.nBlendRef,	= 0
+		self.ofsBlendRef= 0
+		self.BlendRef = []
+
+		
+		self.Color	= AnimBlock()
+		self.Opacity	= AnimBlock()
+		self.Above	= AnimBlock()
+		self.Below	= AnimBlock()
+		
+		self.Resolution,= 0
+		self.Length	= 0
+		self.Angle	= 0
+		self.Flags	= 0
+		self.Blend	= 0
+		
+		self.Unk1	= AnimBlock()
+		self.Unk2	= AnimBlock()
+		
+		self.pad	= 0
+		
+	def unpack(self,f):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
-		self.Pos	= Vec3(f)
+		self.Pos	= Vec3().unpack(f)
 		self.nTexRefs,	= struct.unpack("i",f.read(4))
 		self.ofsTexRefs,= struct.unpack("i",f.read(4))
 		oldpos = f.tell()
@@ -553,10 +791,10 @@ class Ribbon:
 			self.BlendRef.append(temp)
 		f.seek(oldpos)
 		
-		self.Color	= AnimBlock(f,DATA_VEC3)
-		self.Opacity	= AnimBlock(f,DATA_SHORT)
-		self.Above	= AnimBlock(f,DATA_FLOAT)
-		self.Below	= AnimBlock(f,DATA_FLOAT)
+		self.Color	= AnimBlock().unpack(f,DATA_VEC3)
+		self.Opacity	= AnimBlock().unpack(f,DATA_SHORT)
+		self.Above	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.Below	= AnimBlock().unpack(f,DATA_FLOAT)
 		
 		self.Resolution,= struct.unpack("f",f.read(4))
 		self.Length,	= struct.unpack("f",f.read(4))
@@ -564,11 +802,11 @@ class Ribbon:
 		self.Flags,	= struct.unpack("h",f.read(2))
 		self.Blend,	= struct.unpack("h",f.read(2))
 		
-		self.Unk1	= AnimBlock(f,DATA_SHORT)
-		self.Unk2	= AnimBlock(f,DATA_INT)
+		self.Unk1	= AnimBlock().unpack(f,DATA_SHORT)
+		self.Unk2	= AnimBlock().unpack(f,DATA_INT)
 		
 		self.pad,	= struct.unpack("i",f.read(4))
-		
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
 		ret += struct.pack("i",self.Bone)
@@ -593,17 +831,28 @@ class Ribbon:
 		
 		
 class Camera:
-	def __init__(self,f):
+	def __init__(self):
+		self.Type	= 0
+		self.FOV	= 0
+		self.FarClip	= 0
+		self.NearClip	= 0
+		self.TransPos	= AnimBlock()
+		self.Pos	= Vec3()
+		self.TransTar	= AnimBlock()
+		self.Target	= Vec3()
+		self.Scaling	= AnimBlock()
+		
+	def unpack(self,f):
 		self.Type,	= struct.unpack("i",f.read(4))
 		self.FOV,	= struct.unpack("f",f.read(4))
 		self.FarClip,	= struct.unpack("f",f.read(4))
 		self.NearClip,	= struct.unpack("f",f.read(4))
-		self.TransPos	= AnimBlock(f,DATA_VEC9)
-		self.Pos	= Vec3(f)
-		self.TransTar	= AnimBlock(f,DATA_VEC9)
-		self.Target	= Vec3(f)
-		self.Scaling	= AnimBlock(f,DATA_VEC3)
-		
+		self.TransPos	= AnimBlock().unpack(f,DATA_VEC9)
+		self.Pos	= Vec3().unpack(f)
+		self.TransTar	= AnimBlock().unpack(f,DATA_VEC9)
+		self.Target	= Vec3().unpack(f)
+		self.Scaling	= AnimBlock().unpack(f,DATA_VEC3)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.Type)
 		ret += struct.pack("f",self.FOV)
@@ -619,8 +868,11 @@ class Camera:
 
 
 class GlobalSequence:
-	def __init__(self,f):
+	def __init__(self):
+		self.Timestamp = 0
+	def unpack(self,f):
 		self.Timestamp, = struct.unpack("i",f.read(4))
+		return self
 	def pack(self):
 		return struct.pack("i",self.Timestamp)
 	
@@ -719,7 +971,8 @@ def WriteFakeBlock(f,block):
 class M2File:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
-		self.hdr = M2Header(f)
+		self.hdr = M2Header()
+		self.hdr.unpack(f)
 		hdr = self.hdr #just spare some time in tipping
 		
 		f.seek(hdr.name.offset)#Go to the name

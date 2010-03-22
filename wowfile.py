@@ -17,7 +17,7 @@ def ReadBlock(f,chunk,func):
 	f.seek(chunk.offset)
 	ret = []
 	for i in xrange(chunk.count):
-		temp = func(f)
+		temp = func().unpack(f)
 		ret.append(temp)
 	return ret
 	
@@ -33,33 +33,46 @@ def WriteBlock(f,chunk,block):
 	
 	
 class Lookup:
-	def __init__(self,f):
+	def __init__(self):
+		self.Id = 0
+	def unpack(self,f):
 		self.Id, = struct.unpack("h",f.read(2))
+		return self
 	def pack(self):
 		return struct.pack("h",self.Id)
 	
 
 class Chunk:
-	def __init__(self,f):
+	def __init__(self):
+		self.count     = 0
+		self.offset    = 0
+	def unpack(self,f):
 		self.count,     = struct.unpack("i",f.read(4))
 		self.offset,    = struct.unpack("i",f.read(4))
-		
+		return self		
 	def pack(self):
 		ret = struct.pack("2i",self.count,self.offset)
 		return ret
 		
 class Triangle:
-	def __init__(self,f):
+	def __init__(self):
+		self.indices	= (0,0,0)
+	def unpack(self,f):
 		self.indices	= struct.unpack("3H",f.read(6))
+		return self
 	def pack(self):
 		return struct.pack("3H",self.indices[0],self.indices[1],self.indices[2])
 		
 class Vec3:
-	def __init__(self,f):
+	def __init__(self):
+		self.x	= 0
+		self.y	= 0
+		self.z	= 0
+	def unpack(self,f):
 		self.x,	= struct.unpack("f",f.read(4))
 		self.y,	= struct.unpack("f",f.read(4))
-		self.z,	= struct.unpack("f",f.read(4))
-		
+		self.z,	= struct.unpack("f",f.read(4))	
+		return self
 	def pack(self):
 		ret = struct.pack("f",self.x)
 		ret += struct.pack("f",self.y)
@@ -67,17 +80,30 @@ class Vec3:
 		return ret
 		
 class Vec2:
-	def __init__(self,f):
+	def __init__(self):
+		self.x	= 0
+		self.y	= 0
+	def unpack(self,f):
 		self.x,	= struct.unpack("f",f.read(4))
 		self.y,	= struct.unpack("f",f.read(4))
-		
+		return self		
 	def pack(self):
 		ret = struct.pack("f",self.x)
 		ret += struct.pack("f",self.y)
 		return ret
 		
 class Vec9:
-	def __init__(self,f):
+	def __init__(self):
+		self.x1 = 0
+		self.x2 = 0
+		self.x3 = 0
+		self.y1 = 0
+		self.y2 = 0
+		self.y3 = 0
+		self.z1 = 0
+		self.z2 = 0
+		self.z3 = s0
+	def unpack(self,f):
 		self.x1, = struct.unpack("f",f.read(4))
 		self.x2, = struct.unpack("f",f.read(4))
 		self.x3, = struct.unpack("f",f.read(4))
@@ -87,7 +113,7 @@ class Vec9:
 		self.z1, = struct.unpack("f",f.read(4))
 		self.z2, = struct.unpack("f",f.read(4))
 		self.z3, = struct.unpack("f",f.read(4))
-		
+		return self
 	def pack(self):
 		ret = struct.pack("f",self.x1)
 		ret += struct.pack("f",self.x2)
@@ -101,12 +127,17 @@ class Vec9:
 		return ret
 		
 class Quat:
-	def __init__(self,f):
+	def __init__(self):
+		self.x = 0
+		self.y = 0
+		self.z = 0
+		self.w = 0
+	def unpack(self,f):
 		self.x, = struct.unpack("h",f.read(2))
 		self.y, = struct.unpack("h",f.read(2))
 		self.z, = struct.unpack("h",f.read(2))
 		self.w, = struct.unpack("h",f.read(2))
-		
+		return self	
 	def pack(self):
 		ret = struct.pack("h",self.x)
 		ret += struct.pack("h",self.y)
@@ -115,10 +146,13 @@ class Quat:
 		return ret
 		
 class Bounds:
-	def __init__(self,f):
+	def __init__(self):
+		self.BoundingBox	= (0,0,0,0,0,0)
+		self.Radius		= 0
+	def unpack(self,f):
 		self.BoundingBox	= struct.unpack("6f",f.read(24))
 		self.Radius,		= struct.unpack("f",f.read(4))
-		
+		return self
 	def pack(self):
 		ret = struct.pack("6f",self.BoundingBox[0],self.BoundingBox[1],self.BoundingBox[2],self.BoundingBox[3],self.BoundingBox[4],self.BoundingBox[5])
 		ret += struct.pack("f",self.Radius)

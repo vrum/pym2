@@ -3,17 +3,25 @@ import array
 from wowfile import *
 
 class SkinHeader:
-	def __init__(self,f):
-		self.magic,         = struct.unpack("4s",f.read(4))
-		self.Indices        = Chunk(f)
-		self.Triangles      = Chunk(f)
-		self.Properties     = Chunk(f)
-		self.Submeshes      = Chunk(f)
-		self.TextureUnits   = Chunk(f)
+	def __init__(self):
+		self.magic          = 1313426259
+		self.Indices        = Chunk()
+		self.Triangles      = Chunk()
+		self.Properties     = Chunk()
+		self.Submeshes      = Chunk()
+		self.TextureUnits   = Chunk()
+		self.lod	    = 0
+	def unpack(self,f):
+		self.magic,         = struct.unpack("i",f.read(4))
+		self.Indices.unpack(f)
+		self.Triangles.unpack(f)
+		self.Properties.unpack(f)
+		self.Submeshes.unpack(f)
+		self.TextureUnits.unpack(f)
 		self.lod,	    = struct.unpack("i",f.read(4))
-		
+		return self
 	def pack(self):
-		ret = struct.pack("4s",self.magic)
+		ret = struct.pack("i",self.magic)
 		ret +=  self.Indices.pack()
 		ret +=  self.Triangles.pack()
 		ret +=  self.Properties.pack()
@@ -23,7 +31,19 @@ class SkinHeader:
 		return ret
 	
 class Mesh:
-	def __init__(self,f):
+	def __init__(self):
+		self.mesh_id		= 0
+		self.vert_offset	= 0
+		self.num_verts		= 0
+		self.tri_offset	= 0
+		self.num_tris		= 0
+		self.num_bones		= 0
+		self.start_bone		= 0
+		self.unknown		= 0
+		self.rootbone		= 0
+		self.bound		= Bounds()
+		
+	def unpack(self,f):
 		self.mesh_id,		= struct.unpack("i",f.read(4))
 		self.vert_offset,	= struct.unpack("H",f.read(2))
 		self.num_verts,		= struct.unpack("H",f.read(2))
@@ -33,8 +53,8 @@ class Mesh:
 		self.start_bone,	= struct.unpack("H",f.read(2))
 		self.unknown,		= struct.unpack("H",f.read(2))
 		self.rootbone,		= struct.unpack("H",f.read(2))
-		self.bound		= Bounds(f)
-		
+		self.bound.unpack(f)
+		return self
 	def pack(self):
 		ret = struct.pack("i",self.mesh_id)
 		ret += struct.pack("H",self.vert_offset)
@@ -50,7 +70,20 @@ class Mesh:
 		
 
 class Material:
-	def __init__(self,f):
+	def __init__(self):
+		self.flags         = 0
+		self.shading	    = 0
+		self.submesh       = 0
+		self.submesh2      = 0
+		self.color         = 0
+		self.renderflag    = 0
+		self.texunit 	    = 0
+		self.mode          = 0
+		self.texture       = 0
+		self.texunit2      = 0
+		self.transparency  = 0
+		self.animation      = 0
+	def unpack(self,f):
 		self.flags,         = struct.unpack("H",f.read(2))
 		self.shading,	    = struct.unpack("H",f.read(2))
 		self.submesh,       = struct.unpack("H",f.read(2))
@@ -62,8 +95,8 @@ class Material:
 		self.texture,       = struct.unpack("H",f.read(2))
 		self.texunit2,      = struct.unpack("H",f.read(2))
 		self.transparency,  = struct.unpack("H",f.read(2))
-		self.animation,      = struct.unpack("H",f.read(2))
-		
+		self.animation,      = struct.unpack("H",f.read(2))	
+		return self
 	def pack(self):
 		ret = struct.pack("H",self.flags)
 		ret += struct.pack("H",self.shading)
@@ -80,8 +113,11 @@ class Material:
 		return ret
 
 class Propertie:
-	def __init__(self,f):
+	def __init__(self):
+		self.Bones = (0,0,0,0)
+	def unpack(self,f):
 		self.Bones = struct.unpack("4b",f.read(4))
+		return self
 	def pack(self):
 		return struct.pack("4b",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
 	
@@ -89,12 +125,15 @@ class SkinFile:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
 		
-		self.header	= SkinHeader(f)
+		self.header	= SkinHeader()
+		self.header.unpack(f)
 		self.indices	= ReadBlock(f,self.header.Indices,Lookup)
+		self.header.Triangles.count /= 3;
 		self.tri	= ReadBlock(f,self.header.Triangles,Triangle)
 		self.prop	= ReadBlock(f,self.header.Properties,Propertie)
 		self.mesh	= ReadBlock(f,self.header.Submeshes,Mesh)
-		self.texunit	= ReadBlock(f,self.header.TextureUnits,Material)		
+		self.texunit	= ReadBlock(f,self.header.TextureUnits,Material)	
+		
 			
 		f.close()
 		
@@ -105,6 +144,7 @@ class SkinFile:
 		
 		WriteBlock(f,self.header.Indices,self.indices)
 		WriteBlock(f,self.header.Triangles,self.tri)
+		self.header.Triangles.count *= 3;
 		WriteBlock(f,self.header.Properties,self.prop)
 		WriteBlock(f,self.header.Submeshes,self.mesh)
 		WriteBlock(f,self.header.TextureUnits,self.texunit)
