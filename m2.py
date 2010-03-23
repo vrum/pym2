@@ -1,5 +1,8 @@
 import struct
 import array
+import os
+
+#customs
 from wowfile import *
 
 #Tilting Values
@@ -214,38 +217,67 @@ class AnimSub:
 		self.values = []
 
 		
-	def unpack(self,f,type):
+	def unpack(self,f,type,animfile = None):
 		self.type = type
 		self.nEntries,	= struct.unpack("i",f.read(4))
 		self.ofsEntries,= struct.unpack("i",f.read(4))
-		oldpos = f.tell()
-		f.seek(self.ofsEntries)
-		self.values = []
-		for i in xrange(self.nEntries):
-			if(type == DATA_QUAT):
-				temp = Quat().unpack(f)
-				self.values.append(temp)
-			elif(type == DATA_VEC3):
-				temp = Vec3().unpack(f)
-				self.values.append(temp)
-			elif(type == DATA_INT):
-				temp, = struct.unpack("i",f.read(4))
-				self.values.append(temp)
-			elif(type == DATA_SHORT):
-				temp, = struct.unpack("h",f.read(2))
-				self.values.append(temp)
-			elif(type == DATA_VEC2):
-				temp = Vec2().unpack(f)
-				self.values.append(temp)
-			elif(type == DATA_VEC9):
-				temp = Vec9().unpack(f)
-				self.values.append(temp)
-			elif(type == DATA_FLOAT):
-				temp, = struct.unpack("f",f.read(4))
-				self.values.append(temp)
-			else:
-				pass
-		f.seek(oldpos)
+		if(animfile == None):
+			oldpos = f.tell()
+			f.seek(self.ofsEntries)
+			self.values = []
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(f)
+					self.values.append(temp)
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(f)
+					self.values.append(temp)
+				elif(type == DATA_INT):
+					temp, = struct.unpack("i",f.read(4))
+					self.values.append(temp)
+				elif(type == DATA_SHORT):
+					temp, = struct.unpack("h",f.read(2))
+					self.values.append(temp)
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(f)
+					self.values.append(temp)
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(f)
+					self.values.append(temp)
+				elif(type == DATA_FLOAT):
+					temp, = struct.unpack("f",f.read(4))
+					self.values.append(temp)
+				else:
+					pass
+			f.seek(oldpos)
+		else:
+			file = open(animfile[1],"r+b")			
+			file.seek(self.ofsEntries)
+			self.values = []
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(file)
+					self.values.append(temp)
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(file)
+					self.values.append(temp)
+				elif(type == DATA_INT):
+					temp, = struct.unpack("i",file.read(4))
+					self.values.append(temp)
+				elif(type == DATA_SHORT):
+					temp, = struct.unpack("h",file.read(2))
+					self.values.append(temp)
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(file)
+					self.values.append(temp)
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(file)
+					self.values.append(temp)
+				elif(type == DATA_FLOAT):
+					temp, = struct.unpack("f",file.read(4))
+					self.values.append(temp)
+				else:
+					pass
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.nEntries)
@@ -264,7 +296,7 @@ class AnimBlock:
 		self.KeySubs = []
 
 		
-	def unpack(self,f,type):
+	def unpack(self,f,type,animfiles):
 		self.interpolation,= struct.unpack("h",f.read(2))
 		self.gsequ,	= struct.unpack("h",f.read(2))
 		self.nTimes,	= struct.unpack("i",f.read(4))
@@ -274,7 +306,10 @@ class AnimBlock:
 		f.seek(self.ofsTimes)
 		self.TimeSubs = []
 		for i in xrange(self.nTimes):
-			temp = AnimSub().unpack(f,DATA_INT)
+			if(animfiles[i][0] == True):
+				temp = AnimSub().unpack(f,DATA_INT,animfiles[i])
+			else:
+				temp = AnimSub().unpack(f,DATA_INT)
 			self.TimeSubs.append(temp)
 		f.seek(oldpos)
 		
@@ -285,7 +320,10 @@ class AnimBlock:
 		f.seek(self.ofsKeys)
 		self.KeySubs = []
 		for i in xrange(self.nKeys):
-			temp = AnimSub().unpack(f,type)
+			if(animfiles[i][0] == True):
+				temp = AnimSub().unpack(f,type,animfiles[i])
+			else:
+				temp = AnimSub().unpack(f,type)
 			self.KeySubs.append(temp)
 		f.seek(oldpos)
 		return self
@@ -298,7 +336,6 @@ class AnimBlock:
 		ret += struct.pack("i",self.ofsKeys)
 		return ret
 		
-	
 class Bone:
 	def __init__(self):
 		self.KeyBoneId	= 0
@@ -309,14 +346,14 @@ class Bone:
 		self.rotation	= AnimBlock()
 		self.scaling	= AnimBlock()
 		self.pivot	= Vec3()
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.KeyBoneId,	= struct.unpack("i",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
 		self.parent,	= struct.unpack("h",f.read(2))
 		self.unk	= struct.unpack("3h",f.read(6))
-		self.translation= AnimBlock().unpack(f,DATA_VEC3)
-		self.rotation	= AnimBlock().unpack(f,DATA_QUAT)
-		self.scaling	= AnimBlock().unpack(f,DATA_VEC3)
+		self.translation= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT,animfiles)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
 		self.pivot	= Vec3().unpack(f)
 		return self
 	def pack(self):
@@ -336,11 +373,11 @@ class Attachment:
 		self.bone	= 0
 		self.pos	= Vec3()
 		self.Enabled	= AnimBlock()
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.bone,	= struct.unpack("i",f.read(4))
 		self.pos	= Vec3().unpack(f)
-		self.Enabled	= AnimBlock(f,DATA_INT)
+		self.Enabled	= AnimBlock().unpack(f,DATA_INT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
@@ -392,10 +429,10 @@ class UVAnimation:
 		self.translation= AnimBlock()
 		self.rotation	= AnimBlock()
 		self.scaling	= AnimBlock()
-	def unpack(self,f):
-		self.translation= AnimBlock().unpack(f,DATA_VEC3)
-		self.rotation	= AnimBlock().unpack(f,DATA_QUAT)
-		self.scaling	= AnimBlock().unpack(f,DATA_VEC3)	
+	def unpack(self,f,animfiles):
+		self.translation= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT,animfiles)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)	
 		return self
 	def pack(self):
 		ret = self.translation.pack()
@@ -407,9 +444,9 @@ class Color:
 	def __init__(self):
 		self.color = AnimBlock()
 		self.alpha = AnimBlock()
-	def unpack(self,f):
-		self.color = AnimBlock().unpack(f,DATA_VEC3)
-		self.alpha = AnimBlock().unpack(f,DATA_SHORT)	
+	def unpack(self,f,animfiles):
+		self.color = AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT,animfiles)	
 		return self
 	def pack(self):
 		ret = self.color.pack()
@@ -419,8 +456,8 @@ class Color:
 class Transparency:
 	def __init__(self):
 		self.alpha = AnimBlock()
-	def unpack(self,f):
-		self.alpha = AnimBlock().unpack(f,DATA_SHORT)	
+	def unpack(self,f,animfiles):
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT,animfiles)	
 		return self
 	def pack(self):
 		return self.alpha.pack()
@@ -480,17 +517,17 @@ class Light:
 		self.AttStart	= AnimBlock()
 		self.AttEnd	= AnimBlock()
 		self.Enabled	= AnimBlock()
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.Type,	= struct.unpack("h",f.read(2))
 		self.Bone,	= struct.unpack("h",f.read(2))
 		self.Pos	= Vec3().unpack(f)
-		self.AmbientCol	= AnimBlock().unpack(f,DATA_VEC3)
-		self.AmbientInt	= AnimBlock().unpack(f,DATA_FLOAT)
-		self.DiffuseCol	= AnimBlock().unpack(f,DATA_VEC3)
-		self.DiffuseInt	= AnimBlock().unpack(f,DATA_FLOAT)
-		self.AttStart	= AnimBlock().unpack(f,DATA_FLOAT)
-		self.AttEnd	= AnimBlock().unpack(f,DATA_FLOAT)
-		self.Enabled	= AnimBlock().unpack(f,DATA_INT)
+		self.AmbientCol	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.AmbientInt	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.DiffuseCol	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.DiffuseInt	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.AttStart	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.AttEnd	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.Enabled	= AnimBlock().unpack(f,DATA_INT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("h",self.Type)
@@ -615,7 +652,7 @@ class Particle:
 		
 		self.Enabled = AnimBlock()
 		
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.flags1,	= struct.unpack("h",f.read(2))
 		self.flags2,	= struct.unpack("h",f.read(2))
@@ -645,24 +682,24 @@ class Particle:
 		self.tex_tile_rot, = struct.unpack("h",f.read(2))
 		self.tex_rows,	= struct.unpack("h",f.read(2))
 		self.tex_cols,	= struct.unpack("h",f.read(2))
-		self.emission_speed = AnimBlock().unpack(f,DATA_FLOAT)
-		self.speed_var = AnimBlock().unpack(f,DATA_FLOAT)
-		self.vert_range = AnimBlock().unpack(f,DATA_FLOAT)
-		self.hor_range = AnimBlock().unpack(f,DATA_FLOAT)
-		self.gravity = AnimBlock().unpack(f,DATA_FLOAT)
-		self.lifespan = AnimBlock().unpack(f,DATA_FLOAT)
+		self.emission_speed = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.speed_var = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.vert_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.hor_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.gravity = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.lifespan = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.pad1,	= struct.unpack("i",f.read(4))
-		self.emission_rate = AnimBlock().unpack(f,DATA_FLOAT)
+		self.emission_rate = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.pad2,	= struct.unpack("i",f.read(4))
-		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT)
-		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT)
-		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT)
-		self.color	= FakeAnim().unpack(f,DATA_VEC3)
-		self.opacity	= FakeAnim().unpack(f,DATA_SHORT)
-		self.size	= FakeAnim().unpack(f,DATA_VEC2)
+		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.color	= FakeAnim().unpack(f,DATA_VEC3,animfiles)
+		self.opacity	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
+		self.size	= FakeAnim().unpack(f,DATA_VEC2,animfiles)
 		self.pad3	= struct.unpack("2i",f.read(8))
-		self.intensity	= FakeAnim().unpack(f,DATA_SHORT)
-		self.unkfake	= FakeAnim().unpack(f,DATA_SHORT)
+		self.intensity	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
+		self.unkfake	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
 		self.unk1	= Vec3().unpack(f)
 		self.scale	= Vec3().unpack(f)
 		self.slowdown,	= struct.unpack("f",f.read(4))
@@ -682,7 +719,7 @@ class Particle:
 			self.UnkRef.append(temp)
 		f.seek(oldpos)
 		
-		self.Enabled = AnimBlock().unpack(f,DATA_INT)
+		self.Enabled = AnimBlock().unpack(f,DATA_INT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
@@ -767,7 +804,7 @@ class Ribbon:
 		
 		self.pad	= 0
 		
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
 		self.Pos	= Vec3().unpack(f)
@@ -791,10 +828,10 @@ class Ribbon:
 			self.BlendRef.append(temp)
 		f.seek(oldpos)
 		
-		self.Color	= AnimBlock().unpack(f,DATA_VEC3)
-		self.Opacity	= AnimBlock().unpack(f,DATA_SHORT)
-		self.Above	= AnimBlock().unpack(f,DATA_FLOAT)
-		self.Below	= AnimBlock().unpack(f,DATA_FLOAT)
+		self.Color	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.Opacity	= AnimBlock().unpack(f,DATA_SHORT,animfiles)
+		self.Above	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.Below	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		
 		self.Resolution,= struct.unpack("f",f.read(4))
 		self.Length,	= struct.unpack("f",f.read(4))
@@ -802,8 +839,8 @@ class Ribbon:
 		self.Flags,	= struct.unpack("h",f.read(2))
 		self.Blend,	= struct.unpack("h",f.read(2))
 		
-		self.Unk1	= AnimBlock().unpack(f,DATA_SHORT)
-		self.Unk2	= AnimBlock().unpack(f,DATA_INT)
+		self.Unk1	= AnimBlock().unpack(f,DATA_SHORT,animfiles)
+		self.Unk2	= AnimBlock().unpack(f,DATA_INT,animfiles)
 		
 		self.pad,	= struct.unpack("i",f.read(4))
 		return self
@@ -842,16 +879,16 @@ class Camera:
 		self.Target	= Vec3()
 		self.Scaling	= AnimBlock()
 		
-	def unpack(self,f):
+	def unpack(self,f,animfiles):
 		self.Type,	= struct.unpack("i",f.read(4))
 		self.FOV,	= struct.unpack("f",f.read(4))
 		self.FarClip,	= struct.unpack("f",f.read(4))
 		self.NearClip,	= struct.unpack("f",f.read(4))
-		self.TransPos	= AnimBlock().unpack(f,DATA_VEC9)
+		self.TransPos	= AnimBlock().unpack(f,DATA_VEC9,animfiles)
 		self.Pos	= Vec3().unpack(f)
-		self.TransTar	= AnimBlock().unpack(f,DATA_VEC9)
+		self.TransTar	= AnimBlock().unpack(f,DATA_VEC9,animfiles)
 		self.Target	= Vec3().unpack(f)
-		self.Scaling	= AnimBlock().unpack(f,DATA_VEC3)
+		self.Scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Type)
@@ -963,7 +1000,16 @@ def WriteFakeBlock(f,block):
 	FillLine(f)
 	
 	
-		
+def InAnimFile(a_name,anim):
+	first = str(anim.animId)
+	while len(first) < 4:
+		first = "0" +first
+	scnd  = str(anim.subId)
+	while len(scnd) < 2:
+		scnd = "0" +scnd
+	fname = a_name + first + "-" + scnd + ".anim"
+	return (os.path.isfile(fname),fname)
+	
 				
 		
 
@@ -979,15 +1025,19 @@ class M2File:
 		self.name = f.read(hdr.name.count)#Read the name
 		#Read Blocks
 		self.gSequ		= ReadBlock(f,hdr.global_sequences,GlobalSequence)			
-		self.animations		= ReadBlock(f,hdr.animations,Sequ)		
+		self.animations		= ReadBlock(f,hdr.animations,Sequ)
+		self.anim_files		= []
+		tempname = filename[0:len(filename)-3]
+		for i in self.animations:
+			self.anim_files.append(InAnimFile(tempname,i))
 		self.anim_lookup	= ReadBlock(f,hdr.anim_lookup,Lookup)
-		self.bones 		= ReadBlock(f,hdr.bones,Bone)
+		self.bones 		= ReadBlock(f,hdr.bones,Bone,self.anim_files)
 		self.key_bones 		= ReadBlock(f,hdr.key_bones,Lookup)
 		self.vertices 		= ReadBlock(f,hdr.vertices,Vertex)
-		self.colors		= ReadBlock(f,hdr.colors,Color)
+		self.colors		= ReadBlock(f,hdr.colors,Color,self.anim_files)
 		self.textures 		= ReadBlock(f,hdr.textures,Texture)	
-		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency)
-		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation)
+		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency,self.anim_files)
+		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation,self.anim_files)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
 		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
 		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
@@ -998,14 +1048,14 @@ class M2File:
 		self.bounding_triangles = ReadBlock(f,hdr.bounding_triangles,Triangle)
 		self.bounding_vertices	= ReadBlock(f,hdr.bounding_vertices,Vec3)
 		self.bounding_normals	= ReadBlock(f,hdr.bounding_normals,Vec3)
-		self.attachments	= ReadBlock(f,hdr.attachments,Attachment)
+		self.attachments	= ReadBlock(f,hdr.attachments,Attachment,self.anim_files)
 		self.attach_lookup	= ReadBlock(f,hdr.attach_lookup,Lookup)
 		self.events		= ReadBlock(f,hdr.events,Event)
-		self.lights		= ReadBlock(f,hdr.lights,Light)
-		self.cameras		= ReadBlock(f,hdr.cameras,Camera)
+		self.lights		= ReadBlock(f,hdr.lights,Light,self.anim_files)
+		self.cameras		= ReadBlock(f,hdr.cameras,Camera,self.anim_files)
 		self.camera_lookup 	= ReadBlock(f,hdr.camera_lookup,Lookup)
-		self.ribbon_emitters	= ReadBlock(f,hdr.ribbon_emitters,Ribbon)
-		self.particle_emitters	= ReadBlock(f,hdr.particle_emitters,Particle)
+		self.ribbon_emitters	= ReadBlock(f,hdr.ribbon_emitters,Ribbon,self.anim_files)
+		self.particle_emitters	= ReadBlock(f,hdr.particle_emitters,Particle,self.anim_files)
 			
 		f.close()
 		

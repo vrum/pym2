@@ -13,12 +13,17 @@ def FillLine(f):
 		
 	return f
 	
-def ReadBlock(f,chunk,func):
+def ReadBlock(f,chunk,func,animfiles = None):
 	f.seek(chunk.offset)
 	ret = []
-	for i in xrange(chunk.count):
-		temp = func().unpack(f)
-		ret.append(temp)
+	if(animfiles == None):
+		for i in xrange(chunk.count):
+			temp = func().unpack(f)
+			ret.append(temp)
+	else:
+		for i in xrange(chunk.count):
+			temp = func().unpack(f,animfiles)
+			ret.append(temp)
 	return ret
 	
 def WriteBlock(f,chunk,block):
@@ -68,6 +73,8 @@ class Vec3:
 		self.x	= 0
 		self.y	= 0
 		self.z	= 0
+	def __str__(self):
+		return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
 	def unpack(self,f):
 		self.x,	= struct.unpack("f",f.read(4))
 		self.y,	= struct.unpack("f",f.read(4))
@@ -102,7 +109,7 @@ class Vec9:
 		self.y3 = 0
 		self.z1 = 0
 		self.z2 = 0
-		self.z3 = s0
+		self.z3 = 0
 	def unpack(self,f):
 		self.x1, = struct.unpack("f",f.read(4))
 		self.x2, = struct.unpack("f",f.read(4))
