@@ -694,12 +694,12 @@ class Particle:
 		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
-		self.color	= FakeAnim().unpack(f,DATA_VEC3,animfiles)
-		self.opacity	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
-		self.size	= FakeAnim().unpack(f,DATA_VEC2,animfiles)
+		self.color	= FakeAnim().unpack(f,DATA_VEC3)
+		self.opacity	= FakeAnim().unpack(f,DATA_SHORT)
+		self.size	= FakeAnim().unpack(f,DATA_VEC2)
 		self.pad3	= struct.unpack("2i",f.read(8))
-		self.intensity	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
-		self.unkfake	= FakeAnim().unpack(f,DATA_SHORT,animfiles)
+		self.intensity	= FakeAnim().unpack(f,DATA_SHORT)
+		self.unkfake	= FakeAnim().unpack(f,DATA_SHORT)
 		self.unk1	= Vec3().unpack(f)
 		self.scale	= Vec3().unpack(f)
 		self.slowdown,	= struct.unpack("f",f.read(4))
@@ -779,11 +779,11 @@ class Ribbon:
 		self.Id	= 0
 		self.Bone	= 0
 		self.Pos	= Vec3()
-		self.nTexRefs,	= 0
+		self.nTexRefs	= 0
 		self.ofsTexRefs= 0
 		self.TexRefs = []
 		
-		self.nBlendRef,	= 0
+		self.nBlendRef	= 0
 		self.ofsBlendRef= 0
 		self.BlendRef = []
 
@@ -793,7 +793,7 @@ class Ribbon:
 		self.Above	= AnimBlock()
 		self.Below	= AnimBlock()
 		
-		self.Resolution,= 0
+		self.Resolution = 0
 		self.Length	= 0
 		self.Angle	= 0
 		self.Flags	= 0
