@@ -914,59 +914,105 @@ class GlobalSequence:
 		return struct.pack("i",self.Timestamp)
 	
 
-def WriteAnimBlock(f,block):
+def WriteAnimBlock(f,block,animfiles):
 	block.ofsTimes = f.tell()
 	for i in block.TimeSubs:
 		f.write(i.pack())
 	FillLine(f)
-	for i in xrange(block.nTimes):
-		block.TimeSubs[i].ofsEntries = f.tell()	
-		for j in block.TimeSubs[i].values:
-			if(block.TimeSubs[i].type == DATA_QUAT):
-				f.write(j.pack())
-			elif(block.TimeSubs[i].type == DATA_VEC3):
-				f.write(j.pack())
-			elif(block.TimeSubs[i].type == DATA_INT):
-				f.write(struct.pack("i",j))
-			elif(block.TimeSubs[i].type == DATA_SHORT):
-				f.write(struct.pack("h",j))
-			elif(block.TimeSubs[i].type == DATA_VEC2):
-				f.write(j.pack())
-			elif(block.TimeSubs[i].type == DATA_VEC9):
-				f.write(j.pack())
-			elif(block.TimeSubs[i].type == DATA_FLOAT):
-				f.write(struct.pack("f",j))
-			else:
-				pass
-		FillLine(f)
-			
 	
+	for i in xrange(block.nTimes):
+		if (animfiles[i][0] == False ):
+			block.TimeSubs[i].ofsEntries = f.tell()	
+			for j in block.TimeSubs[i].values:
+				if(block.TimeSubs[i].type == DATA_QUAT):
+					f.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_VEC3):
+					f.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_INT):
+					f.write(struct.pack("i",j))
+				elif(block.TimeSubs[i].type == DATA_SHORT):
+					f.write(struct.pack("h",j))
+				elif(block.TimeSubs[i].type == DATA_VEC2):
+					f.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_VEC9):
+					f.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_FLOAT):
+					f.write(struct.pack("f",j))
+				else:
+					pass
+			FillLine(f)
+		else:
+			file = open(animfiles[i][1],"a+b")	
+			file.seek(0,SEEK_END)
+			block.TimeSubs[i].ofsEntries = file.tell()	
+			for j in block.TimeSubs[i].values:
+				if(block.TimeSubs[i].type == DATA_QUAT):
+					file.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_VEC3):
+					file.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_INT):
+					file.write(struct.pack("i",j))
+				elif(block.TimeSubs[i].type == DATA_SHORT):
+					file.write(struct.pack("h",j))
+				elif(block.TimeSubs[i].type == DATA_VEC2):
+					file.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_VEC9):
+					file.write(j.pack())
+				elif(block.TimeSubs[i].type == DATA_FLOAT):
+					file.write(struct.pack("f",j))
+				else:
+					pass
+			FillLine(file)
+
 	
 	block.ofsKeys = f.tell()
 	for i in block.KeySubs:
 		f.write(i.pack())
 	FillLine(f)
 	for i in xrange(block.nKeys):
-		block.KeySubs[i].ofsEntries = f.tell()
-		for j in block.KeySubs[i].values:
-			if(block.KeySubs[i].type == DATA_QUAT):
-				f.write(j.pack())
-			elif(block.KeySubs[i].type == DATA_VEC3):
-				f.write(j.pack())
-			elif(block.KeySubs[i].type == DATA_INT):
-				f.write(struct.pack("i",j))
-			elif(block.KeySubs[i].type == DATA_SHORT):
-				f.write(struct.pack("h",j))
-			elif(block.KeySubs[i].type == DATA_VEC2):
-				f.write(j.pack())
-			elif(block.KeySubs[i].type == DATA_VEC9):
-				f.write(j.pack())
-			elif(block.KeySubs[i].type == DATA_FLOAT):
-				f.write(struct.pack("f",j))
-			else:
-				pass
-	FillLine(f)
-	
+		if (animfiles[i][0] == False ):
+			block.KeySubs[i].ofsEntries = f.tell()	
+			for j in block.KeySubs[i].values:
+				if(block.KeySubs[i].type == DATA_QUAT):
+					f.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_VEC3):
+					f.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_INT):
+					f.write(struct.pack("i",j))
+				elif(block.KeySubs[i].type == DATA_SHORT):
+					f.write(struct.pack("h",j))
+				elif(block.KeySubs[i].type == DATA_VEC2):
+					f.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_VEC9):
+					f.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_FLOAT):
+					f.write(struct.pack("f",j))
+				else:
+					pass
+			FillLine(f)
+		else:
+			file = open(animfiles[i][1],"a+b")	
+			file.seek(0,SEEK_END)
+			block.KeySubs[i].ofsEntries = file.tell()	
+			for j in block.KeySubs[i].values:
+				if(block.KeySubs[i].type == DATA_QUAT):
+					file.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_VEC3):
+					file.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_INT):
+					file.write(struct.pack("i",j))
+				elif(block.KeySubs[i].type == DATA_SHORT):
+					file.write(struct.pack("h",j))
+				elif(block.KeySubs[i].type == DATA_VEC2):
+					file.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_VEC9):
+					file.write(j.pack())
+				elif(block.KeySubs[i].type == DATA_FLOAT):
+					file.write(struct.pack("f",j))
+				else:
+					pass
+			FillLine(file)
+			
 	oldpos = f.tell()
 	
 	f.seek(block.ofsTimes)
@@ -1009,7 +1055,16 @@ def InAnimFile(a_name,anim):
 		scnd = "0" +scnd
 	fname = a_name + first + "-" + scnd + ".anim"
 	return (os.path.isfile(fname),fname)
-	
+
+def CreateAnimFileName(a_name,anim,animfile):
+	first = str(anim.animId)
+	while len(first) < 4:
+		first = "0" +first
+	scnd  = str(anim.subId)
+	while len(scnd) < 2:
+		scnd = "0" +scnd
+	fname = a_name + first + "-" + scnd + ".anim"
+	return (animfile[0],fname)
 				
 		
 
@@ -1062,6 +1117,12 @@ class M2File:
 	def write(self,filename):
 		f = open(filename,"w+b")
 		
+		tempname = filename[0:len(filename)-3]
+		counter = 0
+		for i in self.animations:
+			self.anim_files[counter] = CreateAnimFileName(tempname,i,self.anim_files[counter])
+			counter += 1
+		
 		f.seek(0)
 		f.write(self.hdr.pack())
 		FillLine(f)
@@ -1076,9 +1137,9 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.bones,self.bones)
 		for i in self.bones:
-			WriteAnimBlock(f,i.translation)
-			WriteAnimBlock(f,i.rotation)
-			WriteAnimBlock(f,i.scaling)
+			WriteAnimBlock(f,i.translation,self.anim_files)
+			WriteAnimBlock(f,i.rotation,self.anim_files)
+			WriteAnimBlock(f,i.scaling,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.bones.offset)
 		WriteBlock(f,self.hdr.bones,self.bones)
@@ -1090,8 +1151,8 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.colors,self.colors)
 		for i in self.colors:
-			WriteAnimBlock(f,i.color)
-			WriteAnimBlock(f,i.alpha)
+			WriteAnimBlock(f,i.color,self.anim_files)
+			WriteAnimBlock(f,i.alpha,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.colors.offset)
 		WriteBlock(f,self.hdr.colors,self.colors)
@@ -1109,7 +1170,7 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.transparency,self.transparency)
 		for i in self.transparency:
-			WriteAnimBlock(f,i.alpha)
+			WriteAnimBlock(f,i.alpha,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.transparency.offset)
 		WriteBlock(f,self.hdr.transparency,self.transparency)
@@ -1117,9 +1178,9 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.uv_anim,self.uv_anim )
 		for i in self.uv_anim:
-			WriteAnimBlock(f,i.translation)
-			WriteAnimBlock(f,i.rotation)
-			WriteAnimBlock(f,i.scaling)
+			WriteAnimBlock(f,i.translation,self.anim_files)
+			WriteAnimBlock(f,i.rotation,self.anim_files)
+			WriteAnimBlock(f,i.scaling,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.uv_anim.offset)
 		WriteBlock(f,self.hdr.uv_anim,self.uv_anim)
@@ -1138,7 +1199,7 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.attachments,self.attachments)
 		for i in self.attachments:
-			WriteAnimBlock(f,i.Enabled)
+			WriteAnimBlock(f,i.Enabled,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.attachments.offset)
 		WriteBlock(f,self.hdr.attachments,self.attachments)
@@ -1164,13 +1225,13 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.lights,self.lights)
 		for i in self.lights:
-			WriteAnimBlock(f,i.AmbientCol)
-			WriteAnimBlock(f,i.AmbientInt)
-			WriteAnimBlock(f,i.DiffuseCol)
-			WriteAnimBlock(f,i.DiffuseInt)
-			WriteAnimBlock(f,i.AttStart)
-			WriteAnimBlock(f,i.AttEnd)
-			WriteAnimBlock(f,i.Enabled)
+			WriteAnimBlock(f,i.AmbientCol,self.anim_files)
+			WriteAnimBlock(f,i.AmbientInt,self.anim_files)
+			WriteAnimBlock(f,i.DiffuseCol,self.anim_files)
+			WriteAnimBlock(f,i.DiffuseInt,self.anim_files)
+			WriteAnimBlock(f,i.AttStart,self.anim_files)
+			WriteAnimBlock(f,i.AttEnd,self.anim_files)
+			WriteAnimBlock(f,i.Enabled,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.lights.offset)
 		WriteBlock(f,self.hdr.lights,self.lights)
@@ -1179,9 +1240,9 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.cameras,self.cameras)
 		for i in self.cameras:
-			WriteAnimBlock(f,i.TransPos)
-			WriteAnimBlock(f,i.TransTar)
-			WriteAnimBlock(f,i.Scaling)
+			WriteAnimBlock(f,i.TransPos,self.anim_files)
+			WriteAnimBlock(f,i.TransTar,self.anim_files)
+			WriteAnimBlock(f,i.Scaling,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.cameras.offset)
 		WriteBlock(f,self.hdr.cameras,self.cameras)
@@ -1199,12 +1260,12 @@ class M2File:
 			for j in i.BlendRef:
 				f.write(struct.pack("i",j))
 			FillLine(f)
-			WriteAnimBlock(f,i.Color)
-			WriteAnimBlock(f,i.Opacity)
-			WriteAnimBlock(f,i.Above)
-			WriteAnimBlock(f,i.Below)
-			WriteAnimBlock(f,i.Unk1)
-			WriteAnimBlock(f,i.Unk2)
+			WriteAnimBlock(f,i.Color,self.anim_files)
+			WriteAnimBlock(f,i.Opacity,self.anim_files)
+			WriteAnimBlock(f,i.Above,self.anim_files)
+			WriteAnimBlock(f,i.Below,self.anim_files)
+			WriteAnimBlock(f,i.Unk1,self.anim_files)
+			WriteAnimBlock(f,i.Unk2,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.ribbon_emitters.offset)
 		WriteBlock(f,self.hdr.ribbon_emitters,self.ribbon_emitters)
@@ -1219,17 +1280,17 @@ class M2File:
 			f.write(i.ParticleName)
 			FillLine(f)
 			
-			WriteAnimBlock(f,i.emission_speed)
-			WriteAnimBlock(f,i.speed_var)
-			WriteAnimBlock(f,i.vert_range)
-			WriteAnimBlock(f,i.hor_range)
-			WriteAnimBlock(f,i.gravity)
-			WriteAnimBlock(f,i.lifespan)
-			WriteAnimBlock(f,i.emission_rate)
-			WriteAnimBlock(f,i.emission_area_len)
-			WriteAnimBlock(f,i.emission_area_width)
-			WriteAnimBlock(f,i.gravity2)
-			WriteAnimBlock(f,i.Enabled)
+			WriteAnimBlock(f,i.emission_speed,self.anim_files)
+			WriteAnimBlock(f,i.speed_var,self.anim_files)
+			WriteAnimBlock(f,i.vert_range,self.anim_files)
+			WriteAnimBlock(f,i.hor_range,self.anim_files)
+			WriteAnimBlock(f,i.gravity,self.anim_files)
+			WriteAnimBlock(f,i.lifespan,self.anim_files)
+			WriteAnimBlock(f,i.emission_rate,self.anim_files)
+			WriteAnimBlock(f,i.emission_area_len,self.anim_files)
+			WriteAnimBlock(f,i.emission_area_width,self.anim_files)
+			WriteAnimBlock(f,i.gravity2,self.anim_files)
+			WriteAnimBlock(f,i.Enabled,self.anim_files)
 			
 			WriteFakeBlock(f,i.color)
 			WriteFakeBlock(f,i.opacity)
