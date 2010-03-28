@@ -8,6 +8,7 @@ from wowfile import *
 #Tilting Values
 TILT_X = 1
 TILT_Y = 2
+TILT_XY= 3
 
 #AnimBlock Data Types
 DATA_QUAT = 0
@@ -24,7 +25,7 @@ class M2Header:
 		self.magic         = 808600653
 		self.version        = 264
 		self.name          = Chunk()
-		self.model_type    = 0
+		self.modeltype    = 0
 		self.global_sequences = Chunk()
 		self.animations     = Chunk()
 		self.anim_lookup    = Chunk()
@@ -56,14 +57,14 @@ class M2Header:
 		self.camera_lookup  = Chunk()
 		self.ribbon_emitters = Chunk()
 		self.particle_emitters = Chunk()	
-		if(self.model_type&8):
+		if(self.modeltype&8):
 			self.unknown = Chunk()
 			
 	def unpack(self,f):
 		self.magic,         = struct.unpack("i",f.read(4))
 		self.version,        = struct.unpack("i",f.read(4))
 		self.name.unpack(f)
-		self.model_type,    = struct.unpack("i",f.read(4))
+		self.modeltype,    = struct.unpack("i",f.read(4))
 		self.global_sequences.unpack(f)
 		self.animations.unpack(f)
 		self.anim_lookup.unpack(f)
@@ -95,14 +96,14 @@ class M2Header:
 		self.camera_lookup.unpack(f)
 		self.ribbon_emitters.unpack(f)
 		self.particle_emitters.unpack(f)	
-		if(self.model_type&8):
+		if(self.modeltype&8):
 			self.unknown.unpack(f)
 		
 	def pack(self):
 		ret = struct.pack("i",self.magic)
 		ret += struct.pack("i",self.version)
 		ret += self.name.pack()
-		ret += struct.pack("i",self.model_type)
+		ret += struct.pack("i",self.modeltype)
 		ret += self.global_sequences.pack()
 		ret += self.animations.pack()
 		ret += self.anim_lookup.pack()
@@ -134,7 +135,7 @@ class M2Header:
 		ret += self.camera_lookup.pack()
 		ret += self.ribbon_emitters.pack()
 		ret += self.particle_emitters.pack()
-		if(self.model_type&8):
+		if(self.modeltype&8):
 			ret += self.unknown.pack()
 		return ret
 
@@ -1217,6 +1218,11 @@ class M2File:
 				i.TimeSubs[n].ofsEntries = f.tell()	
 				for j in i.TimeSubs[n].values:
 					f.write(struct.pack("i",j))
+			oldpos = f.tell()
+			f.seek(i.ofsTimes)
+			for n in i.TimeSubs:
+				f.write(n.pack())
+			f.seek(oldpos)
 		FillLine(f)			
 		oldpos = f.tell()
 		f.seek(self.hdr.events.offset)

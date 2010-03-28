@@ -1,2 +1,2 @@
 ToDo-List:
-	*Support of *.anim files
+	* Write more examples
