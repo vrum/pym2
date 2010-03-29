@@ -75,7 +75,7 @@ class Material:
 		self.shading	    = 0
 		self.submesh       = 0
 		self.submesh2      = 0
-		self.color         = 0
+		self.color         = -1
 		self.renderflag    = 0
 		self.texunit 	    = 0
 		self.mode          = 0
