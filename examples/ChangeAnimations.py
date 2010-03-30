@@ -6,18 +6,21 @@ outName = "HumanFemale.m2"
 im2 = M2File(inName)
 om2 = M2File(outName)
 
-
+#change the anims of the bones :P
 def ChangeAnims(i, j):
-	diffVec = j.pivot - i.pivot
+	diffVec = j.pivot - i.pivot # c = b - a, c is the vector from the bone getting the animations to the bone containg them
 	for k in om2.animations:
 		for n in im2.animations:
-			if (k.animId == n.animId) & (k.subId == n.subId):
+			if (k.animId == n.animId) & (k.subId == n.subId):#if it's the same animation, change the values
+			
 				if (i.translation.nTimes > k.index) & ( j.translation.nTimes > n.index):
-					i.translation.interpolation = j.translation.interpolation
-					i.translation.TimeSubs[k.index] = j.translation.TimeSubs[n.index]
-					i.translation.KeySubs[k.index] = j.translation.KeySubs[n.index]
+					i.translation.interpolation = j.translation.interpolation#change interpolation values
+					i.translation.TimeSubs[k.index] = j.translation.TimeSubs[n.index] #change timestamps
+					i.translation.KeySubs[k.index] = j.translation.KeySubs[n.index] #change values
 					for v in i.translation.KeySubs[k.index].values:
-						v = v - diffVec
+						v = v - diffVec #translation values should be changed to fit the other bone
+						#so it what we do here is: v = v - c 
+						#the value gets a new position, relative to the new bone 
 				
 				if (i.rotation.nTimes > k.index) & ( j.rotation.nTimes > n.index):
 					i.rotation.interpolation = j.rotation.interpolation
@@ -49,47 +52,44 @@ def Dependent(bone,file,id,ego):
 		bone = file.bones[bone.parent]
 	return False
 
-#some bones might be ported also	
+#some bones might be ported also
+#but not the bones depending on it	
 changeBones = (0,1,2,3,4)
 					
 ic = 0
 for i in om2.bones:
-	hasChanged = False	
+
 	jc = 0
 	for j in im2.bones:
-
+		##########################################################
+		#the 5 following blocks define the porting of different  #
+		#parts of the anim-skeleton                              #
+		##########################################################
 		#r shoulder
-		if (Dependent(i,om2,17,ic) & Dependent(j,im2,11,jc)) & (Depth(i,om2) == Depth(j,im2)):
-			ChangeAnims(i,j)
-			hasChanged = True
-			break
+		if (Dependent(i,om2,17,ic) & Dependent(j,im2,11,jc)) & (Depth(i,om2) == Depth(j,im2)):#check if bone is at the same position on each model
+			ChangeAnims(i,j) #change model
+			break # no need to check the other bones anymore
 		#l shoulder
 		if (Dependent(i,om2,16,ic) & Dependent(j,im2,10,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
-			hasChanged = True
 			break
-		#r kneee
+		#r leg
 		if (Dependent(i,om2,5,ic) & Dependent(j,im2,5,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
-			hasChanged = True
 			break
-		#l knee
+		#l leg
 		if (Dependent(i,om2,6,ic) & Dependent(j,im2,6,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
-			hasChanged = True
 			break
 			
 		#head 
 		if (Dependent(i,om2,10,ic) & Dependent(j,im2,9,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
-			hasChanged = True
 			break
 		
 		#the other bones
 		if (ic== jc) & (ic in changeBones):
-			print ic
 			ChangeAnims(i,j)
-			hasChanged = True
 			break
 
 		jc += 1
@@ -102,6 +102,7 @@ for i in om2.bones:
 for k in om2.animations:
 		for n in im2.animations:
 			if (k.animId == n.animId) & (k.subId == n.subId):
+			#change only the values, which are not model dependent and affect the animation
 				k.len = n.len
 				k.moveSpeed = n.moveSpeed
 				k.flags = n.flags
