@@ -179,7 +179,7 @@ class Sequ:
 		self.flags	= 0
 		self.prob	= 0
 		self.pad	= 0
-		self.unk	= 0
+		self.unk	=(0,0)
 		self.playSpeed	= 0
 		self.bound	= Bounds()
 		self.next	= 0

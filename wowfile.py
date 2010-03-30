@@ -69,17 +69,37 @@ class Triangle:
 		return struct.pack("3H",self.indices[0],self.indices[1],self.indices[2])
 		
 class Vec3:
-	def __init__(self):
-		self.x	= 0
-		self.y	= 0
-		self.z	= 0
+	def __init__(self,x = 0.0,y = 0.0, z = 0.0):
+		self.x = float(x)
+		self.y = float(y)
+		self.z = float(z)
 	def __str__(self):
 		return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
+		
+	def __add__(self, val):
+		return Vec3( self.x + val.x, self.y + val.y , self.z + val.z)   
+		
+	def __sub__(self,val):
+		return Vec3( self.x - val.x, self.y - val.y , self.z - val.z)   
+		
+	def __iadd__(self, val):
+		self.x = val.x + self.x
+		self.y = val.y + self.y
+		self.z = val.z + self.z
+		return self
+        
+	def __isub__(self, val):
+		self.x = self.x - val.x
+		self.y = self.y - val.y
+		self.z = self.z - val.z
+		return self
+		
 	def unpack(self,f):
 		self.x,	= struct.unpack("f",f.read(4))
 		self.y,	= struct.unpack("f",f.read(4))
 		self.z,	= struct.unpack("f",f.read(4))	
 		return self
+		
 	def pack(self):
 		ret = struct.pack("f",self.x)
 		ret += struct.pack("f",self.y)
