@@ -1,11 +1,21 @@
 from m2 import *
+from RaceInfo import *
 
-inName = "SkeletonMale.m2"
-outName = "HumanFemale.m2"
+
+input = SkeletonMale
+output = Murloc
+
+inName = input.filename
+outName = output.filename
 
 im2 = M2File(inName)
 om2 = M2File(outName)
 
+
+
+#some bones might be ported also
+#but not the bones depending on it	
+changeBones = (0,1,2,3)#,4)
 #change the anims of the bones :P
 def ChangeAnims(i, j):
 	diffVec = j.pivot - i.pivot # c = b - a, c is the vector from the bone getting the animations to the bone containg them
@@ -52,45 +62,46 @@ def Dependent(bone,file,id,ego):
 		bone = file.bones[bone.parent]
 	return False
 
-#some bones might be ported also
-#but not the bones depending on it	
-changeBones = (0,1,2,3,4)
+
 					
 ic = 0
 for i in om2.bones:
 
 	jc = 0
 	for j in im2.bones:
+	
+
 		##########################################################
 		#the 5 following blocks define the porting of different  #
 		#parts of the anim-skeleton                              #
 		##########################################################
 		#r shoulder
-		if (Dependent(i,om2,17,ic) & Dependent(j,im2,11,jc)) & (Depth(i,om2) == Depth(j,im2)):#check if bone is at the same position on each model
+		if (Dependent(i,om2,output.rshoulder,ic) & Dependent(j,im2,input.rshoulder,jc)) & (Depth(i,om2) == Depth(j,im2)):#check if bone is at the same position on each model
 			ChangeAnims(i,j) #change model
 			break # no need to check the other bones anymore
 		#l shoulder
-		if (Dependent(i,om2,16,ic) & Dependent(j,im2,10,jc)) & (Depth(i,om2) == Depth(j,im2)):
+		if (Dependent(i,om2,output.lshoulder,ic) & Dependent(j,im2,input.lshoulder,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
 			break
 		#r leg
-		if (Dependent(i,om2,5,ic) & Dependent(j,im2,5,jc)) & (Depth(i,om2) == Depth(j,im2)):
+		if (Dependent(i,om2,output.rknee,ic) & Dependent(j,im2,input.rknee,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
 			break
 		#l leg
-		if (Dependent(i,om2,6,ic) & Dependent(j,im2,6,jc)) & (Depth(i,om2) == Depth(j,im2)):
+		if (Dependent(i,om2,output.lknee,ic) & Dependent(j,im2,input.lknee,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
 			break
 			
 		#head 
-		if (Dependent(i,om2,10,ic) & Dependent(j,im2,9,jc)) & (Depth(i,om2) == Depth(j,im2)):
+		if (Dependent(i,om2,output.head,ic) & Dependent(j,im2,input.head,jc)) & (Depth(i,om2) == Depth(j,im2)):
 			ChangeAnims(i,j)
 			break
 		
 		#the other bones
+
 		if (ic== jc) & (ic in changeBones):
 			ChangeAnims(i,j)
-			break
+			#break
 
 		jc += 1
 			
@@ -111,6 +122,6 @@ for k in om2.animations:
 				k.unk = n.unk
 				k.playSpeed = n.playSpeed
 
-outName = "D:\\makempq\\Character\\Human\\Female\\" + outName			
+outName = "D:\\makempq\\Character\\Human\\Female\\HumanFemale.m2"			
 om2.write(outName)
 			
