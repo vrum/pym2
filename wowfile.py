@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #This file contains some helpers for the files
 import struct
 

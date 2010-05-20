@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import struct
 import array
 from wowfile import *
