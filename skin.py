@@ -36,7 +36,7 @@ class Mesh:
 		self.mesh_id		= 0
 		self.vert_offset	= 0
 		self.num_verts		= 0
-		self.tri_offset	= 0
+		self.tri_offset		= 0
 		self.num_tris		= 0
 		self.num_bones		= 0
 		self.start_bone		= 0

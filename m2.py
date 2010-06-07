@@ -301,6 +301,7 @@ class AnimBlock:
 		self.nKeys	= 0
 		self.ofsKeys	= 0		
 		self.KeySubs = []
+		self.type = DATA_INT
 
 		
 	def unpack(self,f,type,animfiles):
@@ -308,6 +309,7 @@ class AnimBlock:
 		self.gsequ,	= struct.unpack("h",f.read(2))
 		self.nTimes,	= struct.unpack("i",f.read(4))
 		self.ofsTimes,	= struct.unpack("i",f.read(4))
+		self.type = type
 		
 		oldpos = f.tell()
 		f.seek(self.ofsTimes)

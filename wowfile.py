@@ -1,6 +1,11 @@
 #!/usr/bin/python
 #This file contains some helpers for the files
 import struct
+from sys import version_info
+if version_info < (3,0):
+	xrange = xrange
+else:
+	xrange = range
 
 SEEK_SET	= 0
 SEEK_CUR	= 1
@@ -75,7 +80,7 @@ class Vec3:
 		self.y = float(y)
 		self.z = float(z)
 	def __str__(self):
-		return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
+		return "{ "+str(self.x)+" , "+str(self.y)+ " , "+str(self.z)+" }"
 		
 	def __add__(self, val):
 		return Vec3( self.x + val.x, self.y + val.y , self.z + val.z)   
@@ -111,6 +116,9 @@ class Vec2:
 	def __init__(self):
 		self.x	= 0
 		self.y	= 0
+	def __str__(self):
+		return "{ "+str(self.x)+" , "+str(self.y)+" }"
+
 	def unpack(self,f):
 		self.x,	= struct.unpack("f",f.read(4))
 		self.y,	= struct.unpack("f",f.read(4))
@@ -131,6 +139,8 @@ class Vec9:
 		self.z1 = 0
 		self.z2 = 0
 		self.z3 = 0
+	def __str__(self):
+		return "{ "+str(self.x1)+" , "+str(self.x2)+" , "+str(self.x3)+" , "+str(self.y1)+ " , "+str(self.y2)+ " , "+str(self.y3)+ " , "+str(self.z1)+ " , "+str(self.z2)+ " , "+str(self.z3)+" }"
 	def unpack(self,f):
 		self.x1, = struct.unpack("f",f.read(4))
 		self.x2, = struct.unpack("f",f.read(4))
@@ -160,6 +170,8 @@ class Quat:
 		self.y = 0
 		self.z = 0
 		self.w = 0
+	def __str__(self):
+		return "{ "+str(self.x)+" , "+str(self.y)+" , "+str(self.z)+" , "+str(self.w)+" }"
 	def unpack(self,f):
 		self.x, = struct.unpack("h",f.read(2))
 		self.y, = struct.unpack("h",f.read(2))
