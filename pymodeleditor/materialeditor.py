@@ -148,6 +148,8 @@ class MaterialEditor(QtGui.QDialog):
 		self.skin = skin
 		for i in range(len(self.skin.texunit)):
 			self.chooseBox.addItem(str(i))
+		if len(self.skin.texunit) != 0:
+			self.lastchoice = 0
 
 		for i in range(len(self.skin.mesh)):
 			temp = str(self.skin.mesh[i].mesh_id)

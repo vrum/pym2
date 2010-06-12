@@ -37,18 +37,20 @@ class UVAnimEditor(QtGui.QDialog):
 		self.line.setFrameShadow(QtGui.QFrame.Sunken)
 		self.line.setObjectName("line")
 
-
-		self.editTranslationButton = QtGui.QPushButton(Dialog)
+		self.translationIcon = QtGui.QIcon("Icons/edit-translation.png")
+		self.editTranslationButton =  QtGui.QPushButton(self.translationIcon,"Edit Translation",Dialog)
 		self.editTranslationButton.setGeometry(QtCore.QRect(10, 50, 120, 28))
 		self.editTranslationButton.setObjectName("editTranslationButton")
 		self.connect(self.editTranslationButton, QtCore.SIGNAL("clicked()"), self.editTranslation) 
 
-		self.editScalingButton = QtGui.QPushButton(Dialog)
+		self.scalingIcon = QtGui.QIcon("Icons/edit-scaling.png")
+		self.editScalingButton = QtGui.QPushButton(self.scalingIcon,"Edit Scaling",Dialog)
 		self.editScalingButton.setGeometry(QtCore.QRect(10, 90, 120, 28))
 		self.editScalingButton.setObjectName("editScalingButton")
 		self.connect(self.editScalingButton, QtCore.SIGNAL("clicked()"), self.editScaling) 
 
-		self.editRotationButton = QtGui.QPushButton(Dialog)
+		self.rotationIcon = QtGui.QIcon("Icons/edit-rotation.png")
+		self.editRotationButton = QtGui.QPushButton(self.rotationIcon,"Edit Rotation",Dialog)
 		self.editRotationButton.setGeometry(QtCore.QRect(10, 130, 120, 28))
 		self.editRotationButton.setObjectName("editRotationButton")
 		self.connect(self.editRotationButton, QtCore.SIGNAL("clicked()"), self.editRotation) 
@@ -85,7 +87,7 @@ class UVAnimEditor(QtGui.QDialog):
 
 
 	def setScaling(self):
-		self.m2.uv_anim[self.comboBox.currentIndex()].translation = self.ScalingEditor.getAnimBlock()
+		self.m2.uv_anim[self.comboBox.currentIndex()].scaling = self.ScalingEditor.getAnimBlock()
 
 	def editScaling(self):		
 		temp = self.comboBox.currentIndex()
@@ -95,7 +97,7 @@ class UVAnimEditor(QtGui.QDialog):
 		self.connect(self.ScalingEditor,QtCore.SIGNAL("AnimBlockEdited()"),self.setScaling)
 
 	def setRotation(self):
-		self.m2.uv_anim[self.comboBox.currentIndex()].translation = self.RotationEditor.getAnimBlock()
+		self.m2.uv_anim[self.comboBox.currentIndex()].rotation = self.RotationEditor.getAnimBlock()
 
 	def editRotation(self):		
 		temp = self.comboBox.currentIndex()

@@ -9,10 +9,12 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui, QtOpenGL
-from OpenGL.GL import *
+
 
 from m2 import *
 from skin import *
+
+from glView import *
 
 from transparencychooser import *
 from renderflags import *
@@ -20,133 +22,8 @@ from textureeditor import *
 from gsequedit import *
 from uvanimeditor import *
 from materialeditor import *
-
-LeftMouse = 0x1
-RightMouse = 0x2
-MidMouse = 0x4
-
-ColPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
-
-
-class GlWidget(QtOpenGL.QGLWidget):
-
-	def setModel(self,m2,skin):
-		self.m2 = m2
-		self.skin = skin
-		self.thing = self.makeObject()
-		self.paintGL()
-		self.updateGL()
-
-	def initializeGL(self):
-		self.qglClearColor(ColPurple.dark())
-		self.modelname = "Test.m2"
-		self.m2 = M2File(self.modelname)
-		self.skinname = self.modelname[0:len(self.modelname)-3]+"00.skin"
-		self.skin = SkinFile(self.skinname)
-		self.xRot = 0
-		self.yRot = 0
-		self.zRot = 0
-		self.mscale = 0.1
-		#enable transparency
-		glEnable (GL_BLEND)
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-		self.thing = self.makeObject()
-		glShadeModel(GL_FLAT)
-		glEnable(GL_DEPTH_TEST)
-		glEnable(GL_CULL_FACE)
-
-
-	def makeObject(self):
-		
-		liste = glGenLists(1)
-		glNewList(liste, GL_COMPILE)	
-		
-		glPolygonMode(GL_FRONT, GL_LINE)	
-		glBegin(GL_TRIANGLES)		
-		for i in self.skin.mesh:
-			transparency = self.m2.transparency[0].alpha.KeySubs[0].values[0] / float(0x7FFF)
-			for t in range(i.num_tris/3):#i.tri_offset+
-				try:						
-					v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
-					v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
-					v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
-					glColor4f(1.0,0.0,0.0,transparency)
-					glVertex3f(v1.pos[0]*self.mscale,v1.pos[1]*self.mscale,v1.pos[2]*self.mscale)
-					glColor4f(0.0,1.0,0.0,transparency)
-					glVertex3f(v2.pos[0]*self.mscale,v2.pos[1]*self.mscale,v2.pos[2]*self.mscale)
-					glColor4f(0.0,0.0,1.0,transparency)
-					glVertex3f(v3.pos[0]*self.mscale,v3.pos[1]*self.mscale,v3.pos[2]*self.mscale)
-					glColor3f(1.0,1.0,1.0)
-				except:
-					print "Vertex: " + str(t) + "failed"
-		glEnd()		
-		glPolygonMode(GL_FRONT, GL_FILL)
-		glEndList()	
-				
-		return liste
-
-	def paintGL(self):
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-		glLoadIdentity()
-		glTranslated(0.0, 0.0, -10.0)
-		glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0);
-		glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0);
-		glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0);
-
-		glCallList(self.thing)
-
-	def resizeGL(self,width,height):
-		glViewport(0, 0, width, height)		# Reset The Current Viewport And Perspective Transformation
-		glMatrixMode(GL_PROJECTION)
-		glLoadIdentity()
-		glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
-		glMatrixMode(GL_MODELVIEW)
-
-	def setXRotation(self,angle):
-		angle = self.normalizeAngle(angle)
-		if (angle != self.xRot):
-			self.xRot = angle
-			self.updateGL()
-
-	def setYRotation(self,angle):
-		angle = self.normalizeAngle(angle)
-		if (angle != self.yRot):
-			self.yRot = angle
-			self.updateGL()
-
-	def setZRotation(self,angle):
-		angle = self.normalizeAngle(angle)
-		if (angle != self.zRot):
-			self.zRot = angle
-			self.updateGL()
-
-	def setScale(self,scale):
-		self.mscale = scale / 100.0
-		glDeleteLists(self.thing,1)
-		self.thing = self.makeObject()
-		self.paintGL()
-		self.updateGL()
-
-	def mousePressEvent(self, event):
-		self.lastPos = event.pos()
-
-	def mouseMoveEvent(self,event):
-		dx = event.x() - self.lastPos.x()
-		dy = event.y() - self.lastPos.y()
-		if (event.buttons() & LeftMouse):
-			self.setXRotation(self.xRot + 8 * dy)
-			self.setYRotation(self.yRot + 8 * dx)
-		elif (event.buttons() & RightMouse):
-			self.setXRotation(self.xRot + 8 * dy)
-			self.setZRotation(self.zRot + 8 * dx)
-		lastPos = event.pos()
-
-	def normalizeAngle(self,angle):
-		while (angle < 0):
-			angle += 360*16
-		while (angle > 360*16):
-			angle -= 360*16
-		return angle
+from attachmenteditor import *
+from nodetree import *
 
 
 class PyModelEditor(object):
@@ -240,19 +117,31 @@ class PyModelEditor(object):
 		self.materialButton.setObjectName("materialButton")
 		self.connect(self.materialButton, QtCore.SIGNAL("clicked()"), self.editMaterials)
 
+
+		self.attachmentButton = QtGui.QPushButton(Form)
+		self.attachmentButton.setGeometry(QtCore.QRect(10, 570, 132, 28))
+		self.attachmentButton.setObjectName("attachmentButton")
+		self.connect(self.attachmentButton, QtCore.SIGNAL("clicked()"), self.editAttachments)
+
+
+		self.boneButton = QtGui.QPushButton(Form)
+		self.boneButton.setGeometry(QtCore.QRect(140, 570, 132, 28))
+		self.boneButton.setObjectName("boneButton")
+		self.connect(self.boneButton, QtCore.SIGNAL("clicked()"), self.showBoneTree)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
 	def retranslateUi(self, Form):
 		Form.setWindowTitle(QtGui.QApplication.translate("Form", "PyModelEditor", None, QtGui.QApplication.UnicodeUTF8))
-		self.exitButton.setText(QtGui.QApplication.translate("Form", "Exit", None, QtGui.QApplication.UnicodeUTF8))
-		self.okButton.setText(QtGui.QApplication.translate("Form", "Ok", None, QtGui.QApplication.UnicodeUTF8))
 		self.transparencyButton.setText(QtGui.QApplication.translate("Form", "Edit Transparency", None, QtGui.QApplication.UnicodeUTF8))
 		self.renderflagButton.setText(QtGui.QApplication.translate("Form", "Edit Renderflags", None, QtGui.QApplication.UnicodeUTF8))
 		self.textureButton.setText(QtGui.QApplication.translate("Form", "Edit Textures", None, QtGui.QApplication.UnicodeUTF8))
 		self.gsequButton.setText(QtGui.QApplication.translate("Form", "Global Sequences", None, QtGui.QApplication.UnicodeUTF8))
 		self.uvanimButton.setText(QtGui.QApplication.translate("Form", "Edit UV Animations", None, QtGui.QApplication.UnicodeUTF8))
 		self.materialButton.setText(QtGui.QApplication.translate("Form", "Edit Materials", None, QtGui.QApplication.UnicodeUTF8))
+		self.attachmentButton.setText(QtGui.QApplication.translate("Form", "Edit Attachments", None, QtGui.QApplication.UnicodeUTF8))
+		self.boneButton.setText(QtGui.QApplication.translate("Form", "Show Node Tree", None, QtGui.QApplication.UnicodeUTF8))
 
 	def openM2(self):
 		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",QtCore.QDir.currentPath())
@@ -274,7 +163,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.tChooser, QtCore.SIGNAL("accepted()"), self.setTransparency)
 
 	def setTransparency(self):
-		self.m2.transparency = self.tChooser.m2.transparency
+		self.m2 = self.tChooser.m2
 		self.Gl.setModel(self.m2,self.skin)
 
 	def editRenderflags(self):
@@ -284,7 +173,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.rfChooser, QtCore.SIGNAL("accepted()"), self.setRenderflags)
 
 	def setRenderflags(self):
-		self.m2.renderflags = self.rfChooser.m2.renderflags
+		self.m2 = self.rfChooser.m2
 		self.Gl.setModel(self.m2,self.skin)
 
 	def editTextures(self):
@@ -294,7 +183,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.texChooser, QtCore.SIGNAL("accepted()"), self.setTextures)
 
 	def setTextures(self):
-		self.m2.textures = self.texChooser.m2.textures
+		self.m2 = self.texChooser.m2
 		self.Gl.setModel(self.m2,self.skin)
 
 
@@ -305,7 +194,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.gEditor, QtCore.SIGNAL("accepted()"), self.setGlobalSequences)
 
 	def setGlobalSequences(self):
-		self.m2.gSequ = self.gEditor.m2.gSequ
+		self.m2 = self.gEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 
 
@@ -316,7 +205,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.uvEditor, QtCore.SIGNAL("accepted()"), self.setUVAnimations)
 
 	def setUVAnimations(self):
-		self.m2.uv_anim = self.uvEditor.m2.uv_anim
+		self.m2 = self.uvEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 
 
@@ -329,5 +218,20 @@ class PyModelEditor(object):
 	def setMaterials(self):
 		self.skin.texunit = self.matEditor.skin.texunit
 		self.Gl.setModel(self.m2,self.skin)
-		
+
+
+	def editAttachments(self):
+		self.attEditor = AttachmentEditor()
+		self.attEditor.setModel(self.m2,self.skin)
+		self.attEditor.show()
+		QtCore.QObject.connect(self.attEditor, QtCore.SIGNAL("accepted()"), self.setAttachments)
+
+	def setAttachments(self):
+		self.m2 = self.attEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
+
+	def showBoneTree(self):
+		self.bonetree = BoneView()
+		self.bonetree.setModel(self.m2,self.skin)
+		self.bonetree.show()
 

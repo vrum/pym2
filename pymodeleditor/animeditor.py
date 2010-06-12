@@ -10,7 +10,7 @@ class Ui_AnimEditor(object):
 		AnimEditor.setObjectName("AnimEditor")
 		AnimEditor.resize(540, 373)
 
-		self.currentAnim = 0
+		self.currentAnim = -1
 
 		self.animCombo = QtGui.QComboBox(AnimEditor)
 		self.animCombo.setGeometry(QtCore.QRect(10, 10, 85, 27))
@@ -65,6 +65,8 @@ class Ui_AnimEditor(object):
 		self.type = animblock.type
 		for i in range(animblock.nKeys):
 			self.animCombo.addItem(str(i))
+		if animblock.nKeys != 0:
+			self.currentAnim = 0
 		for i in globalsequ:
 			self.globalCombo.addItem(str(i.Timestamp))
 
@@ -76,9 +78,10 @@ class Ui_AnimEditor(object):
 
 	def setTextData(self,anim):
 		s = ""
-		if(self.animblock.nKeys > anim):
-			for i in range(self.animblock.KeySubs[anim].nEntries):
-				s += str(self.animblock.TimeSubs[anim].values[i]) +":" + str(self.animblock.KeySubs[anim].values[i]) +"\n"		
+		if self.currentAnim !=-1:
+			if(self.animblock.nKeys > anim):
+				for i in range(self.animblock.KeySubs[anim].nEntries):
+					s += str(self.animblock.TimeSubs[anim].values[i]) +":" + str(self.animblock.KeySubs[anim].values[i]) +"\n"		
 		self.textEdit.setPlainText(s)
 
 	def finished_now(self):
@@ -87,7 +90,8 @@ class Ui_AnimEditor(object):
 		self.emit(QtCore.SIGNAL("AnimBlockEdited()"))
 
 	def changeAnimation(self):
-		(self.animblock.TimeSubs[self.currentAnim],self.animblock.KeySubs[self.currentAnim])= self.getAnimSub()
+		if self.currentAnim !=-1:
+			(self.animblock.TimeSubs[self.currentAnim],self.animblock.KeySubs[self.currentAnim])= self.getAnimSub()
 		self.currentAnim = self.animCombo.currentIndex()
 		self.setTextData(self.currentAnim)
 

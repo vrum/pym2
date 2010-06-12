@@ -8,6 +8,10 @@ import m2
 tex_type = { 0 : 0, 1 : 1, 2:2, 3:3, 4:6, 5:8,6:9,7:10,8:11,9:12,10:13,11:14}
 type_tex = { 0 : 0, 1 : 1, 2:2, 3:3, 6:4,8:5,9:6,10:7,11:8,12:9,13:10,14:11}
 
+TextureTypes = { 0 : "Hardcoded" , 1 : "Body/Clothes" , 2 : "Items", 3 : "ArmorReflect?", 6 : "Hair/Beard",
+8 : "Tauren fur", 9 : "Inventory Art 1", 10 : "quillboarpinata", 11 : "Skin for creatures or gameobjects 1",
+12 : "Skin for creatures or gameobjects 2" ,13 : "Skin for creatures or gameobjects 3", 14 : "Inventory Art 2"} 
+
 class TextureEditor(QtGui.QDialog):
 	def __init__(self): 
 		QtGui.QDialog.__init__(self) 
@@ -122,18 +126,24 @@ class TextureEditor(QtGui.QDialog):
 
 		self.m2.textures[self.last].flags = flags
 
+		self.comboBox.setItemText(self.last,str(self.last)+": "+TextureTypes[self.m2.textures[self.last].type]+" "+self.m2.textures[self.last].name)
+
 	def setModel(self,m2,skin):
 		self.m2 = m2
 		self.skin = skin
 		for i in range(len(self.m2.textures)):
-			self.comboBox.addItem(str(i)+": "+self.m2.textures[i].name)
+			self.comboBox.addItem(str(i)+": "+TextureTypes[self.m2.textures[i].type]+" "+self.m2.textures[i].name)
 		self.changeEdit()
 
 	def addTexture(self):
 		tex = m2.Texture()
 		self.m2.textures.append(tex)
+		lu = m2.Lookup()
+		lu.Id = self.m2.hdr.textures.count
+		self.m2.tex_lookup.append(lu)
 		self.comboBox.addItem(str(self.m2.hdr.textures.count))
 		self.m2.hdr.textures.count += 1
+		self.m2.hdr.tex_lookup.count += 1
 
 	def changeEdit(self):
 		self.saveOld()
