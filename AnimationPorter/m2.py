@@ -473,7 +473,7 @@ class Transparency:
 	
 class Event:
 	def __init__(self):
-		self.Id	= 0
+		self.Id	= ""
 		self.Data	= 0
 		self.Bone	= 0
 		self.Pos	= Vec3()
@@ -486,7 +486,7 @@ class Event:
 
 		
 	def unpack(self,f):
-		self.Id,	= struct.unpack("i",f.read(4))
+		self.Id	= struct.unpack("4c",f.read(4))
 		self.Data,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
 		self.Pos	= Vec3().unpack(f)
@@ -504,7 +504,7 @@ class Event:
 		f.seek(oldpos)
 		return self
 	def pack(self):
-		ret = struct.pack("i",self.Id)
+		ret = struct.pack("4c",self.Id[0],self.Id[1],self.Id[2],self.Id[3])
 		ret += struct.pack("i",self.Data)
 		ret += struct.pack("i",self.Bone)
 		ret += self.Pos.pack()
@@ -691,22 +691,18 @@ class Particle:
 		self.tex_tile_rot, = struct.unpack("h",f.read(2))
 		self.tex_rows,	= struct.unpack("h",f.read(2))
 		self.tex_cols,	= struct.unpack("h",f.read(2))
-
 		self.emission_speed = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.speed_var = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.vert_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.hor_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.gravity = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.lifespan = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
-
 		self.pad1,	= struct.unpack("i",f.read(4))
 		self.emission_rate = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.pad2,	= struct.unpack("i",f.read(4))
-
 		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
-
 		self.color	= FakeAnim().unpack(f,DATA_VEC3)
 		self.opacity	= FakeAnim().unpack(f,DATA_SHORT)
 		self.size	= FakeAnim().unpack(f,DATA_VEC2)
@@ -1089,6 +1085,7 @@ def CreateAnimFileName(a_name,anim,animfile):
 class M2File:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
+		self.filename = filename
 		self.hdr = M2Header()
 		self.hdr.unpack(f)
 		hdr = self.hdr #just spare some time in tipping
@@ -1133,7 +1130,7 @@ class M2File:
 		
 	def write(self,filename):
 		f = open(filename,"w+b")
-		
+		self.filename = filename
 		tempname = filename[0:len(filename)-3]
 		counter = 0
 		for i in self.animations:
