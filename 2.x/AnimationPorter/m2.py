@@ -15,6 +15,8 @@ DATA_VEC2 = 4
 DATA_FLOAT= 5
 DATA_VEC9 = 6
 
+log2 = open("D:\\Programmierung\\Python\\PyM2\\2.x\\AnimationPorter\\logfile2.txt","r+")
+
 
 #Classes for the different structs
 class M2Header:
@@ -239,11 +241,11 @@ class GlobalSequence:
 class Sequ:
 	def __init__(self):
 		self.animId	= 0
-		self.Start	= 0
-		self.End	= 0
+		self.start	= 0
+		self.end	= 0
 		self.moveSpeed	= 0
 		self.flags	= 0
-		self.unk	=(0,0)
+		self.unk	=(0,0,0)
 		self.playSpeed	= 0
 		self.bound	= Bounds()
 		self.next	= 0
@@ -251,8 +253,8 @@ class Sequ:
 		
 	def unpack(self,f):
 		self.animId,	= struct.unpack("i",f.read(4))
-		self.Start,	= struct.unpack("i",f.read(4))
-		self.End,	= struct.unpack("i",f.read(4))
+		self.start,	= struct.unpack("i",f.read(4))
+		self.end,	= struct.unpack("i",f.read(4))
 		self.moveSpeed,	= struct.unpack("f",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
 		self.unk	= struct.unpack("3i",f.read(12))
@@ -263,11 +265,11 @@ class Sequ:
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.animId)
-		ret += struct.pack("i",self.Start)
-		ret += struct.pack("i",self.End)
+		ret += struct.pack("i",self.start)
+		ret += struct.pack("i",self.end)
 		ret += struct.pack("f",self.moveSpeed)
 		ret += struct.pack("i",self.flags)
-		ret += struct.pack("2i",self.unk[0],self.unk[1])
+		ret += struct.pack("3i",self.unk[0],self.unk[1],self.unk[2])
 		ret += struct.pack("i",self.playSpeed)
 		ret += self.bound.pack()
 		ret += struct.pack("h",self.next)
@@ -669,7 +671,7 @@ class Particle:
 
 		#lazyness blah :/
 		self.floats = []
-		for i in range(72):
+		for i in range(77):
 			self.floats.append(struct.unpack("f",f.read(4)))
 		
 		self.Enabled = AnimBlock().unpack(f,DATA_INT)
@@ -708,7 +710,7 @@ class Particle:
 		ret += self.gravity2.pack()
 
 		
-		for i in range(72):
+		for i in range(77):
 			ret += struct.pack("f",self.floats[i])
 
 		
@@ -815,16 +817,17 @@ class DUnknown:
 		self.a = 0
 		self.b = 0
 	def unpack(self,f):
-		self.a, = struct.unpack("i",f.read(4))
-		self.b, = struct.unpack("i",f.read(4))
+		self.a, = struct.unpack("h",f.read(2))
+		self.b, = struct.unpack("h",f.read(2))
+		return self
 	def pack(self):
-		ret = struct.pack("i",self.a)
-		ret += struct.pack("i",self.b)
+		ret = struct.pack("h",self.a)
+		ret += struct.pack("h",self.b)
 		return ret
 
 class Event:
 	def __init__(self):
-		self.Id	= 0
+		self.Id	= ""
 		self.Data	= 0
 		self.Bone	= 0
 		self.Pos	= Vec3()
@@ -843,7 +846,7 @@ class Event:
 
 		
 	def unpack(self,f):
-		self.Id,	= struct.unpack("i",f.read(4))
+		self.Id	= struct.unpack("4c",f.read(4))
 		self.Data,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
 		self.Pos	= Vec3().unpack(f)
@@ -873,7 +876,7 @@ class Event:
 		f.seek(oldpos)
 		return self
 	def pack(self):
-		ret = struct.pack("i",self.Id)
+		ret = struct.pack("4c",self.Id[0],self.Id[1],self.Id[2],self.Id[3])
 		ret += struct.pack("i",self.Data)
 		ret += struct.pack("i",self.Bone)
 		ret += self.Pos.pack()
@@ -964,7 +967,7 @@ class M2File:
 		self.colors		= ReadBlock(f,hdr.colors,Color)
 		self.textures 		= ReadBlock(f,hdr.textures,Texture)	
 		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency)	
-		#self.iblock	 	= ReadBlock(f,hdr.IBlock,IUnknown)
+		self.iblock	 	= ReadBlock(f,hdr.IBlock,GlobalSequence)
 		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
 		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
@@ -1003,7 +1006,8 @@ class M2File:
 		
 		WriteBlock(f,self.hdr.global_sequences,self.gSequ)			
 		WriteBlock(f,self.hdr.animations,self.animations)		
-		WriteBlock(f,self.hdr.anim_lookup,self.anim_lookup)
+		WriteBlock(f,self.hdr.anim_lookup,self.anim_lookup)	
+		WriteBlock(f,self.hdr.DBlock,self.dblock)
 
 
 		######bones#####
@@ -1073,6 +1077,8 @@ class M2File:
 		f.seek(self.hdr.transparency.offset)
 		WriteBlock(f,self.hdr.transparency,self.transparency)
 		f.seek(oldpos)	
+		
+		WriteBlock(f,self.hdr.IBlock,self.iblock)
 
 		####uv animation#####
 		

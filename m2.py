@@ -147,7 +147,7 @@ class M2Header:
 
 class Vertex:
 	def __init__(self):
-		self.pos        = (0,0,0)
+		self.pos        = Vec3()
 		self.bweights   = (0,0,0,0)
 		self.bindices   = (0,0,0,0)
 		self.normal     = (0,0,0)
@@ -155,7 +155,7 @@ class Vertex:
 		self.unk         = (0,0)
 		
 	def unpack(self,f):
-		self.pos        = struct.unpack("3f",f.read(12))
+		self.pos        = Vec3().unpack(f)
 		self.bweights   = struct.unpack("4B",f.read(4))
 		self.bindices   = struct.unpack("4B",f.read(4))
 		self.normal     = struct.unpack("3f",f.read(12))
@@ -163,7 +163,7 @@ class Vertex:
 		self.unk         = struct.unpack("2f",f.read(8))
 		return self
 	def pack(self):
-		ret = struct.pack("3f",self.pos[0],self.pos[1],self.pos[2])
+		ret = self.pos.pack()
 		ret += struct.pack("4B",self.bweights[0],self.bweights[1],self.bweights[2],self.bweights[3])
 		ret += struct.pack("4B",self.bindices[0],self.bindices[1],self.bindices[2],self.bindices[3])
 		ret += struct.pack("3f",self.normal[0],self.normal[1],self.normal[2])

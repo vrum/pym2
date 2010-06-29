@@ -62,6 +62,7 @@ class GlWidget(QtOpenGL.QGLWidget):
 					v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
 					v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
 					v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
+					#print v1.pos
 					glColor4f(1.0,0.0,0.0,transparency)
 					glVertex3f(v1.pos[0]*self.mscale,v1.pos[1]*self.mscale,v1.pos[2]*self.mscale)
 					glColor4f(0.0,1.0,0.0,transparency)
@@ -70,7 +71,8 @@ class GlWidget(QtOpenGL.QGLWidget):
 					glVertex3f(v3.pos[0]*self.mscale,v3.pos[1]*self.mscale,v3.pos[2]*self.mscale)
 					glColor3f(1.0,1.0,1.0)
 				except:
-					print "Vertex: " + str(t) + "failed"
+					pass
+					#print "Vertex: " + str(t) + " failed"
 			s += 1
 		glEnd()		
 

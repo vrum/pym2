@@ -31,7 +31,7 @@ class AnimPorter(QtGui.QDialog):
 		self.setupUi(self)
 	def setupUi(self, Form):
 		Form.setObjectName("Form")
-		Form.resize(700, 540)
+		Form.resize(700, 650)
 		self.treeM1 = QtGui.QTreeWidget(Form)
 		self.treeM1.setGeometry(QtCore.QRect(10, 70, 320, 281))
 		self.treeM1.setObjectName("treeM1")
@@ -65,11 +65,6 @@ class AnimPorter(QtGui.QDialog):
 		self.openm2Button.setObjectName("openm2Button")
 		self.connect(self.openm2Button, QtCore.SIGNAL("clicked()"), self.openModel2)
 
-		self.portselectedButton = QtGui.QPushButton(Form)
-		self.portselectedButton.setGeometry(QtCore.QRect(10, 490, 181, 28))
-		self.portselectedButton.setObjectName("portselectedButton")
-		self.connect(self.portselectedButton, QtCore.SIGNAL("clicked()"), self.portSelected)
-
 		self.bonesM1 = QtGui.QTextEdit(Form)
 		self.bonesM1.setGeometry(QtCore.QRect(10, 370, 320, 111))
 		self.bonesM1.setObjectName("bonesM1")
@@ -78,13 +73,26 @@ class AnimPorter(QtGui.QDialog):
 		self.bonesM2.setGeometry(QtCore.QRect(350, 370, 320, 111))
 		self.bonesM2.setObjectName("bonesM2")
 
+		self.singleM1 = QtGui.QTextEdit(Form)
+		self.singleM1.setGeometry(QtCore.QRect(10, 490, 320, 80))
+		self.singleM1.setObjectName("singleM1")
+
+		self.singleM2 = QtGui.QTextEdit(Form)
+		self.singleM2.setGeometry(QtCore.QRect(350, 490, 320, 80))
+		self.singleM2.setObjectName("singleM2")
+
+		self.portselectedButton = QtGui.QPushButton(Form)
+		self.portselectedButton.setGeometry(QtCore.QRect(10, 580, 181, 28))
+		self.portselectedButton.setObjectName("portselectedButton")
+		self.connect(self.portselectedButton, QtCore.SIGNAL("clicked()"), self.portSelected)
+
 		self.portallButton = QtGui.QPushButton(Form)
-		self.portallButton.setGeometry(QtCore.QRect(210, 490, 181, 28))
+		self.portallButton.setGeometry(QtCore.QRect(210, 580, 181, 28))
 		self.portallButton.setObjectName("portallButton")
 		self.connect(self.portallButton, QtCore.SIGNAL("clicked()"), self.portAll)
 
 		self.pushButton = QtGui.QPushButton(Form)
-		self.pushButton.setGeometry(QtCore.QRect(420, 490, 181, 28))
+		self.pushButton.setGeometry(QtCore.QRect(420, 580, 181, 28))
 		self.pushButton.setObjectName("pushButton")
 		self.connect(self.pushButton, QtCore.SIGNAL("clicked()"), self.addAnim)
 
@@ -144,6 +152,29 @@ class AnimPorter(QtGui.QDialog):
 				
 
 		return (bone,btwo)
+		
+	def getSingleBones(self):
+		t= self.singleM1.toPlainText().split("\n")
+		bone = []
+		for i in t:
+			if (i!=""):
+				g = int(i)
+				bone.append(g)
+
+		
+		t= self.singleM2.toPlainText().split("\n")
+		btwo = []
+		for i in t:
+			if (i!=""):
+				g = int(i)
+				btwo.append(g)
+
+		###fix this!!####
+		#if len(bone) != len(btwo):
+		#	if len(bone) > len(btwo):
+				
+
+		return (bone,btwo)
 
 	def portAll(self):
 		(bone,btwo) = self.getBones()
@@ -157,6 +188,11 @@ class AnimPorter(QtGui.QDialog):
 						break
 					jc += 1
 				ic += 1
+				
+		
+		(bone,btwo) = self.getSingleBones()
+		for c in range(len(bone)):
+			PortAll(self.m1.bones[bone[c]],self.m2.bones[btwo[c]],self.m1,self.m2)
 
 	def portSelected(self):
 		(bone,btwo) = self.getBones()		
@@ -172,11 +208,16 @@ class AnimPorter(QtGui.QDialog):
 						break
 					jc += 1
 				ic += 1
+				
+		
+		(bone,btwo) = self.getSingleBones()
+		for c in range(len(bone)):
+			PortSelected(self.m1.bones[bone[c]],self.m2.bones[btwo[c]],self.m1,self.m2,anim1.animId,anim2.animId,anim1.subId,anim2.subId)
 
 	def addAnim(self):
-		(bone,btwo) = self.getBones()
 		anim = self.m2.animations[self.animsm2Box.currentIndex()]
 		(canim,tmp) = getAnim(anim.animId,anim.subId,self.m1,self.m2)
+		(bone,btwo) = self.getBones()
 		for c in range(len(bone)):
 			ic = 0
 			for i in self.m1.bones:
@@ -185,8 +226,12 @@ class AnimPorter(QtGui.QDialog):
 					if (Dependent(i,self.m1,bone[c],ic) & Dependent(j,self.m2,btwo[c],jc)) & (Depth(i,self.m1) == Depth(j,self.m2)):
 						AddAnim(i,j,canim)
 						break
-					jc += 1
+					jc += 1	
 				ic += 1
+			
+		(bone,btwo) = self.getSingleBones()
+		for c in range(len(bone)):
+			AddAnim(self.m1.bones[bone[c]],self.m2.bones[btwo[c]],canim)
 		
 		self.updateAnimBox(self.m1,self.animsm1Box)
 
@@ -313,7 +358,7 @@ def getAnim(canim,sId,om2,im2):
 			if i.next != -1:
 				sId += 1
 				(tmp,om2.animations[pos].next) = getAnim(canim,sId,om2,im2)
-				canimId.append(tmp)
+				canimId.extend(tmp)
 				
 			while om2.hdr.anim_lookup.count <= canim:
 				om2.hdr.anim_lookup.count +=1

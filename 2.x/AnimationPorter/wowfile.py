@@ -46,6 +46,8 @@ class Range:
 	def __init__(self):
 		self.Start = 0
 		self.End = 0
+	def __str__(self):
+		return ("{"+str(self.Start)+","+str(self.End)+"}")
 	def unpack(self,f):
 		self.Start, = struct.unpack("i",f.read(4))
 		self.End, = struct.unpack("i",f.read(4))

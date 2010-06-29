@@ -54,6 +54,14 @@ Murloccostume.head = 8
 Murloccostume.filename = "Murloccostume.m2"
 
 
+VampyBloodPrince = Race()
+VampyBloodPrince.lshoulder = 14
+VampyBloodPrince.rshoulder = 15
+VampyBloodPrince.lknee = 5
+VampyBloodPrince.rknee = 4
+VampyBloodPrince.head = 13
+VampyBloodPrince.filename = "VampyBloodPrince.m2"
+
 
 Zombie = Race()
 Zombie.lshoulder = 10
