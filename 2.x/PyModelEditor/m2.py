@@ -71,6 +71,8 @@ class M2Header:
 		self.key_bones.unpack(f)
 		self.vertices.unpack(f)
 		self.views.unpack(f)
+		###HACK!!!#
+		self.views.count = 1
 		self.colors.unpack(f)
 		self.textures.unpack(f)
 		self.transparency.unpack(f)

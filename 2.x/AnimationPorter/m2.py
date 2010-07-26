@@ -15,7 +15,6 @@ DATA_VEC2 = 4
 DATA_FLOAT= 5
 DATA_VEC9 = 6
 
-log2 = open("D:\\Programmierung\\Python\\PyM2\\2.x\\AnimationPorter\\logfile2.txt","r+")
 
 
 #Classes for the different structs
@@ -73,6 +72,8 @@ class M2Header:
 		self.key_bones.unpack(f)
 		self.vertices.unpack(f)
 		self.views.unpack(f)
+		##HACK!!!
+		self.views.count = 1
 		self.colors.unpack(f)
 		self.textures.unpack(f)
 		self.transparency.unpack(f)

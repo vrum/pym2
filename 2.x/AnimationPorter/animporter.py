@@ -16,7 +16,6 @@ attachment_types = { 0:"Mountpoint/Left Wrist", 1:"Right Palm", 2:"Left Palm", 3
 38:"demolishervehicle2",39:"vehicle seat 1",40:"vehicle seat 2",41:"vehicle seat 3",42:"vehicle seat 4",43:"Unk9",44:"Unk10",45:"Unk11",46:"Unk12",
 47:"Unk13",48:"Unk14",49:"Unk15"}
 
-logfile = open("D:\\Programmierung\\Python\\PyM2\\2.x\\AnimationPorter\\logfile.txt","r+")
 
 class Node(QtGui.QTreeWidgetItem):
 	def setId(self,i):
@@ -183,6 +182,8 @@ class AnimPorter(QtGui.QDialog):
 
 	def portAll(self):
 		(bone,btwo) = self.getBones()
+		#for i in self.m1.bones:
+		#	RemoveShared(i,self.m1,self.m2)
 		for c in range(len(bone)):
 			ic = 0
 			for i in self.m1.bones:
@@ -198,6 +199,8 @@ class AnimPorter(QtGui.QDialog):
 		(bone,btwo) = self.getSingleBones()
 		for c in range(len(bone)):
 			PortAll(self.m1.bones[bone[c]],self.m2.bones[btwo[c]],self.m1,self.m2)
+			
+		FixAnimationSpeeds(self.m1, self.m2)
 
 	def portSelected(self):
 		(bone,btwo) = self.getBones()		
@@ -395,9 +398,52 @@ def GetAnimDepth(anim,model):
 	i = 0
 	if anim.next != -1:
 		i += GetAnimDepth(model.animations[anim.next],model)
+		i += 1
 	return i
 
+	
+def FixAnimationSpeeds(om2,im2):
+	kindex = 0
+	for k in om2.animations:
+		nindex = 0
+		for n in im2.animations:
+			if (k.animId == n.animId)&(GetAnimDepth(k,om2)==GetAnimDepth(n,im2)):
+				k.playSpeed = n.playSpeed
+			nindex += 1
+		kindex += 1
 
+def PortAnimation(old,new,oldind,newind):
+	while new.nRanges <= newind:
+	
+
+def RemoveShared(i,om2,im2):
+	kindex = 0
+	#start = i.rotation.nTimes
+	#end = i.rotation.nTimes + 1
+	#i.rotation.nTimes += 1
+	#i.rotation.Times.append(3333)
+	#i.rotation.nKeys += 1
+	#tquat = Quat()
+	#tquat.x = tquat.y = tquat.z = 32767
+	#tquat.w = -1
+	#i.rotation.Keys.append(tquat)
+	for k in om2.animations:
+		nindex = 0
+		for n in im2.animations:
+			if (k.animId == n.animId)&(GetAnimDepth(k,om2)==GetAnimDepth(n,im2)):
+				if (i.translation.nRanges > kindex):
+					i.translation.Ranges[kindex].Start = 0
+					i.translation.Ranges[kindex].End = 1
+				if (i.rotation.nRanges > kindex):
+					i.rotation.Ranges[kindex].Start = 0
+					i.rotation.Ranges[kindex].End = 1
+				if (i.scaling.nRanges > kindex):
+					i.scaling.Ranges[kindex].Start = 0
+					i.scaling.Ranges[kindex].End = 1
+				break
+			nindex += 1
+		kindex += 1
+		
 def PortAll(i, j,om2,im2):
 	diffVec = j.pivot - i.pivot # c = b - a, c is the vector from the bone getting the animations to the bone containg them
 	kindex = 0
@@ -405,6 +451,210 @@ def PortAll(i, j,om2,im2):
 		nindex = 0
 		for n in im2.animations:
 			if (k.animId == n.animId)&(GetAnimDepth(k,om2)==GetAnimDepth(n,im2)):#if it's the same animation, change the values
+				
+				if  ( j.translation.nRanges > nindex) :	
+				
+					append = False
+					i.translation.interpolation = j.translation.interpolation
+					oldRanges = Range()
+					if (i.translation.nRanges > kindex) :
+						oldRanges.Start = i.translation.Ranges[kindex].Start
+						oldRanges.End = i.translation.Ranges[kindex].End
+					else:
+						while (i.translation.nRanges <= kindex):
+							tRange = Range()
+							i.translation.Ranges.append(tRange)
+							i.translation.nRanges += 1
+						
+					lenOld = oldRanges.End - oldRanges.Start + 1
+					newRanges = Range()
+					newRanges.Start = j.translation.Ranges[nindex].Start
+					newRanges.End = j.translation.Ranges[nindex].End
+					lenNew = newRanges.End - newRanges.Start + 1
+					lendiff = lenNew - lenOld
+					
+					
+					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
+						append = True
+					if append:
+						i.translation.Ranges[kindex].Start = len(i.translation.Times) 
+						i.translation.Ranges[kindex].End = len(i.translation.Times) + 1
+					else:			
+						for z in i.translation.Ranges:
+							if z.Start > i.translation.Ranges[kindex].Start:
+								z.Start += lendiff
+								z.End += lendiff
+								
+					i.translation.Ranges[kindex].End += lendiff 
+					
+					t0 = k.start - n.start
+					tl = k.end - n.end
+					if append:
+						i.translation.nKeys += i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start + 1 
+						i.translation.Keys.extend(j.translation.Keys[newRanges.Start:newRanges.End + 1])
+						i.translation.nTimes += i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start + 1
+						i.translation.Times.extend(j.translation.Times[newRanges.Start:newRanges.End + 1])
+					else:
+						i.translation.nKeys += lendiff
+						i.translation.Keys[oldRanges.Start:oldRanges.End + 1] = j.translation.Keys[newRanges.Start:newRanges.End + 1]
+						i.translation.nTimes += lendiff
+						i.translation.Times[oldRanges.Start:oldRanges.End + 1] = j.translation.Times[newRanges.Start:newRanges.End + 1]
+					for z in range(i.translation.Ranges[kindex].Start,i.translation.Ranges[kindex].End ):#+ 1
+						c = z - i.translation.Ranges[kindex].Start
+						a = i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start
+						try:
+							i.translation.Times[z] += ((a-c)*t0 + c*tl)/a
+						except:
+							print c
+							print z
+							print append
+							print len(i.translation.Times)
+							print i.translation.Ranges[kindex].Start
+							print i.translation.Ranges[kindex].End 
+							raise IndexError
+							
+					
+					for z in range(i.translation.Ranges[kindex].Start,i.translation.Ranges[kindex].End ):#+ 1
+						i.translation.Keys[z] -= diffVec
+						
+				if ( j.rotation.nRanges > nindex) :
+					append = False
+					i.rotation.interpolation = j.rotation.interpolation
+
+					oldRanges = Range()
+					if (i.rotation.nRanges > kindex) :
+						oldRanges.Start = i.rotation.Ranges[kindex].Start
+						oldRanges.End = i.rotation.Ranges[kindex].End
+					else:
+						while (i.rotation.nRanges <= kindex):
+							tRange = Range()
+							i.rotation.Ranges.append(tRange)
+							i.rotation.nRanges += 1
+					lenOld = oldRanges.End - oldRanges.Start + 1
+					newRanges = Range()
+					newRanges.Start = j.rotation.Ranges[nindex].Start
+					newRanges.End = j.rotation.Ranges[nindex].End
+					lenNew = newRanges.End - newRanges.Start + 1
+					lendiff = lenNew - lenOld
+					
+					
+					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
+						append = True
+					if append:
+						i.rotation.Ranges[kindex].Start = len(i.rotation.Times) 
+						i.rotation.Ranges[kindex].End = len(i.rotation.Times) + 1
+					else:			
+						for z in i.rotation.Ranges:
+							if z.Start > i.rotation.Ranges[kindex].Start:
+								z.Start += lendiff
+								z.End += lendiff
+								
+					i.rotation.Ranges[kindex].End += lendiff
+					
+					t0 = k.start - n.start
+					tl = k.end - n.end
+					if append:
+						i.rotation.nKeys += i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start + 1 
+						i.rotation.Keys.extend(j.rotation.Keys[newRanges.Start:newRanges.End + 1])
+						i.rotation.nTimes += i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start + 1
+						i.rotation.Times.extend(j.rotation.Times[newRanges.Start:newRanges.End + 1])
+					else:
+						i.rotation.nKeys += lendiff
+						i.rotation.Keys[oldRanges.Start:oldRanges.End + 1] = j.rotation.Keys[newRanges.Start:newRanges.End + 1]
+						i.rotation.nTimes += lendiff
+						i.rotation.Times[oldRanges.Start:oldRanges.End + 1] = j.rotation.Times[newRanges.Start:newRanges.End + 1]
+					for z in range(i.rotation.Ranges[kindex].Start,i.rotation.Ranges[kindex].End ):#+ 1
+						c = z - i.rotation.Ranges[kindex].Start
+						a = i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start
+						try:
+							i.rotation.Times[z] += ((a-c)*t0 + c*tl)/a
+						except:
+							print c
+							print z
+							print append
+							print len(i.rotation.Times)
+							print i.rotation.Ranges[kindex].Start
+							print i.rotation.Ranges[kindex].End 
+							raise IndexError
+							
+					i.rotation.Times[i.rotation.Ranges[kindex].Start] = k.start		
+					i.rotation.Times[i.rotation.Ranges[kindex].End] = k.end
+				
+				if ( j.scaling.nRanges > nindex) :
+					
+					append = False
+					i.scaling.interpolation = j.scaling.interpolation
+
+					oldRanges = Range()
+					if (i.scaling.nRanges > kindex) :
+						oldRanges.Start = i.scaling.Ranges[kindex].Start
+						oldRanges.End = i.scaling.Ranges[kindex].End
+					else:
+						while (i.scaling.nRanges <= kindex):
+							tRange = Range()
+							i.scaling.Ranges.append(tRange)
+							i.scaling.nRanges += 1
+					lenOld = oldRanges.End - oldRanges.Start + 1
+					newRanges = Range()
+					newRanges.Start = j.scaling.Ranges[nindex].Start
+					newRanges.End = j.scaling.Ranges[nindex].End
+					lenNew = newRanges.End - newRanges.Start + 1
+					lendiff = lenNew - lenOld
+					
+					
+					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
+						append = True
+					if append:
+						i.scaling.Ranges[kindex].Start = len(i.scaling.Times) 
+						i.scaling.Ranges[kindex].End = len(i.scaling.Times) + 1
+					else:			
+						for z in i.scaling.Ranges:
+							if z.Start > i.scaling.Ranges[kindex].Start:
+								z.Start += lendiff
+								z.End += lendiff
+								
+					i.scaling.Ranges[kindex].End += lendiff
+					
+					t0 = k.start - n.start
+					tl = k.end - n.end
+					if append:
+						i.scaling.nKeys += i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start + 1 
+						i.scaling.Keys.extend(j.scaling.Keys[newRanges.Start:newRanges.End + 1])
+						i.scaling.nTimes += i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start + 1
+						i.scaling.Times.extend(j.scaling.Times[newRanges.Start:newRanges.End + 1])
+					else:
+						i.scaling.nKeys += lendiff
+						i.scaling.Keys[oldRanges.Start:oldRanges.End + 1] = j.scaling.Keys[newRanges.Start:newRanges.End + 1]
+						i.scaling.nTimes += lendiff
+						i.scaling.Times[oldRanges.Start:oldRanges.End + 1] = j.scaling.Times[newRanges.Start:newRanges.End + 1]
+					for z in range(i.scaling.Ranges[kindex].Start,i.scaling.Ranges[kindex].End):# + 1
+						c = z - i.scaling.Ranges[kindex].Start
+						a = i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start
+						try:
+							i.scaling.Times[z] += ((a-c)*t0 + c*tl)/a
+						except:
+							print c
+							print z
+							print append
+							print len(i.scaling.Times)
+							print i.scaling.Ranges[kindex].Start
+							print i.scaling.Ranges[kindex].End 
+							raise IndexError
+							
+					
+				
+				break
+			nindex += 1
+		kindex += 1
+				
+
+def PortSelected(i, j,om2,im2,anim1,anim2,sub1,sub2):
+	diffVec = j.pivot - i.pivot # c = b - a, c is the vector from the bone getting the animations to the bone containg them
+	kindex = 0
+	for k in om2.animations:
+		nindex = 0
+		for n in im2.animations:
+			if (kindex == anim1) & (nindex == anim2) &(GetAnimDepth(k,om2) == sub1) & (GetAnimDepth(n,im2) == sub2):#if it's the same animation, change the values
 				
 				if (i.translation.nRanges > kindex) & ( j.translation.nRanges > nindex) :			
 					append = False
@@ -517,6 +767,9 @@ def PortAll(i, j,om2,im2):
 							print i.rotation.Ranges[kindex].Start
 							print i.rotation.Ranges[kindex].End 
 							raise IndexError
+							
+					i.rotation.Times[i.rotation.Ranges[kindex].Start] = k.start		
+					i.rotation.Times[i.rotation.Ranges[kindex].End] = k.end
 				
 				if (i.scaling.nRanges > kindex) & ( j.scaling.nRanges > nindex) :
 					
@@ -573,191 +826,12 @@ def PortAll(i, j,om2,im2):
 							print i.scaling.Ranges[kindex].End 
 							raise IndexError
 							
+						
 					
 				
 				break
 			nindex += 1
 		kindex += 1
-				
-
-def PortSelected(i, j,om2,im2,anim1,anim2,sub1,sub2):
-	diffVec = j.pivot - i.pivot # c = b - a, c is the vector from the bone getting the animations to the bone containg them
-	kindex = 0
-	for k in om2.animations:
-		nindex = 0
-		for n in im2.animations:
-			if (kindex == anim1) & (nindex == anim2) &(GetAnimDepth(k,om2) == sub1) & (GetAnimDepth(n,im2) == sub2):#if it's the  animation, change the values
-			
-				if (i.translation.nRanges > kindex) & ( j.translation.nRanges > nindex):			
-					append = False
-					i.translation.interpolation = j.translation.interpolation
-
-					oldRanges = Range()
-					oldRanges.Start = i.translation.Ranges[kindex].Start
-					oldRanges.End = i.translation.Ranges[kindex].End
-					lenOld = oldRanges.End - oldRanges.Start + 1
-					newRanges = Range()
-					newRanges.Start = j.translation.Ranges[nindex].Start
-					newRanges.End = j.translation.Ranges[nindex].End
-					lenNew = newRanges.End - newRanges.Start + 1
-					lendiff = lenNew - lenOld
-					
-					
-					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
-						append = True
-					if append:
-						i.translation.Ranges[kindex].Start = len(i.translation.Times) 
-						i.translation.Ranges[kindex].End = len(i.translation.Times) + 1
-					else:			
-						for z in i.translation.Ranges:
-							if z.Start > i.translation.Ranges[kindex].Start:
-								z.Start += lendiff
-								z.End += lendiff
-								
-					i.translation.Ranges[kindex].End += lendiff
-					
-					t0 = k.start - n.start
-					tl = k.end - n.end
-					if append:
-						i.translation.nKeys += i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start + 1 
-						i.translation.Keys.extend(j.translation.Keys[newRanges.Start:newRanges.End + 1])
-						i.translation.nTimes += i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start + 1
-						i.translation.Times.extend(j.translation.Times[newRanges.Start:newRanges.End + 1])
-					else:
-						i.translation.nKeys += lendiff
-						i.translation.Keys[oldRanges.Start:oldRanges.End + 1] = j.translation.Keys[newRanges.Start:newRanges.End + 1]
-						i.translation.nTimes += lendiff
-						i.translation.Times[oldRanges.Start:oldRanges.End + 1] = j.translation.Times[newRanges.Start:newRanges.End + 1]
-					for z in range(i.translation.Ranges[kindex].Start,i.translation.Ranges[kindex].End + 1):
-						c = z - i.translation.Ranges[kindex].Start
-						a = i.translation.Ranges[kindex].End + 1 - i.translation.Ranges[kindex].Start
-						try:
-							i.translation.Times[z] += ((a-c)*t0 + c*tl)/a
-						except:
-							print c
-							print z
-							print append
-							print len(i.translation.Times)
-							print i.translation.Ranges[kindex].Start
-							print i.translation.Ranges[kindex].End 
-							raise IndexError
-							
-					
-					for z in range(i.translation.Ranges[kindex].Start,i.translation.Ranges[kindex].End + 1):
-						i.translation.Keys[z] -= diffVec
-				
-				if (i.rotation.nRanges > kindex) & ( j.rotation.nRanges > nindex):
-					append = False
-					i.rotation.interpolation = j.rotation.interpolation
-
-					oldRanges = Range()
-					oldRanges.Start = i.rotation.Ranges[kindex].Start
-					oldRanges.End = i.rotation.Ranges[kindex].End
-					lenOld = oldRanges.End - oldRanges.Start + 1
-					newRanges = Range()
-					newRanges.Start = j.rotation.Ranges[nindex].Start
-					newRanges.End = j.rotation.Ranges[nindex].End
-					lenNew = newRanges.End - newRanges.Start + 1
-					lendiff = lenNew - lenOld
-					
-					
-					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
-						append = True
-					if append:
-						i.rotation.Ranges[kindex].Start = len(i.rotation.Times) 
-						i.rotation.Ranges[kindex].End = len(i.rotation.Times) + 1
-					else:			
-						for z in i.rotation.Ranges:
-							if z.Start > i.rotation.Ranges[kindex].Start:
-								z.Start += lendiff
-								z.End += lendiff
-								
-					i.rotation.Ranges[kindex].End += lendiff
-					
-					t0 = k.start - n.start
-					tl = k.end - n.end
-					if append:
-						i.rotation.nKeys += i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start + 1 
-						i.rotation.Keys.extend(j.rotation.Keys[newRanges.Start:newRanges.End + 1])
-						i.rotation.nTimes += i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start + 1
-						i.rotation.Times.extend(j.rotation.Times[newRanges.Start:newRanges.End + 1])
-					else:
-						i.rotation.nKeys += lendiff
-						i.rotation.Keys[oldRanges.Start:oldRanges.End + 1] = j.rotation.Keys[newRanges.Start:newRanges.End + 1]
-						i.rotation.nTimes += lendiff
-						i.rotation.Times[oldRanges.Start:oldRanges.End + 1] = j.rotation.Times[newRanges.Start:newRanges.End + 1]
-					for z in range(i.rotation.Ranges[kindex].Start,i.rotation.Ranges[kindex].End + 1):
-						c = z - i.rotation.Ranges[kindex].Start
-						a = i.rotation.Ranges[kindex].End + 1 - i.rotation.Ranges[kindex].Start
-						try:
-							i.rotation.Times[z] += ((a-c)*t0 + c*tl)/a
-						except:
-							print c
-							print z
-							print append
-							print len(i.rotation.Times)
-							print i.rotation.Ranges[kindex].Start
-							print i.rotation.Ranges[kindex].End 
-							raise IndexError
-				
-				if (i.scaling.nRanges > kindex) & ( j.scaling.nRanges > nindex):
-					
-					append = False
-					i.scaling.interpolation = j.scaling.interpolation
-
-					oldRanges = Range()
-					oldRanges.Start = i.scaling.Ranges[kindex].Start
-					oldRanges.End = i.scaling.Ranges[kindex].End
-					lenOld = oldRanges.End - oldRanges.Start + 1
-					newRanges = Range()
-					newRanges.Start = j.scaling.Ranges[nindex].Start
-					newRanges.End = j.scaling.Ranges[nindex].End
-					lenNew = newRanges.End - newRanges.Start + 1
-					lendiff = lenNew - lenOld
-					
-					
-					if ((lenOld == 0)) |((lenOld == 1)) | ((lenOld == 2)):
-						append = True
-					if append:
-						i.scaling.Ranges[kindex].Start = len(i.scaling.Times) 
-						i.scaling.Ranges[kindex].End = len(i.scaling.Times) + 1
-					else:			
-						for z in i.scaling.Ranges:
-							if z.Start > i.scaling.Ranges[kindex].Start:
-								z.Start += lendiff
-								z.End += lendiff
-								
-					i.scaling.Ranges[kindex].End += lendiff
-					
-					t0 = k.start - n.start
-					tl = k.end - n.end
-					if append:
-						i.scaling.nKeys += i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start + 1 
-						i.scaling.Keys.extend(j.scaling.Keys[newRanges.Start:newRanges.End + 1])
-						i.scaling.nTimes += i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start + 1
-						i.scaling.Times.extend(j.scaling.Times[newRanges.Start:newRanges.End + 1])
-					else:
-						i.scaling.nKeys += lendiff
-						i.scaling.Keys[oldRanges.Start:oldRanges.End + 1] = j.scaling.Keys[newRanges.Start:newRanges.End + 1]
-						i.scaling.nTimes += lendiff
-						i.scaling.Times[oldRanges.Start:oldRanges.End + 1] = j.scaling.Times[newRanges.Start:newRanges.End + 1]
-					for z in range(i.scaling.Ranges[kindex].Start,i.scaling.Ranges[kindex].End + 1):
-						c = z - i.scaling.Ranges[kindex].Start
-						a = i.scaling.Ranges[kindex].End + 1 - i.scaling.Ranges[kindex].Start
-						try:
-							i.scaling.Times[z] += ((a-c)*t0 + c*tl)/a
-						except:
-							print c
-							print z
-							print append
-							print len(i.scaling.Times)
-							print i.scaling.Ranges[kindex].Start
-							print i.scaling.Ranges[kindex].End 
-							raise IndexError
-				break
-			nindex += 1
-		kindex += 1
-
 #get the depth of a bone
 def Depth(bone,file):
 	ret = 0
@@ -784,5 +858,4 @@ app = QtGui.QApplication(sys.argv)
 dialog = AnimPorter() 
 dialog.show() 
 sys.exit(app.exec_())
-logfile.close()
 

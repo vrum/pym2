@@ -63,8 +63,8 @@ class M2Header:
 		self.camera_lookup  = Chunk()
 		self.ribbon_emitters = Chunk()
 		self.particle_emitters = Chunk()	
-		if(self.modeltype&8):
-			self.unknown = Chunk()
+		#if(self.modeltype&8):
+		self.unknown = Chunk()
 			
 	def unpack(self,f):
 		self.magic,         = struct.unpack("i",f.read(4))

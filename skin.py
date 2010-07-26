@@ -117,10 +117,10 @@ class Propertie:
 	def __init__(self):
 		self.Bones = (0,0,0,0)
 	def unpack(self,f):
-		self.Bones = struct.unpack("4b",f.read(4))
+		self.Bones = struct.unpack("4B",f.read(4))
 		return self
 	def pack(self):
-		return struct.pack("4b",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
+		return struct.pack("4B",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
 	
 class SkinFile:
 	def __init__(self,filename):

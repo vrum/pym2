@@ -111,7 +111,8 @@ class TextureEditor(QtGui.QDialog):
 	def saveOld(self):
 		if (self.last == -1):
 			return
-		name = self.lineEdit.text()
+		name = str(self.lineEdit.text())
+		name.encode("cp1252")
 		if len(name) == 0:
 			name = "\0"
 		if name[len(name)-1] != "\0":

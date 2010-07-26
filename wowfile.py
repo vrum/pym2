@@ -46,6 +46,8 @@ def WriteBlock(f,chunk,block):
 class Lookup:
 	def __init__(self):
 		self.Id = 0
+	def __str__(self):
+		return "("+str(self.Id)+")"
 	def unpack(self,f):
 		self.Id, = struct.unpack("h",f.read(2))
 		return self

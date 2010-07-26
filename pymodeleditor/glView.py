@@ -54,7 +54,10 @@ class GlWidget(QtOpenGL.QGLWidget):
 		for i in self.skin.mesh:
 			for j in self.skin.texunit:
 				if j.submesh == s:
-					transparency = self.m2.transparency[self.m2.trans_lookup[j.transparency].Id].alpha.KeySubs[0].values[0] / float(0x7FFF)	
+					try:
+						transparency = self.m2.transparency[self.m2.trans_lookup[j.transparency].Id].alpha.KeySubs[0].values[0] / float(0x7FFF)	
+					except:
+						print "oO"
 					break
 			
 			for t in range(i.num_tris/3):
@@ -62,16 +65,14 @@ class GlWidget(QtOpenGL.QGLWidget):
 					v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
 					v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
 					v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
-					#print v1.pos
-					glColor4f(1.0,0.0,0.0,transparency)
-					glVertex3f(v1.pos[0]*self.mscale,v1.pos[1]*self.mscale,v1.pos[2]*self.mscale)
-					glColor4f(0.0,1.0,0.0,transparency)
-					glVertex3f(v2.pos[0]*self.mscale,v2.pos[1]*self.mscale,v2.pos[2]*self.mscale)
 					glColor4f(0.0,0.0,1.0,transparency)
-					glVertex3f(v3.pos[0]*self.mscale,v3.pos[1]*self.mscale,v3.pos[2]*self.mscale)
+					glVertex3f(v1.pos.x*self.mscale,v1.pos.y*self.mscale,v1.pos.z*self.mscale)
+					glVertex3f(v2.pos.x*self.mscale,v2.pos.y*self.mscale,v2.pos.z*self.mscale)
+					
+					glVertex3f(v3.pos.x*self.mscale,v3.pos.y*self.mscale,v3.pos.z*self.mscale)
 					glColor3f(1.0,1.0,1.0)
-				except:
-					pass
+				except Exception, e:
+					print e
 					#print "Vertex: " + str(t) + " failed"
 			s += 1
 		glEnd()		

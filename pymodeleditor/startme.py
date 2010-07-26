@@ -3,7 +3,8 @@
 import sys 
 from PyQt4 import QtGui, QtCore 
 from pymodeleditor import PyModelEditor as Editor
-
+#import win32
+#sys.path += ['.']
 
 
 class PyModelEditor(QtGui.QDialog, Editor): 

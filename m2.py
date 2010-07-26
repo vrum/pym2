@@ -44,7 +44,7 @@ class M2Header:
 		self.transparency   = Chunk()
 		self.uv_anim        = Chunk()
 		self.tex_replace    = Chunk()
-		self.render_flags   = Chunk()
+		self.renderflags   = Chunk()
 		self.bone_lookup    = Chunk()
 		self.tex_lookup     = Chunk()
 		self.tex_units      = Chunk()
@@ -78,12 +78,14 @@ class M2Header:
 		self.key_bones.unpack(f)
 		self.vertices.unpack(f)
 		self.nviews,        = struct.unpack("i",f.read(4))
+		##HACK!!!###
+		self.nviews = 1
 		self.colors.unpack(f)
 		self.textures.unpack(f)
 		self.transparency.unpack(f)
 		self.uv_anim.unpack(f)
 		self.tex_replace.unpack(f)
-		self.render_flags.unpack(f)
+		self.renderflags.unpack(f)
 		self.bone_lookup.unpack(f)
 		self.tex_lookup.unpack(f)
 		self.tex_units.unpack(f)
@@ -122,7 +124,7 @@ class M2Header:
 		ret += self.transparency.pack()
 		ret += self.uv_anim.pack()
 		ret += self.tex_replace.pack()
-		ret += self.render_flags.pack()
+		ret += self.renderflags.pack()
 		ret += self.bone_lookup.pack()
 		ret += self.tex_lookup.pack()
 		ret += self.tex_units.pack()
@@ -302,6 +304,7 @@ class AnimBlock:
 		self.ofsKeys	= 0		
 		self.KeySubs = []
 		self.type = DATA_INT
+		
 
 		
 	def unpack(self,f,type,animfiles):
@@ -355,6 +358,8 @@ class Bone:
 		self.rotation	= AnimBlock()
 		self.scaling	= AnimBlock()
 		self.pivot	= Vec3()
+	def __str__(self):
+		return ("("+str(self.KeyBoneId)+","+str(self.flags)+","+str(self.parent)+","+str(self.pivot)+")")
 	def unpack(self,f,animfiles):
 		self.KeyBoneId,	= struct.unpack("i",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
@@ -1111,7 +1116,7 @@ class M2File:
 		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency,self.anim_files)
 		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation,self.anim_files)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
-		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
+		self.renderflags 	= ReadBlock(f,hdr.renderflags,Renderflags)
 		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
 		self.tex_lookup 	= ReadBlock(f,hdr.tex_lookup,Lookup)
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
@@ -1178,6 +1183,7 @@ class M2File:
 		WriteBlock(f,self.hdr.textures,self.textures )	
 		for i in self.textures:
 			i.ofs_name = f.tell()
+			i.len_name = len(i.name)
 			f.write(i.name)
 			FillLine(f)
 		oldpos = f.tell()
@@ -1204,7 +1210,7 @@ class M2File:
 		f.seek(oldpos)	
 		
 		WriteBlock(f,self.hdr.tex_replace,self.tex_replace)
-		WriteBlock(f,self.hdr.render_flags,self.renderflags )
+		WriteBlock(f,self.hdr.renderflags,self.renderflags )
 		WriteBlock(f,self.hdr.bone_lookup,self.bone_lookup)
 		WriteBlock(f,self.hdr.tex_lookup,self.tex_lookup)
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)

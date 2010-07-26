@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-
 from PyQt4 import QtCore, QtGui
 import m2
 
@@ -111,12 +107,14 @@ class TextureEditor(QtGui.QDialog):
 	def saveOld(self):
 		if (self.last == -1):
 			return
-		name = self.lineEdit.text()
+		name = str(self.lineEdit.text())
+		name.encode("cp1252")
 		if len(name) == 0:
 			name = "\0"
 		if name[len(name)-1] != "\0":
 				name += "\0"
 		self.m2.textures[self.last].name = name
+		self.m2.textures[self.last].len_name = len(name) 
 		self.m2.textures[self.last].type = tex_type[self.typeBox.currentIndex()]
 		flags = 0
 		if (self.xwrap.checkState() == 2):
