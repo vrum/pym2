@@ -23,6 +23,7 @@ from uvanimeditor import *
 from materialeditor import *
 from attachmenteditor import *
 from nodetree import *
+from geoseteditor import *
 
 
 class PyModelEditor(object):
@@ -50,6 +51,7 @@ class PyModelEditor(object):
 
 		self.Gl = GlWidget(Form)
 		self.Gl.setGeometry(QtCore.QRect(10, 40, 640, 480))
+		self.Gl.setMode(0)
 
 		self.xslider = QtGui.QSlider(Form)
 		self.xslider.setGeometry(QtCore.QRect(660,30,30,480))
@@ -128,6 +130,12 @@ class PyModelEditor(object):
 		self.boneButton.setObjectName("boneButton")
 		self.connect(self.boneButton, QtCore.SIGNAL("clicked()"), self.showBoneTree)
 
+
+		self.geoButton = QtGui.QPushButton(Form)
+		self.geoButton.setGeometry(QtCore.QRect(270, 570, 132, 28))
+		self.geoButton.setObjectName("geoButton")
+		self.connect(self.geoButton, QtCore.SIGNAL("clicked()"), self.editGeosets)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -141,6 +149,7 @@ class PyModelEditor(object):
 		self.materialButton.setText(QtGui.QApplication.translate("Form", "Edit Materials", None, QtGui.QApplication.UnicodeUTF8))
 		self.attachmentButton.setText(QtGui.QApplication.translate("Form", "Edit Attachments", None, QtGui.QApplication.UnicodeUTF8))
 		self.boneButton.setText(QtGui.QApplication.translate("Form", "Show Node Tree", None, QtGui.QApplication.UnicodeUTF8))
+		self.geoButton.setText(QtGui.QApplication.translate("Form", "Edit Geosets", None, QtGui.QApplication.UnicodeUTF8))
 
 	def openM2(self):
 		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",QtCore.QDir.currentPath())
@@ -233,4 +242,13 @@ class PyModelEditor(object):
 		self.bonetree = BoneView()
 		self.bonetree.setModel(self.m2,self.skin)
 		self.bonetree.show()
+
+	def editGeosets(self):
+		self.geoEditor = GeosetEditor()
+		self.geoEditor.setModel(self.m2,self.skin)
+		self.geoEditor.show()
+		QtCore.QObject.connect(self.geoEditor, QtCore.SIGNAL("accepted()"), self.setGeosets)
+
+	def setGeosets(self):
+		pass
 

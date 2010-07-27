@@ -15,12 +15,25 @@ ColPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
 
 class GlWidget(QtOpenGL.QGLWidget):
 
-	def setModel(self,m2,skin):
+	def setModel(self,m2,skin,Id = 0):
+		self.xRot = 0
+		self.yRot = 0
+		self.zRot = 0
+		self.mscale = 0.1
 		self.m2 = m2
 		self.skin = skin
+		self.Id = Id
 		self.thing = self.makeObject()
 		self.paintGL()
 		self.updateGL()
+
+	def setMode(self,mode):
+		if mode == 0:
+			self.makeObject = self.makeAll
+		elif mode == 1:
+			self.makeObject = self.makeOne
+		else:
+			self.makeObject = self.makeAll
 
 	def initializeGL(self):
 		self.qglClearColor(ColPurple.dark())
@@ -35,13 +48,57 @@ class GlWidget(QtOpenGL.QGLWidget):
 		#enable transparency
 		glEnable (GL_BLEND)
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+		self.Id = 0
 		self.thing = self.makeObject()
 		glShadeModel(GL_FLAT)
 		glEnable(GL_DEPTH_TEST)
 		glEnable(GL_CULL_FACE)
 
+	def makeOne(self):
+		
+		liste = glGenLists(1)
+		glNewList(liste, GL_COMPILE)	
+		
+		glPolygonMode(GL_FRONT, GL_LINE)
+	
+		glBegin(GL_TRIANGLES)	
+		s = 0	
+		transparency = 1.0
+		for i in self.skin.mesh:
+			if s == self.Id:
+				for j in self.skin.texunit:
+					if j.submesh == s:
+						try:
+							transparency = self.m2.transparency[self.m2.trans_lookup[j.transparency].Id].alpha.KeySubs[0].values[0] / float(0x7FFF)	
+						except:
+							print "oO"
+						break
+			
+				for t in range(i.num_tris/3):
+					try:						
+						v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
+						v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
+						v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
+						glColor4f(0.0,0.0,1.0,transparency)
+						glVertex3f(v1.pos.x*self.mscale,v1.pos.y*self.mscale,v1.pos.z*self.mscale)
+						glVertex3f(v2.pos.x*self.mscale,v2.pos.y*self.mscale,v2.pos.z*self.mscale)
+					
+						glVertex3f(v3.pos.x*self.mscale,v3.pos.y*self.mscale,v3.pos.z*self.mscale)
+						glColor3f(1.0,1.0,1.0)
+					except Exception, e:
+						print e
+						#print "Vertex: " + str(t) + " failed"
+			s += 1
+				
+		glEnd()		
 
-	def makeObject(self):
+		glPolygonMode(GL_FRONT, GL_FILL)
+		glEndList()	
+				
+		return liste
+
+
+	def makeAll(self):
 		
 		liste = glGenLists(1)
 		glNewList(liste, GL_COMPILE)	
@@ -139,11 +196,11 @@ class GlWidget(QtOpenGL.QGLWidget):
 		dx = event.x() - self.lastPos.x()
 		dy = event.y() - self.lastPos.y()
 		if (event.buttons() & LeftMouse):
-			self.setXRotation(self.xRot + 8 * dy)
-			self.setYRotation(self.yRot + 8 * dx)
+			self.setXRotation(self.xRot + 4 * dy)
+			self.setYRotation(self.yRot + 4 * dx)
 		elif (event.buttons() & RightMouse):
-			self.setXRotation(self.xRot + 8 * dy)
-			self.setZRotation(self.zRot + 8 * dx)
+			self.setXRotation(self.xRot + 4 * dy)
+			self.setZRotation(self.zRot + 4 * dx)
 		lastPos = event.pos()
 
 	def normalizeAngle(self,angle):
