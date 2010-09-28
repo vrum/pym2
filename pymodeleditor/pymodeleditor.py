@@ -25,6 +25,7 @@ from attachmenteditor import *
 from nodetree import *
 from geoseteditor import *
 from lighteditor import *
+from sequenceeditor import *
 
 
 class PyModelEditor(object):
@@ -144,6 +145,12 @@ class PyModelEditor(object):
 		self.lightButton.setObjectName("lightButton")
 		self.connect(self.lightButton, QtCore.SIGNAL("clicked()"), self.editLights)
 
+
+		self.sequenceButton = QtGui.QPushButton(Form)
+		self.sequenceButton.setGeometry(QtCore.QRect(140, 595, 132, 28))
+		self.sequenceButton.setObjectName("sequenceButton")
+		self.connect(self.sequenceButton, QtCore.SIGNAL("clicked()"), self.editSequences)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -159,10 +166,11 @@ class PyModelEditor(object):
 		self.boneButton.setText(QtGui.QApplication.translate("Form", "Show Node Tree", None, QtGui.QApplication.UnicodeUTF8))
 		self.geoButton.setText(QtGui.QApplication.translate("Form", "Edit Geosets", None, QtGui.QApplication.UnicodeUTF8))
 		self.lightButton.setText(QtGui.QApplication.translate("Form", "Edit Lights", None, QtGui.QApplication.UnicodeUTF8))
+		self.sequenceButton.setText(QtGui.QApplication.translate("Form", "Edit Sequences", None, QtGui.QApplication.UnicodeUTF8))
 
 		
 	def getLastDir(self):
-		conf = open("PyModelEditor.conf","r")
+		conf = open("PyModelEditor.conf","a+")
 		path = conf.readline()
 		conf.close()
 		if len(path) > 2:
@@ -295,5 +303,16 @@ class PyModelEditor(object):
 
 	def setLights(self):
 		self.m2 = self.lightEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
+
+
+	def editSequences(self):
+		self.sequEditor = SequenceEditor()
+		self.sequEditor.setModel(self.m2,self.skin)
+		self.sequEditor.show()
+		QtCore.QObject.connect(self.sequEditor, QtCore.SIGNAL("accepted()"), self.setSequences)
+
+	def setSequences(self):
+		self.m2 = self.sequEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 

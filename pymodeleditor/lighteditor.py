@@ -115,7 +115,7 @@ class LightEditor(QtGui.QDialog):
 		QtCore.QMetaObject.connectSlotsByName(Dialog)
 
 	def retranslateUi(self, Dialog):
-		Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+		Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Light Editor", None, QtGui.QApplication.UnicodeUTF8))
 		self.addButton.setText(QtGui.QApplication.translate("Dialog", "Add", None, QtGui.QApplication.UnicodeUTF8))
 		self.label.setText(QtGui.QApplication.translate("Dialog", "Position:", None, QtGui.QApplication.UnicodeUTF8))
 		self.ambientColorButton.setText(QtGui.QApplication.translate("Dialog", "AmbientColor", None, QtGui.QApplication.UnicodeUTF8))
