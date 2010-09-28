@@ -37,7 +37,7 @@ class M2Header:
 		self.IBlock		= Chunk()
 		self.uv_anim        = Chunk()
 		self.tex_replace    = Chunk()
-		self.render_flags   = Chunk()
+		self.renderflags   = Chunk()
 		self.bone_lookup    = Chunk()
 		self.tex_lookup     = Chunk()
 		self.tex_units      = Chunk()
@@ -79,7 +79,7 @@ class M2Header:
 		self.IBlock.unpack(f)
 		self.uv_anim.unpack(f)
 		self.tex_replace.unpack(f)
-		self.render_flags.unpack(f)
+		self.renderflags.unpack(f)
 		self.bone_lookup.unpack(f)
 		self.tex_lookup.unpack(f)
 		self.tex_units.unpack(f)
@@ -118,7 +118,7 @@ class M2Header:
 		ret += self.IBlock.pack()
 		ret += self.uv_anim.pack()
 		ret += self.tex_replace.pack()
-		ret += self.render_flags.pack()
+		ret += self.renderflags.pack()
 		ret += self.bone_lookup.pack()
 		ret += self.tex_lookup.pack()
 		ret += self.tex_units.pack()
@@ -445,10 +445,10 @@ class Propertie:
 	def __init__(self):
 		self.Bones = (0,0,0,0)
 	def unpack(self,f):
-		self.Bones = struct.unpack("4b",f.read(4))
+		self.Bones = struct.unpack("4B",f.read(4))
 		return self
 	def pack(self):
-		return struct.pack("4b",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
+		return struct.pack("4B",self.Bones[0],self.Bones[1],self.Bones[2],self.Bones[3])
 
 
 
@@ -901,7 +901,10 @@ def WriteAnimBlock(f,block):
 		block.ofsTimes = f.tell()
 	
 		for j in block.Times:
-			f.write(struct.pack("i",j))
+			try:
+				f.write(struct.pack("i",j))
+			except:
+				print type(j)
 		FillLine(f)
 
 	
@@ -959,6 +962,7 @@ class M2File:
 		self.materials		= []
 		for i in range(self.hdr.views.count):
 			self.indices.append(ReadBlock(f,self.views[i].Indices,Lookup))
+			self.views[i].Triangles.count /= 3
 			self.triangles.append(ReadBlock(f,self.views[i].Triangles,Triangle))
 			self.properties.append(ReadBlock(f,self.views[i].Properties,Propertie))
 			self.submeshes.append(ReadBlock(f,self.views[i].Submeshes,Mesh))
@@ -970,7 +974,7 @@ class M2File:
 		self.iblock	 	= ReadBlock(f,hdr.IBlock,GlobalSequence)
 		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
-		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
+		self.renderflags 	= ReadBlock(f,hdr.renderflags,Renderflags)
 		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
 		self.tex_lookup 	= ReadBlock(f,hdr.tex_lookup,Lookup)
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
@@ -1032,6 +1036,7 @@ class M2File:
 		for i in range(self.hdr.views.count):
 			WriteBlock(f,self.views[i].Indices,self.indices[i])
 			WriteBlock(f,self.views[i].Triangles,self.triangles[i])
+			self.views[i].Triangles.count *= 3
 			WriteBlock(f,self.views[i].Properties,self.properties[i])
 			WriteBlock(f,self.views[i].Submeshes,self.submeshes[i])
 			WriteBlock(f,self.views[i].TextureUnits,self.materials[i])		
@@ -1096,7 +1101,7 @@ class M2File:
 		######lookups####		
 				
 		WriteBlock(f,self.hdr.tex_replace,self.tex_replace)
-		WriteBlock(f,self.hdr.render_flags,self.renderflags )
+		WriteBlock(f,self.hdr.renderflags,self.renderflags )
 		WriteBlock(f,self.hdr.bone_lookup,self.bone_lookup)
 		WriteBlock(f,self.hdr.tex_lookup,self.tex_lookup)
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)

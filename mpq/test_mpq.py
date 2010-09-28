@@ -57,26 +57,70 @@ class StormLib:
 			self.SFileSetCompactCallback = getattr(stormlib,"_Z23SFileSetCompactCallbackPvPFvS_jP14_LARGE_INTEGERS1_ES_")
 			self.SFileSetDataCompression = getattr(stormlib,"_Z23SFileSetDataCompressionj")
 			self.SFileUpdateFileAttributes = getattr(stormlib,"_Z25SFileUpdateFileAttributesPvPKc")
-		
+		elif os.name == "nt":
+			stormlib = ctypes.cdll.LoadLibrary("StormLib/StormLib.dll")
+			
+			
+			self.SFileOpenArchive = getattr(stormlib,"SFileOpenArchive")
+			self.SFileCreateArchive = getattr(stormlib,"SFileCreateArchive")
+			self.SFileCreateArchiveEx = getattr(stormlib,"SFileCreateArchiveEx")			
+			
+			self.SFileSetLocale = getattr(stormlib,"SFileSetLocale")
+			self.SFileGetLocale = getattr(stormlib,"SFileGetLocale")
+			self.SFileFlushArchive = getattr(stormlib,"SFileFlushArchive")
+			self.SFileCloseArchive = getattr(stormlib,"SFileCloseArchive")			
+			
+			self.SFileAddListFile = getattr(stormlib,"SFileAddListFile")
+			
+			self.SFileSetCompactCallback = getattr(stormlib,"SFileSetCompactCallback")	
+			self.SFileCompactArchive = getattr(stormlib,"SFileCompactArchive")
+			
+			self.SFileSetHashTableSize = getattr(stormlib,"SFileSetHashTableSize")			
+			
+			self.SFileCreateAttributes = getattr(stormlib,"SFileCreateAttributes")
+			self.SFileGetAttributes = getattr(stormlib,"SFileGetAttributes")
+			self.SFileSetAttributes = getattr(stormlib,"SFileSetAttributes")
+			self.SFileUpdateFileAttributes = getattr(stormlib,"SFileUpdateFileAttributes")			
+			
+			self.SFileOpenFileEx = getattr(stormlib,"SFileOpenFileEx")
+			self.SFileGetFileSize = getattr(stormlib,"SFileGetFileSize")
+			self.SFileSetFilePointer = getattr(stormlib,"SFileSetFilePointer")
+			self.SFileReadFile = getattr(stormlib,"SFileReadFile")
+			self.SFileCloseFile = getattr(stormlib,"SFileCloseFile")			
+			
+			self.SFileHasFile = getattr(stormlib,"SFileHasFile")
+			self.SFileGetFileName = getattr(stormlib,"SFileGetFileName")
+			self.SFileGetFileInfo = getattr(stormlib,"SFileGetFileInfo")
+			
+			self.SFileExtractFile = getattr(stormlib,"SFileExtractFile")
+			
+			self.SFileVerifyFile = getattr(stormlib,"SFileVerifyFile")
+			
+			self.SFileVerifyArchive = getattr(stormlib,"SFileVerifyArchive")
+			
+			self.SFileFindFirstFile = getattr(stormlib,"SFileFindFirstFile")
+			self.SFileFindNextFile = getattr(stormlib,"SFileFindNextFile")
+			self.SFileFindClose = getattr(stormlib,"SListFileFindClose")
+			
+			self.SFileEnumLocales = getattr(stormlib,"SFileEnumLocales")
+			
+			self.SFileCreateFile = getattr(stormlib,"SFileCreateFile")
+			self.SFileWriteFile = getattr(stormlib,"SFileWriteFile")
+			self.SFileFinishFile = getattr(stormlib, "SFileFinishFile")
+			self.SFileAddFileEx = getattr(stormlib,"SFileAddFileEx")
+			self.SFileAddFile = getattr(stormlib,"SFileAddFile")
+			self.SFileAddWave = getattr(stormlib,"SFileAddWave")
+			self.SFileRemoveFile = getattr(stormlib,"SFileRemoveFile")
+			self.SFileRenameFile = getattr(stormlib,"SFileRenameFile")
+			self.SFileSetFileLocale = getattr(stormlib,"SFileSetFileLocale")
+			self.SFileSetDataCompression = getattr(stormlib,"SFileSetDataCompression")
+			self.SFileSetAddFileCallback = getattr(stormlib,"SFileSetAddFileCallback")
+						
+
 		else:
 			print os.name + " not yet supported :/"
 	
-hmpq = ctypes.c_void_p(None)
-hfile = ctypes.c_void_p(None)
-dfile = ctypes.c_void_p(None)
-NULL = ctypes.c_void_p(None)
-mpqname = ctypes.c_char_p("patch-5.MPQ")
-diskname = ctypes.c_char_p("/home/bastian/workspace/pym2/mpq/CharBaseInfo.dbc")
-libst = StormLib()
-libst.SFileOpenArchive(mpqname,0,0,ctypes.byref(hmpq))
-filename = ctypes.c_char_p("dbfilesclient/CharBaseInfo.dbc")
-libst.SFileOpenFileEx(hmpq,filename,0,ctypes.byref(hfile))
-dfile = libst.CreateFile(diskname,GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL)
-szBuffer = ctypes.create_string_buffer('\000' * 0x10000)
-dwBytes = ctypes.c_uint(1)
-#while dwBytes > 0:
-libst.SFileReadFile(hfile, szBuffer, len(szBuffer), ctypes.byref(dwBytes), NULL)
-if dwBytes > 0:
-	libst.WriteFile(dfile,szBuffer,dwBytes, ctypes.byref(dwBytes),NULL)
 
 
+
+s = StormLib()

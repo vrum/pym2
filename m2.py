@@ -152,7 +152,7 @@ class Vertex:
 		self.pos        = Vec3()
 		self.bweights   = (0,0,0,0)
 		self.bindices   = (0,0,0,0)
-		self.normal     = (0,0,0)
+		self.normal     = Vec3()
 		self.uv         = (0,0)
 		self.unk         = (0,0)
 		
@@ -160,7 +160,7 @@ class Vertex:
 		self.pos        = Vec3().unpack(f)
 		self.bweights   = struct.unpack("4B",f.read(4))
 		self.bindices   = struct.unpack("4B",f.read(4))
-		self.normal     = struct.unpack("3f",f.read(12))
+		self.normal     = Vec3().unpack(f)
 		self.uv         = struct.unpack("2f",f.read(8))
 		self.unk         = struct.unpack("2f",f.read(8))
 		return self
@@ -168,7 +168,7 @@ class Vertex:
 		ret = self.pos.pack()
 		ret += struct.pack("4B",self.bweights[0],self.bweights[1],self.bweights[2],self.bweights[3])
 		ret += struct.pack("4B",self.bindices[0],self.bindices[1],self.bindices[2],self.bindices[3])
-		ret += struct.pack("3f",self.normal[0],self.normal[1],self.normal[2])
+		ret += self.normal.pack()
 		ret += struct.pack("2f",self.uv[0],self.uv[1])
 		ret += struct.pack("2f",self.unk[0],self.unk[1])
 		return ret

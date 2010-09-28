@@ -196,11 +196,11 @@ class GlWidget(QtOpenGL.QGLWidget):
 		dx = event.x() - self.lastPos.x()
 		dy = event.y() - self.lastPos.y()
 		if (event.buttons() & LeftMouse):
-			self.setXRotation(self.xRot + 4 * dy)
-			self.setYRotation(self.yRot + 4 * dx)
+			self.setXRotation(self.xRot -  dy)
+			self.setYRotation(self.yRot -  dx)
 		elif (event.buttons() & RightMouse):
-			self.setXRotation(self.xRot + 4 * dy)
-			self.setZRotation(self.zRot + 4 * dx)
+			self.setXRotation(self.xRot -  dy)
+			self.setZRotation(self.zRot -  dx)
 		lastPos = event.pos()
 
 	def normalizeAngle(self,angle):

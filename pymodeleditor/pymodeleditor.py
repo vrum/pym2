@@ -24,12 +24,14 @@ from materialeditor import *
 from attachmenteditor import *
 from nodetree import *
 from geoseteditor import *
+from lighteditor import *
 
 
 class PyModelEditor(object):
 	def setupUi(self, Form):
+		self.lastDir = QtCore.QDir.currentPath()
 		Form.setObjectName("Form")
-		Form.resize(800, 600)
+		Form.resize(800, 700)
 
 		#remove later
 		modelname = "Test.m2"
@@ -136,6 +138,12 @@ class PyModelEditor(object):
 		self.geoButton.setObjectName("geoButton")
 		self.connect(self.geoButton, QtCore.SIGNAL("clicked()"), self.editGeosets)
 
+
+		self.lightButton = QtGui.QPushButton(Form)
+		self.lightButton.setGeometry(QtCore.QRect(10, 595, 132, 28))
+		self.lightButton.setObjectName("lightButton")
+		self.connect(self.lightButton, QtCore.SIGNAL("clicked()"), self.editLights)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -150,19 +158,43 @@ class PyModelEditor(object):
 		self.attachmentButton.setText(QtGui.QApplication.translate("Form", "Edit Attachments", None, QtGui.QApplication.UnicodeUTF8))
 		self.boneButton.setText(QtGui.QApplication.translate("Form", "Show Node Tree", None, QtGui.QApplication.UnicodeUTF8))
 		self.geoButton.setText(QtGui.QApplication.translate("Form", "Edit Geosets", None, QtGui.QApplication.UnicodeUTF8))
+		self.lightButton.setText(QtGui.QApplication.translate("Form", "Edit Lights", None, QtGui.QApplication.UnicodeUTF8))
 
+		
+	def getLastDir(self):
+		conf = open("PyModelEditor.conf","r")
+		path = conf.readline()
+		conf.close()
+		if len(path) > 2:
+			self.lastDir = path
+		else:
+			self.lastDir = QtCore.QDir.currentPath()
+			
+	def saveLastDir(self):
+		conf = open("PyModelEditor.conf","w+")
+		conf.write(self.lastDir)
+		conf.close()
+		
 	def openM2(self):
-		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",QtCore.QDir.currentPath())
+		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",self.lastDir)
 		self.m2 = M2File(openname)
 		skinname = openname[0:len(openname)-3]+"00.skin"
 		self.skin = SkinFile(skinname)
 		self.Gl.setModel(self.m2,self.skin)
+		openname = str(openname)
+		last = openname.rfind("/")
+		self.lastDir = openname[0:last]		
+		self.saveLastDir()
 
 	def saveM2(self):
-		savename = QtGui.QFileDialog().getSaveFileName(self,"Save File",QtCore.QDir.currentPath())
+		savename = QtGui.QFileDialog().getSaveFileName(self,"Save File",self.lastDir)
 		self.m2.write(savename)
 		skinname = savename[0:len(savename)-3]+"00.skin"
 		self.skin.write(skinname)
+		savename = str(savename)
+		last = savename.rfind("/")
+		self.lastDir = savename[0:last]		
+		self.saveLastDir()
 
 	def editTransparency(self):
 		self.tChooser = TransparencyChooser()
@@ -250,5 +282,18 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.geoEditor, QtCore.SIGNAL("accepted()"), self.setGeosets)
 
 	def setGeosets(self):
-		pass
+		self.m2 = self.geoEditor.m2
+		self.skin = self.geoEditor.skin
+		self.Gl.setModel(self.m2,self.skin)
+
+
+	def editLights(self):
+		self.lightEditor = LightEditor()
+		self.lightEditor.setModel(self.m2,self.skin)
+		self.lightEditor.show()
+		QtCore.QObject.connect(self.lightEditor, QtCore.SIGNAL("accepted()"), self.setLights)
+
+	def setLights(self):
+		self.m2 = self.lightEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
 

@@ -95,6 +95,14 @@ class GeosetEditor(QtGui.QDialog):
 		self.GlView.setObjectName("GlView")
 		self.GlView.setMode(1)
 
+		self.scaleslider = QtGui.QSlider(Dialog)
+		self.scaleslider.setGeometry(QtCore.QRect(450,110,30,250))
+		self.scaleslider.setRange(1,500)
+		self.scaleslider.setSingleStep(10)
+		self.scaleslider.setPageStep(50)
+		self.scaleslider.setTickInterval(50)
+		self.connect(self.scaleslider,QtCore.SIGNAL("valueChanged(int)"),self.GlView.setScale)
+
 		self.lineEdit = QtGui.QLineEdit(Dialog)
 		self.lineEdit.setGeometry(QtCore.QRect(450, 70, 91, 26))
 		self.lineEdit.setObjectName("lineEdit")
