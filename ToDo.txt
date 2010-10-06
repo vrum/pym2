@@ -1,2 +1,5 @@
 ToDo-List:
-	* Write more examples
+	* Easy MPQ access
+	* Extend the BLP lib for writing
+	* WMO/WDT/WDL/ADT Support
+
