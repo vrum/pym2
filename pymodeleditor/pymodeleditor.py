@@ -26,6 +26,7 @@ from nodetree import *
 from geoseteditor import *
 from lighteditor import *
 from sequenceeditor import *
+from thingseditor import *
 
 
 class PyModelEditor(object):
@@ -151,6 +152,12 @@ class PyModelEditor(object):
 		self.sequenceButton.setObjectName("sequenceButton")
 		self.connect(self.sequenceButton, QtCore.SIGNAL("clicked()"), self.editSequences)
 
+
+		self.thingsButton = QtGui.QPushButton(Form)
+		self.thingsButton.setGeometry(QtCore.QRect(270, 595, 132, 28))
+		self.thingsButton.setObjectName("thingsButton")
+		self.connect(self.thingsButton, QtCore.SIGNAL("clicked()"), self.editThings)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -167,6 +174,7 @@ class PyModelEditor(object):
 		self.geoButton.setText(QtGui.QApplication.translate("Form", "Edit Geosets", None, QtGui.QApplication.UnicodeUTF8))
 		self.lightButton.setText(QtGui.QApplication.translate("Form", "Edit Lights", None, QtGui.QApplication.UnicodeUTF8))
 		self.sequenceButton.setText(QtGui.QApplication.translate("Form", "Edit Sequences", None, QtGui.QApplication.UnicodeUTF8))
+		self.thingsButton.setText(QtGui.QApplication.translate("Form", "Edit Things", None, QtGui.QApplication.UnicodeUTF8))
 
 		
 	def getLastDir(self):
@@ -314,5 +322,16 @@ class PyModelEditor(object):
 
 	def setSequences(self):
 		self.m2 = self.sequEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
+
+
+	def editThings(self):
+		self.thingEditor = ThingsEditor()
+		self.thingEditor.setModel(self.m2,self.skin)
+		self.thingEditor.show()
+		QtCore.QObject.connect(self.thingEditor, QtCore.SIGNAL("accepted()"), self.setThings)
+
+	def setThings(self):
+		self.m2 = self.thingEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 

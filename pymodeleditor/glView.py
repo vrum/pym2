@@ -105,6 +105,7 @@ class GlWidget(QtOpenGL.QGLWidget):
 		
 		glPolygonMode(GL_FRONT, GL_LINE)
 	
+		#this is for the model you see
 		glBegin(GL_TRIANGLES)	
 		s = 0	
 		transparency = 1.0
@@ -134,6 +135,7 @@ class GlWidget(QtOpenGL.QGLWidget):
 			s += 1
 		glEnd()		
 
+		#this paints the bones!
 		glBegin(GL_LINES)
 		for i in self.m2.bones:
 			if i.parent != -1:
@@ -141,6 +143,49 @@ class GlWidget(QtOpenGL.QGLWidget):
 				glVertex3f(i.pivot.x*self.mscale,i.pivot.y*self.mscale,i.pivot.z*self.mscale)
 				glVertex3f(self.m2.bones[i.parent].pivot.x*self.mscale,self.m2.bones[i.parent].pivot.y*self.mscale,self.m2.bones[i.parent].pivot.z*self.mscale)
 		glEnd()
+		
+		#this is the bounding box
+		glBegin(GL_TRIANGLES)
+		for i in self.m2.bounding_triangles:
+			try:
+				v1 = self.m2.bounding_vertices[i.indices[0]]
+				v2 = self.m2.bounding_vertices[i.indices[1]]
+				v3 = self.m2.bounding_vertices[i.indices[2]]
+				
+				glColor3f(1.0,1.0,1.0)
+				glVertex3f(v1.x*self.mscale,v1.y*self.mscale,v1.z*self.mscale)
+				glVertex3f(v2.x*self.mscale,v2.y*self.mscale,v2.z*self.mscale)
+				glVertex3f(v3.x*self.mscale,v3.y*self.mscale,v3.z*self.mscale)
+				
+			except Exception, e:
+				print e
+				print i
+		glEnd()
+		
+		#and these are the normals for the bounding box
+		glBegin(GL_LINES)
+		count = 0
+		tri = 0
+		for i in self.m2.bounding_normals:
+			try:
+				glColor3f(1.0,1.0,0.0)
+			
+				v1 = self.m2.bounding_vertices[self.m2.bounding_triangles[count].indices[tri]]
+				glVertex3f(v1.x*self.mscale,v1.y*self.mscale,v1.z*self.mscale)
+				glVertex3f((v1.x+i.x)*self.mscale,(v1.y+i.y)*self.mscale,(v1.z+i.z)*self.mscale)
+				
+			except Exception, e:
+				print e
+				print i
+				
+			tri += 1
+			if tri == 3:
+				count += 1
+				tri = 0
+			
+		glEnd()
+		
+		
 
 		glPolygonMode(GL_FRONT, GL_FILL)
 		glEndList()	
