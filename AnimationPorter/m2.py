@@ -44,7 +44,7 @@ class M2Header:
 		self.transparency   = Chunk()
 		self.uv_anim        = Chunk()
 		self.tex_replace    = Chunk()
-		self.render_flags   = Chunk()
+		self.renderflags   = Chunk()
 		self.bone_lookup    = Chunk()
 		self.tex_lookup     = Chunk()
 		self.tex_units      = Chunk()
@@ -62,8 +62,7 @@ class M2Header:
 		self.cameras        = Chunk()
 		self.camera_lookup  = Chunk()
 		self.ribbon_emitters = Chunk()
-		self.particle_emitters = Chunk()	
-		#if(self.modeltype&8):
+		self.particle_emitters = Chunk()
 		self.unknown = Chunk()
 			
 	def unpack(self,f):
@@ -78,12 +77,14 @@ class M2Header:
 		self.key_bones.unpack(f)
 		self.vertices.unpack(f)
 		self.nviews,        = struct.unpack("i",f.read(4))
+		##HACK!!!###
+		self.nviews = 1
 		self.colors.unpack(f)
 		self.textures.unpack(f)
 		self.transparency.unpack(f)
 		self.uv_anim.unpack(f)
 		self.tex_replace.unpack(f)
-		self.render_flags.unpack(f)
+		self.renderflags.unpack(f)
 		self.bone_lookup.unpack(f)
 		self.tex_lookup.unpack(f)
 		self.tex_units.unpack(f)
@@ -122,7 +123,7 @@ class M2Header:
 		ret += self.transparency.pack()
 		ret += self.uv_anim.pack()
 		ret += self.tex_replace.pack()
-		ret += self.render_flags.pack()
+		ret += self.renderflags.pack()
 		ret += self.bone_lookup.pack()
 		ret += self.tex_lookup.pack()
 		ret += self.tex_units.pack()
@@ -147,26 +148,26 @@ class M2Header:
 
 class Vertex:
 	def __init__(self):
-		self.pos        = (0,0,0)
+		self.pos        = Vec3()
 		self.bweights   = (0,0,0,0)
 		self.bindices   = (0,0,0,0)
-		self.normal     = (0,0,0)
+		self.normal     = Vec3()
 		self.uv         = (0,0)
 		self.unk         = (0,0)
 		
 	def unpack(self,f):
-		self.pos        = struct.unpack("3f",f.read(12))
+		self.pos        = Vec3().unpack(f)
 		self.bweights   = struct.unpack("4B",f.read(4))
 		self.bindices   = struct.unpack("4B",f.read(4))
-		self.normal     = struct.unpack("3f",f.read(12))
+		self.normal     = Vec3().unpack(f)
 		self.uv         = struct.unpack("2f",f.read(8))
 		self.unk         = struct.unpack("2f",f.read(8))
 		return self
 	def pack(self):
-		ret = struct.pack("3f",self.pos[0],self.pos[1],self.pos[2])
+		ret = self.pos.pack()
 		ret += struct.pack("4B",self.bweights[0],self.bweights[1],self.bweights[2],self.bweights[3])
 		ret += struct.pack("4B",self.bindices[0],self.bindices[1],self.bindices[2],self.bindices[3])
-		ret += struct.pack("3f",self.normal[0],self.normal[1],self.normal[2])
+		ret += self.normal.pack()
 		ret += struct.pack("2f",self.uv[0],self.uv[1])
 		ret += struct.pack("2f",self.unk[0],self.unk[1])
 		return ret
@@ -302,6 +303,7 @@ class AnimBlock:
 		self.ofsKeys	= 0		
 		self.KeySubs = []
 		self.type = DATA_INT
+		
 
 		
 	def unpack(self,f,type,animfiles):
@@ -355,6 +357,8 @@ class Bone:
 		self.rotation	= AnimBlock()
 		self.scaling	= AnimBlock()
 		self.pivot	= Vec3()
+	def __str__(self):
+		return ("("+str(self.KeyBoneId)+","+str(self.flags)+","+str(self.parent)+","+str(self.pivot)+")")
 	def unpack(self,f,animfiles):
 		self.KeyBoneId,	= struct.unpack("i",f.read(4))
 		self.flags,	= struct.unpack("i",f.read(4))
@@ -473,7 +477,7 @@ class Transparency:
 	
 class Event:
 	def __init__(self):
-		self.Id	= ""
+		self.Id	= 0
 		self.Data	= 0
 		self.Bone	= 0
 		self.Pos	= Vec3()
@@ -486,7 +490,7 @@ class Event:
 
 		
 	def unpack(self,f):
-		self.Id	= struct.unpack("4c",f.read(4))
+		self.Id,	= struct.unpack("i",f.read(4))
 		self.Data,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
 		self.Pos	= Vec3().unpack(f)
@@ -504,7 +508,7 @@ class Event:
 		f.seek(oldpos)
 		return self
 	def pack(self):
-		ret = struct.pack("4c",self.Id[0],self.Id[1],self.Id[2],self.Id[3])
+		ret = struct.pack("i",self.Id)
 		ret += struct.pack("i",self.Data)
 		ret += struct.pack("i",self.Bone)
 		ret += self.Pos.pack()
@@ -691,18 +695,22 @@ class Particle:
 		self.tex_tile_rot, = struct.unpack("h",f.read(2))
 		self.tex_rows,	= struct.unpack("h",f.read(2))
 		self.tex_cols,	= struct.unpack("h",f.read(2))
+
 		self.emission_speed = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.speed_var = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.vert_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.hor_range = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.gravity = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.lifespan = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+
 		self.pad1,	= struct.unpack("i",f.read(4))
 		self.emission_rate = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.pad2,	= struct.unpack("i",f.read(4))
+
 		self.emission_area_len = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.emission_area_width = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
 		self.gravity2 = AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+
 		self.color	= FakeAnim().unpack(f,DATA_VEC3)
 		self.opacity	= FakeAnim().unpack(f,DATA_SHORT)
 		self.size	= FakeAnim().unpack(f,DATA_VEC2)
@@ -1085,7 +1093,6 @@ def CreateAnimFileName(a_name,anim,animfile):
 class M2File:
 	def __init__(self,filename):
 		f = open(filename,"r+b")
-		self.filename = filename
 		self.hdr = M2Header()
 		self.hdr.unpack(f)
 		hdr = self.hdr #just spare some time in tipping
@@ -1108,12 +1115,14 @@ class M2File:
 		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency,self.anim_files)
 		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation,self.anim_files)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
-		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
+		self.renderflags 	= ReadBlock(f,hdr.renderflags,Renderflags)
 		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
 		self.tex_lookup 	= ReadBlock(f,hdr.tex_lookup,Lookup)
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
 		self.trans_lookup 	= ReadBlock(f,hdr.trans_lookup,Lookup)
 		self.uv_anim_lookup 	= ReadBlock(f,hdr.uv_anim_lookup,Lookup)
+		#This was a big bug, fine I found it --Tig :)
+		self.hdr.bounding_triangles.count /= 3;
 		self.bounding_triangles = ReadBlock(f,hdr.bounding_triangles,Triangle)
 		self.bounding_vertices	= ReadBlock(f,hdr.bounding_vertices,Vec3)
 		self.bounding_normals	= ReadBlock(f,hdr.bounding_normals,Vec3)
@@ -1130,7 +1139,7 @@ class M2File:
 		
 	def write(self,filename):
 		f = open(filename,"w+b")
-		self.filename = filename
+		
 		tempname = filename[0:len(filename)-3]
 		counter = 0
 		for i in self.animations:
@@ -1175,6 +1184,7 @@ class M2File:
 		WriteBlock(f,self.hdr.textures,self.textures )	
 		for i in self.textures:
 			i.ofs_name = f.tell()
+			i.len_name = len(i.name)
 			f.write(i.name)
 			FillLine(f)
 		oldpos = f.tell()
@@ -1201,13 +1211,15 @@ class M2File:
 		f.seek(oldpos)	
 		
 		WriteBlock(f,self.hdr.tex_replace,self.tex_replace)
-		WriteBlock(f,self.hdr.render_flags,self.renderflags )
+		WriteBlock(f,self.hdr.renderflags,self.renderflags )
 		WriteBlock(f,self.hdr.bone_lookup,self.bone_lookup)
 		WriteBlock(f,self.hdr.tex_lookup,self.tex_lookup)
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)
 		WriteBlock(f,self.hdr.trans_lookup,self.trans_lookup)
 		WriteBlock(f,self.hdr.uv_anim_lookup,self.uv_anim_lookup)
-		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)
+		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)		
+		#This was a big bug, fine I found it --Tig :)
+		self.hdr.bounding_triangles.count *= 3;
 		WriteBlock(f,self.hdr.bounding_vertices,self.bounding_vertices)
 		WriteBlock(f,self.hdr.bounding_normals,self.bounding_normals)
 		
