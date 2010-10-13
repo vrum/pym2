@@ -46,8 +46,6 @@ def WriteBlock(f,chunk,block):
 class Lookup:
 	def __init__(self):
 		self.Id = 0
-	def __str__(self):
-		return "("+str(self.Id)+")"
 	def unpack(self,f):
 		self.Id, = struct.unpack("h",f.read(2))
 		return self
@@ -55,7 +53,7 @@ class Lookup:
 		return struct.pack("h",self.Id)
 	
 
-class Chunk: #m2 and skin chunks!
+class Chunk:
 	def __init__(self):
 		self.count     = 0
 		self.offset    = 0
@@ -70,6 +68,8 @@ class Chunk: #m2 and skin chunks!
 class Triangle:
 	def __init__(self):
 		self.indices	= (0,0,0)
+	def __str__(self):
+		return "{ "+str(self.indices[0])+" , "+str(self.indices[1])+ " , "+str(self.indices[2])+" }"
 	def unpack(self,f):
 		self.indices	= struct.unpack("3H",f.read(6))
 		return self
@@ -189,14 +189,17 @@ class Quat:
 		
 class Bounds:
 	def __init__(self):
-		self.BoundingBox	= (0,0,0,0,0,0)
+		self.minimumExtend	= Vec3()
+		self.maximumExtend	= Vec3()
 		self.Radius		= 0
 	def unpack(self,f):
-		self.BoundingBox	= struct.unpack("6f",f.read(24))
+		self.minimumExtend	= Vec3().unpack(f)
+		self.maximumExtend	= Vec3().unpack(f)
 		self.Radius,		= struct.unpack("f",f.read(4))
 		return self
 	def pack(self):
-		ret = struct.pack("6f",self.BoundingBox[0],self.BoundingBox[1],self.BoundingBox[2],self.BoundingBox[3],self.BoundingBox[4],self.BoundingBox[5])
+		ret = self.minimumExtend.pack()
+		ret += self.maximumExtend.pack()
 		ret += struct.pack("f",self.Radius)
 		return ret
 	
