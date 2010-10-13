@@ -30,6 +30,10 @@ class WChunk: #Chunk Basic Class for World Data (like adt,wmo etc.)
 		
 		
 class MVER(WChunk):
+	def __init__(self):
+		self.magic = 1297499474
+		self.size = 4
+		self.version = 18
 	def unpackData(self,f):
 		self.version, = struct.unpack("i",f.read(4))
 		
