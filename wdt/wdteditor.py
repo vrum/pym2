@@ -5,6 +5,7 @@
 from PyQt4 import QtCore, QtGui
 import sys
 
+from wowfile import *
 from wdt import *
 
 class WDTEditor(QtGui.QMainWindow):
@@ -253,6 +254,17 @@ class WDTEditor(QtGui.QMainWindow):
 			self.wdt.setVertexShading()
 		else:
 			self.wdt.unsetVertexShading()
+			
+		#if (hasTerr == False):	
+		name = str(self.filenameEdit.text())
+		name.encode("cp1252")
+		
+		self.wdt.setWMOName(name)	
+		pos = Vec3()
+		pos.x = float(self.xPos.text())
+		pos.y = float(self.yPos.text())
+		pos.z = float(self.zPos.text())
+		self.wdt.setWMOPosition(pos)
 			
 		self.wdt.write(filename)
 			

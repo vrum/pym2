@@ -236,6 +236,7 @@ class WDTFile(WoWFile):
 		self.main = MAIN()
 		self.mwmo = MWMO()
 		self.modf = MODF()
+		self.modf.addEntry()
 		
 	def readData(self,f):
 		self.mver.unpack(f)
@@ -295,16 +296,16 @@ class WDTFile(WoWFile):
 			return Vec3()
 		
 	def setWMOPosition(self,pos):
-		pass
+		self.modf.setEntryPosition(0,pos)
 		
 	def getWMOOrientation(self):
 		if not self.mphd.hasTerrain():
-			return self.modf.getEntryPosition(0)
+			return self.modf.getEntryOrientation(0)
 		else:
 			return Vec3()
 		
 	def setWMOOrientation(self,ori):
-		pass
+		self.modf.setEntryOrientation(0,pos)
 		
 '''
 wdt = WDTFile()#.read("AlliancePVPBarracks.wdt")
