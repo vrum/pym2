@@ -17,6 +17,8 @@ class MWMO(WChunk):
 		return self.filename
 	def setFilename(self,name):
 		self.filename = name
+	def getFilename(self):
+		return self.filename
 		
 class MODF(WChunk):
 	class WmoEntry:
@@ -57,6 +59,30 @@ class MODF(WChunk):
 			ret += struct.pack("h",self.nameset)
 			ret += struct.pack("h",self.pad)
 			return ret
+			
+		def setPosition(self,pos):
+			self.position = pos
+			
+		def setOrientation(self,ori):
+			self.orientation = ori
+			
+		def getPosition(self):
+			return self.position
+			
+		def getOrientation(self):
+			return self.orientation
+			
+		def setFlags(self,flags):
+			self.flags = flags
+			
+		def setDoodadSet(self,dds):
+			self.doodadset = dds
+			
+		def setNameSet(self,nms):
+			self.nameset = nms
+			
+		def setIndex(self,ind):
+			self.index = ind
 		
 	def __init__(self):
 		self.magic = 1297040454
@@ -77,6 +103,29 @@ class MODF(WChunk):
 	def addEntry(self):
 		self.nEntries += 1
 		self.entries.append(self.WmoEntry())
+		
+	def setEntryPosition(self,entry,pos):
+		try:
+			self.entries[entry].setPosition(pos)
+		except:
+			print "Entry not found"
+			
+	def getEntryPosition(self,entry):
+		try:
+			return self.entries[entry].getPosition()
+		except:
+			print "Entry not found"
+			
+	def setEntryOrientation(self,entry,ori):
+		try:
+			self.entries[entry].setOrientation(ori)
+		except:
+			print "Entry not found"
+	def getEntryOrientation(self,entry):
+		try:
+			return self.entries[entry].getOrientation()
+		except:
+			print "Entry not found"
 
 class MPHD(WChunk):
 	def __init__(self):
@@ -103,9 +152,29 @@ class MPHD(WChunk):
 		else:
 			return True
 	def setTerrain(self):
-		self.flags &= 14
+		self.flags &= 14		
 	def unsetTerrain(self):
 		self.flags |= 1
+		
+	def hasBigAlpha(self):
+		if self.flags & 4:
+			return True
+		else:
+			return False
+	def setBigAlpha(self):
+		self.flags |= 4
+	def unsetBigAlpha(self):
+		self.flags &= 11
+		
+	def hasVertexShading(self):
+		if self.flags & 2:
+			return True
+		else:
+			return False
+	def setVertexShading(self):
+		self.flags |= 2
+	def unsetVertexShading(self):
+		self.flags &= 13
 	
 class MAIN(WChunk):
 	class MapEntry:
@@ -187,9 +256,60 @@ class WDTFile(WoWFile):
 			f.write(self.modf.pack())
 		return f
 		
+	def checkTile(self,x,y):
+		self.main.checkTile(x,y)
 		
-
+	def uncheckTile(self,x,y):
+		self.main.uncheckTile(x,y)
+		
+	def setTerrain(self):
+		self.mphd.setTerrain()
+		
+	def unsetTerrain(self):
+		self.mphd.unsetTerrain()
+		
+	def setBigAlpha(self):
+		self.mphd.setBigAlpha()
+		
+	def unsetBigAlpha(self):
+		self.mphd.unsetBigAlpha()
+		
+	def setVertexShading(self):
+		self.mphd.setVertexShading()
+		
+	def unsetVertexShading(self):
+		self.mphd.unsetVertexShading()
+		
+	def setWMOName(self,name):
+		self.mwmo.setFilename(name)
+	def getWMOName(self):
+		if not self.mphd.hasTerrain():
+			return self.mwmo.getFilename()
+		else:
+			return ""
+		
+	def getWMOPosition(self):
+		if not self.mphd.hasTerrain():
+			return self.modf.getEntryPosition(0)
+		else:
+			return Vec3()
+		
+	def setWMOPosition(self,pos):
+		pass
+		
+	def getWMOOrientation(self):
+		if not self.mphd.hasTerrain():
+			return self.modf.getEntryPosition(0)
+		else:
+			return Vec3()
+		
+	def setWMOOrientation(self,ori):
+		pass
+		
+'''
 wdt = WDTFile()#.read("AlliancePVPBarracks.wdt")
 wdt.mphd.unsetTerrain()
 wdt.mphd.setTerrain()
+wdt.checkTile(0,0)
 wdt.write("blah.wdt")
+'''
