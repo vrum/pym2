@@ -219,6 +219,11 @@ class WDTEditor(QtGui.QMainWindow):
 		self.xPos.setText(str(pos.x))
 		self.yPos.setText(str(pos.y))
 		self.zPos.setText(str(pos.y))
+		
+		ori = self.wdt.getWMOOrientation()
+		self.oriA.setValue(ori.x)
+		self.oriB.setValue(ori.y)
+		self.oriC.setValue(ori.z)
 				
 		
 		filename = str(filename)

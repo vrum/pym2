@@ -233,79 +233,59 @@ class AnimSub:
 			oldpos = f.tell()
 			f.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):
-				temp = Quat()			
-				for i in xrange(self.nEntries):
-					temp.unpack(f)	
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_VEC3):
-				temp = Vec3()			
-				for i in xrange(self.nEntries):
-					temp.unpack(f)	
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_INT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_INT):
 					temp, = struct.unpack("i",f.read(4))
 					self.values.append(temp)
-			elif(type == DATA_SHORT):			
-				for i in xrange(self.nEntries):
+				elif(type == DATA_SHORT):
 					temp, = struct.unpack("h",f.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):
-				temp = Vec2()			
-				for i in xrange(self.nEntries):
-					temp.unpack(f)	
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_VEC9):
-				temp = Vec9()			
-				for i in xrange(self.nEntries):
-					temp.unpack(f)	
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_FLOAT):			
-				for i in xrange(self.nEntries):
+				elif(type == DATA_FLOAT):
 					temp, = struct.unpack("f",f.read(4))
 					self.values.append(temp)
-			else:
-				pass
+				else:
+					pass
 			f.seek(oldpos)
 		else:
 			file = open(animfile[1],"r+b")			
 			file.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):
-				temp = Quat()					
-				for i in xrange(self.nEntries):
-					temp.unpack(file)
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC3):
-				temp = Vec3()					
-				for i in xrange(self.nEntries):
-					temp.unpack(file)
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_INT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_INT):
 					temp, = struct.unpack("i",file.read(4))
 					self.values.append(temp)
-			elif(type == DATA_SHORT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_SHORT):
 					temp, = struct.unpack("h",file.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):
-				temp = Vec2()					
-				for i in xrange(self.nEntries):
-					temp.unpack(file)
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC9):
-				temp = Vec9()					
-				for i in xrange(self.nEntries):
-					temp.unpack(file)
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_FLOAT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_FLOAT):
 					temp, = struct.unpack("f",file.read(4))
 					self.values.append(temp)
-			else:
-				pass
+				else:
+					pass
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.nEntries)
@@ -906,7 +886,6 @@ class Ribbon:
 class Camera:
 	def __init__(self):
 		self.Type	= 0
-		self.FOV	= 0
 		self.FarClip	= 0
 		self.NearClip	= 0
 		self.TransPos	= AnimBlock()
@@ -914,10 +893,11 @@ class Camera:
 		self.TransTar	= AnimBlock()
 		self.Target	= Vec3()
 		self.Scaling	= AnimBlock()
+		self.UnkAnim	= AnimBlock() #FOV?
 		
 	def unpack(self,f,animfiles):
 		self.Type,	= struct.unpack("i",f.read(4))
-		self.FOV,	= struct.unpack("f",f.read(4))
+		#self.FOV,	= struct.unpack("f",f.read(4))
 		self.FarClip,	= struct.unpack("f",f.read(4))
 		self.NearClip,	= struct.unpack("f",f.read(4))
 		self.TransPos.unpack(f,DATA_VEC9,animfiles)
@@ -925,10 +905,11 @@ class Camera:
 		self.TransTar.unpack(f,DATA_VEC9,animfiles)
 		self.Target.unpack(f)
 		self.Scaling.unpack(f,DATA_VEC3,animfiles)
+		self.UnkAnim.unpack(f,DATA_FLOAT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Type)
-		ret += struct.pack("f",self.FOV)
+		#ret += struct.pack("f",self.FOV)
 		ret += struct.pack("f",self.FarClip)
 		ret += struct.pack("f",self.NearClip)
 		ret += self.TransPos.pack()
@@ -936,6 +917,7 @@ class Camera:
 		ret += self.TransTar.pack()
 		ret += self.Target.pack()
 		ret += self.Scaling.pack()
+		ret += self.UnkAnim.pack()
 		return ret
 		
 
@@ -1293,6 +1275,7 @@ class M2File:
 			WriteAnimBlock(f,i.TransPos,self.anim_files)
 			WriteAnimBlock(f,i.TransTar,self.anim_files)
 			WriteAnimBlock(f,i.Scaling,self.anim_files)
+			WriteAnimBlock(f,i.UnkAnim,self.anim_files)
 		oldpos = f.tell()
 		f.seek(self.hdr.cameras.offset)
 		WriteBlock(f,self.hdr.cameras,self.cameras)
