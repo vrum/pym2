@@ -73,24 +73,24 @@ class GlWidget(QtOpenGL.QGLWidget):
 						except:
 							print "oO"
 						break
-			
+				glColor4f(0.0,0.0,1.0,transparency)
 				for t in range(i.num_tris/3):
 					try:						
 						v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
 						v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
 						v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
-						glColor4f(0.0,0.0,1.0,transparency)
 						glVertex3f(v1.pos.x*self.mscale,v1.pos.y*self.mscale,v1.pos.z*self.mscale)
 						glVertex3f(v2.pos.x*self.mscale,v2.pos.y*self.mscale,v2.pos.z*self.mscale)
 					
 						glVertex3f(v3.pos.x*self.mscale,v3.pos.y*self.mscale,v3.pos.z*self.mscale)
-						glColor3f(1.0,1.0,1.0)
+
 					except Exception, e:
 						print e
 						#print "Vertex: " + str(t) + " failed"
 			s += 1
 				
 		glEnd()		
+		
 
 		glPolygonMode(GL_FRONT, GL_FILL)
 		glEndList()	
@@ -118,17 +118,16 @@ class GlWidget(QtOpenGL.QGLWidget):
 						print "oO"
 					break
 			
+			glColor4f(0.0,0.0,1.0,transparency)
 			for t in range(i.num_tris/3):
 				try:						
 					v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
 					v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
 					v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
-					glColor4f(0.0,0.0,1.0,transparency)
 					glVertex3f(v1.pos.x*self.mscale,v1.pos.y*self.mscale,v1.pos.z*self.mscale)
 					glVertex3f(v2.pos.x*self.mscale,v2.pos.y*self.mscale,v2.pos.z*self.mscale)
 					
 					glVertex3f(v3.pos.x*self.mscale,v3.pos.y*self.mscale,v3.pos.z*self.mscale)
-					glColor3f(1.0,1.0,1.0)
 				except Exception, e:
 					print e
 					#print "Vertex: " + str(t) + " failed"
@@ -137,22 +136,21 @@ class GlWidget(QtOpenGL.QGLWidget):
 
 		#this paints the bones!
 		glBegin(GL_LINES)
+		glColor4f(1.0,0.0,0.0,1.0)
 		for i in self.m2.bones:
 			if i.parent != -1:
-				glColor4f(1.0,0.0,0.0,1.0)
 				glVertex3f(i.pivot.x*self.mscale,i.pivot.y*self.mscale,i.pivot.z*self.mscale)
 				glVertex3f(self.m2.bones[i.parent].pivot.x*self.mscale,self.m2.bones[i.parent].pivot.y*self.mscale,self.m2.bones[i.parent].pivot.z*self.mscale)
 		glEnd()
 		
 		#this is the bounding box
 		glBegin(GL_TRIANGLES)
+		glColor3f(1.0,1.0,1.0)
 		for i in self.m2.bounding_triangles:
 			try:
 				v1 = self.m2.bounding_vertices[i.indices[0]]
 				v2 = self.m2.bounding_vertices[i.indices[1]]
 				v3 = self.m2.bounding_vertices[i.indices[2]]
-				
-				glColor3f(1.0,1.0,1.0)
 				glVertex3f(v1.x*self.mscale,v1.y*self.mscale,v1.z*self.mscale)
 				glVertex3f(v2.x*self.mscale,v2.y*self.mscale,v2.z*self.mscale)
 				glVertex3f(v3.x*self.mscale,v3.y*self.mscale,v3.z*self.mscale)
@@ -164,11 +162,11 @@ class GlWidget(QtOpenGL.QGLWidget):
 		
 		#and these are the normals for the bounding box
 		glBegin(GL_LINES)
+		glColor3f(1.0,1.0,0.0)
 		count = 0
 		tri = 0
 		for i in self.m2.bounding_normals:
 			try:
-				glColor3f(1.0,1.0,0.0)
 			
 				v1 = self.m2.bounding_vertices[self.m2.bounding_triangles[count].indices[tri]]
 				glVertex3f(v1.x*self.mscale,v1.y*self.mscale,v1.z*self.mscale)
@@ -185,7 +183,16 @@ class GlWidget(QtOpenGL.QGLWidget):
 			
 		glEnd()
 		
-		
+		glPointSize(5.0)
+		glBegin(GL_POINTS)
+		glColor3f(0.0,1.0,0.0)
+		for i in self.m2.vertices:
+			try:
+				glVertex3f(i.pos.x*self.mscale ,i.pos.y*self.mscale ,i.pos.z*self.mscale )
+			except Exception, e:
+				print e
+				print i
+		glEnd()
 
 		glPolygonMode(GL_FRONT, GL_FILL)
 		glEndList()	

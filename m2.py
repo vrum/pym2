@@ -44,7 +44,7 @@ class M2Header:
 		self.transparency   = Chunk()
 		self.uv_anim        = Chunk()
 		self.tex_replace    = Chunk()
-		self.render_flags   = Chunk()
+		self.renderflags   = Chunk()
 		self.bone_lookup    = Chunk()
 		self.tex_lookup     = Chunk()
 		self.tex_units      = Chunk()
@@ -84,7 +84,7 @@ class M2Header:
 		self.transparency.unpack(f)
 		self.uv_anim.unpack(f)
 		self.tex_replace.unpack(f)
-		self.render_flags.unpack(f)
+		self.renderflags.unpack(f)
 		self.bone_lookup.unpack(f)
 		self.tex_lookup.unpack(f)
 		self.tex_units.unpack(f)
@@ -123,7 +123,7 @@ class M2Header:
 		ret += self.transparency.pack()
 		ret += self.uv_anim.pack()
 		ret += self.tex_replace.pack()
-		ret += self.render_flags.pack()
+		ret += self.renderflags.pack()
 		ret += self.bone_lookup.pack()
 		ret += self.tex_lookup.pack()
 		ret += self.tex_units.pack()
@@ -233,14 +233,14 @@ class AnimSub:
 			oldpos = f.tell()
 			f.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):
-				temp = Quat()			
-				for i in xrange(self.nEntries):
+			if(type == DATA_QUAT):	
+				for i in xrange(self.nEntries):					
+					temp = Quat()		
 					temp.unpack(f)	
 					self.values.append(temp)
 			elif(type == DATA_VEC3):
-				temp = Vec3()			
 				for i in xrange(self.nEntries):
+					temp = Vec3()	
 					temp.unpack(f)	
 					self.values.append(temp)
 			elif(type == DATA_INT):
@@ -251,14 +251,14 @@ class AnimSub:
 				for i in xrange(self.nEntries):
 					temp, = struct.unpack("h",f.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):
-				temp = Vec2()			
+			elif(type == DATA_VEC2):	
 				for i in xrange(self.nEntries):
+					temp = Vec2()		
 					temp.unpack(f)	
 					self.values.append(temp)
-			elif(type == DATA_VEC9):
-				temp = Vec9()			
+			elif(type == DATA_VEC9):		
 				for i in xrange(self.nEntries):
+					temp = Vec9()	
 					temp.unpack(f)	
 					self.values.append(temp)
 			elif(type == DATA_FLOAT):			
@@ -272,14 +272,14 @@ class AnimSub:
 			file = open(animfile[1],"r+b")			
 			file.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):
-				temp = Quat()					
+			if(type == DATA_QUAT):			
 				for i in xrange(self.nEntries):
+					temp = Quat()		
 					temp.unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC3):
-				temp = Vec3()					
+			elif(type == DATA_VEC3):				
 				for i in xrange(self.nEntries):
+					temp = Vec3()	
 					temp.unpack(file)
 					self.values.append(temp)
 			elif(type == DATA_INT):
@@ -290,14 +290,14 @@ class AnimSub:
 				for i in xrange(self.nEntries):
 					temp, = struct.unpack("h",file.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):
-				temp = Vec2()					
+			elif(type == DATA_VEC2):			
 				for i in xrange(self.nEntries):
+					temp = Vec2()		
 					temp.unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC9):
-				temp = Vec9()					
+			elif(type == DATA_VEC9):				
 				for i in xrange(self.nEntries):
+					temp = Vec9()	
 					temp.unpack(file)
 					self.values.append(temp)
 			elif(type == DATA_FLOAT):
@@ -959,46 +959,58 @@ def WriteAnimBlock(f,block,animfiles):
 	
 		for i in xrange(block.nTimes):
 			if (animfiles[i][0] == False ):
-				block.TimeSubs[i].ofsEntries = f.tell()	
-				for j in block.TimeSubs[i].values:
-					if(block.TimeSubs[i].type == DATA_QUAT):
+				block.TimeSubs[i].ofsEntries = f.tell()					
+				if(block.TimeSubs[i].type == DATA_QUAT):
+					for j in block.TimeSubs[i].values:
+						f.write(j.pack())						
+				elif(block.TimeSubs[i].type == DATA_VEC3):
+					for j in block.TimeSubs[i].values:
 						f.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_VEC3):
-						f.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_INT):
+				elif(block.TimeSubs[i].type == DATA_INT):
+					for j in block.TimeSubs[i].values:
 						f.write(struct.pack("i",j))
-					elif(block.TimeSubs[i].type == DATA_SHORT):
+				elif(block.TimeSubs[i].type == DATA_SHORT):
+					for j in block.TimeSubs[i].values:
 						f.write(struct.pack("h",j))
-					elif(block.TimeSubs[i].type == DATA_VEC2):
+				elif(block.TimeSubs[i].type == DATA_VEC2):
+					for j in block.TimeSubs[i].values:
 						f.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_VEC9):
+				elif(block.TimeSubs[i].type == DATA_VEC9):
+					for j in block.TimeSubs[i].values:
 						f.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_FLOAT):
+				elif(block.TimeSubs[i].type == DATA_FLOAT):
+					for j in block.TimeSubs[i].values:
 						f.write(struct.pack("f",j))
-					else:
-						pass
+				else:
+					pass
 				FillLine(f)
 			else:
 				file = open(animfiles[i][1],"a+b")	
 				file.seek(0,SEEK_END)
 				block.TimeSubs[i].ofsEntries = file.tell()	
-				for j in block.TimeSubs[i].values:
-					if(block.TimeSubs[i].type == DATA_QUAT):
+				if(block.TimeSubs[i].type == DATA_QUAT):					
+					for j in block.TimeSubs[i].values:
 						file.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_VEC3):
+				elif(block.TimeSubs[i].type == DATA_VEC3):				
+					for j in block.TimeSubs[i].values:
 						file.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_INT):
+				elif(block.TimeSubs[i].type == DATA_INT):				
+					for j in block.TimeSubs[i].values:
 						file.write(struct.pack("i",j))
-					elif(block.TimeSubs[i].type == DATA_SHORT):
+				elif(block.TimeSubs[i].type == DATA_SHORT):				
+					for j in block.TimeSubs[i].values:
 						file.write(struct.pack("h",j))
-					elif(block.TimeSubs[i].type == DATA_VEC2):
+				elif(block.TimeSubs[i].type == DATA_VEC2):				
+					for j in block.TimeSubs[i].values:
 						file.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_VEC9):
+				elif(block.TimeSubs[i].type == DATA_VEC9):				
+					for j in block.TimeSubs[i].values:
 						file.write(j.pack())
-					elif(block.TimeSubs[i].type == DATA_FLOAT):
+				elif(block.TimeSubs[i].type == DATA_FLOAT):				
+					for j in block.TimeSubs[i].values:
 						file.write(struct.pack("f",j))
-					else:
-						pass
+				else:
+					pass
 				FillLine(file)
 	
 	
@@ -1009,45 +1021,58 @@ def WriteAnimBlock(f,block,animfiles):
 		for i in xrange(block.nKeys):
 			if (animfiles[i][0] == False ):
 				block.KeySubs[i].ofsEntries = f.tell()	
-				for j in block.KeySubs[i].values:
-					if(block.KeySubs[i].type == DATA_QUAT):
+				
+				if(block.KeySubs[i].type == DATA_QUAT):
+					for j in block.KeySubs[i].values:
 						f.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_VEC3):
+				elif(block.KeySubs[i].type == DATA_VEC3):
+					for j in block.KeySubs[i].values:
 						f.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_INT):
+				elif(block.KeySubs[i].type == DATA_INT):
+					for j in block.KeySubs[i].values:
 						f.write(struct.pack("i",j))
-					elif(block.KeySubs[i].type == DATA_SHORT):
+				elif(block.KeySubs[i].type == DATA_SHORT):
+					for j in block.KeySubs[i].values:
 						f.write(struct.pack("h",j))
-					elif(block.KeySubs[i].type == DATA_VEC2):
+				elif(block.KeySubs[i].type == DATA_VEC2):
+					for j in block.KeySubs[i].values:
 						f.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_VEC9):
+				elif(block.KeySubs[i].type == DATA_VEC9):
+					for j in block.KeySubs[i].values:
 						f.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_FLOAT):
+				elif(block.KeySubs[i].type == DATA_FLOAT):
+					for j in block.KeySubs[i].values:
 						f.write(struct.pack("f",j))
-					else:	
-						pass
+				else:	
+					pass
 				FillLine(f)
 			else:
 				file = open(animfiles[i][1],"a+b")	
 				file.seek(0,SEEK_END)
-				block.KeySubs[i].ofsEntries = file.tell()	
-				for j in block.KeySubs[i].values:
-					if(block.KeySubs[i].type == DATA_QUAT):
+				block.KeySubs[i].ofsEntries = file.tell()
+				if(block.KeySubs[i].type == DATA_QUAT):	
+					for j in block.KeySubs[i].values:
 						file.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_VEC3):
+				elif(block.KeySubs[i].type == DATA_VEC3):
+					for j in block.KeySubs[i].values:
 						file.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_INT):
+				elif(block.KeySubs[i].type == DATA_INT):
+					for j in block.KeySubs[i].values:
 						file.write(struct.pack("i",j))
-					elif(block.KeySubs[i].type == DATA_SHORT):
+				elif(block.KeySubs[i].type == DATA_SHORT):
+					for j in block.KeySubs[i].values:
 						file.write(struct.pack("h",j))
-					elif(block.KeySubs[i].type == DATA_VEC2):
+				elif(block.KeySubs[i].type == DATA_VEC2):
+					for j in block.KeySubs[i].values:
 						file.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_VEC9):
+				elif(block.KeySubs[i].type == DATA_VEC9):
+					for j in block.KeySubs[i].values:
 						file.write(j.pack())
-					elif(block.KeySubs[i].type == DATA_FLOAT):
+				elif(block.KeySubs[i].type == DATA_FLOAT):
+					for j in block.KeySubs[i].values:
 						file.write(struct.pack("f",j))
-					else:
-						pass
+				else:
+					pass
 				FillLine(file)
 			
 		oldpos = f.tell()
@@ -1134,7 +1159,7 @@ class M2File:
 		self.transparency 	= ReadBlock(f,hdr.transparency,Transparency,self.anim_files)
 		self.uv_anim 		= ReadBlock(f,hdr.uv_anim,UVAnimation,self.anim_files)
 		self.tex_replace 	= ReadBlock(f,hdr.tex_replace,Lookup)
-		self.renderflags 	= ReadBlock(f,hdr.render_flags,Renderflags)
+		self.renderflags 	= ReadBlock(f,hdr.renderflags,Renderflags)
 		self.bone_lookup 	= ReadBlock(f,hdr.bone_lookup,Lookup)
 		self.tex_lookup 	= ReadBlock(f,hdr.tex_lookup,Lookup)
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
@@ -1230,7 +1255,7 @@ class M2File:
 		f.seek(oldpos)	
 		
 		WriteBlock(f,self.hdr.tex_replace,self.tex_replace)
-		WriteBlock(f,self.hdr.render_flags,self.renderflags )
+		WriteBlock(f,self.hdr.renderflags,self.renderflags )
 		WriteBlock(f,self.hdr.bone_lookup,self.bone_lookup)
 		WriteBlock(f,self.hdr.tex_lookup,self.tex_lookup)
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)

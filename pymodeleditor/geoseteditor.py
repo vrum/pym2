@@ -107,6 +107,18 @@ class GeosetEditor(QtGui.QDialog):
 		self.lineEdit.setGeometry(QtCore.QRect(450, 70, 91, 26))
 		self.lineEdit.setObjectName("lineEdit")
 
+		self.scaleEdit = QtGui.QLineEdit(Dialog)
+		self.scaleEdit.setGeometry(QtCore.QRect(20, 370, 40, 26))
+		self.scaleEdit.setObjectName("scaleEdit")
+		self.scaleEdit.setText("1.0")
+		
+
+		self.scaleIcon = QtGui.QIcon("Icons/edit-scaling.png")
+		self.scaleButton = QtGui.QPushButton(self.scaleIcon,"Rescale",self)
+		self.scaleButton.setGeometry(QtCore.QRect(80, 370, 122, 27))
+		self.scaleButton.setObjectName("scaleButton")
+		self.connect(self.scaleButton, QtCore.SIGNAL("clicked()"), self.rescaleGeoset)
+
 		self.retranslateUi(Dialog)
 		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), Dialog.accept)
 		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), Dialog.reject)
@@ -116,6 +128,41 @@ class GeosetEditor(QtGui.QDialog):
 	def finalizeMe(self):
 		self.saveOld()
 		self.accept()
+		
+	def rescaleGeoset(self):
+		scale = float(self.scaleEdit.text())
+		s = 0	
+		rescaled = []
+		for i in self.skin.mesh:
+			if s == self.comboBox.currentIndex():
+				for t in range(i.num_tris/3):
+					try:	
+						if (self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id not in rescaled):					
+							v1 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id]
+							v1.pos.x *= scale
+							v1.pos.y *= scale
+							v1.pos.z *= scale
+							rescaled.append(self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[0]].Id)
+						
+						if (self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id not in rescaled):
+							v2 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id]
+							v2.pos.x *= scale
+							v2.pos.y *= scale
+							v2.pos.z *= scale
+							rescaled.append(self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[1]].Id)
+						if (self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id not in rescaled):
+							v3 = self.m2.vertices[self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id]
+							v3.pos.x *= scale
+							v3.pos.y *= scale
+							v3.pos.z *= scale
+							rescaled.append(self.skin.indices[self.skin.tri[i.tri_offset/3+ t].indices[2]].Id)
+
+					except Exception, e:
+						print e
+						#print "Vertex: " + str(t) + " failed"
+			s += 1
+		
+		self.GlView.setModel(self.m2,self.skin,self.comboBox.currentIndex())
 
 	def changeEdit(self):
 		self.saveOld()

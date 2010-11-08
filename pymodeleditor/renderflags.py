@@ -172,8 +172,8 @@ class RenderFlagsEditor(QtGui.QDialog):
 	def addRenderflag(self):
 		rf = m2.Renderflags()
 		self.m2.renderflags.append(rf)
-		self.comboBox.addItem(str(self.m2.hdr.render_flags.count))
-		self.m2.hdr.render_flags.count += 1
+		self.comboBox.addItem(str(self.m2.hdr.renderflags.count))
+		self.m2.hdr.renderflags.count += 1
 
 	def changeEdit(self):
 		self.saveOld()

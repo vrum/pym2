@@ -1,24 +1,21 @@
 from chunk import *
 from wowfile import *
 
-class MWMO(WChunk):
+class MWMO(FilenameChunk):
 	def __init__(self):
 		self.magic = 1297567055
 		self.size = 0
-		self.filename = "\0"
-	def unpackData(self,f):
-		self.filename = f.read(self.size)
-	def packData(self):	
-		#make sure last character is \0!
-		if len(self.filename) == 0:
-			self.filename = "\0"
-		if self.filename[len(self.filename)-1] != "\0":
-				self.filename += "\0"
-		return self.filename
+		self.filenames = []
 	def setFilename(self,name):
-		self.filename = name
+		if(len(self.filenames) !=0):
+			self.filenames[0] = name
+		else:
+			self.filenames.append(name)
 	def getFilename(self):
-		return self.filename
+		if(len(self.filenames) !=0):
+			return self.filenames[0]
+		else:
+			return ""
 		
 class MODF(WChunk):
 	class WmoEntry:
@@ -307,10 +304,9 @@ class WDTFile(WoWFile):
 	def setWMOOrientation(self,ori):
 		self.modf.setEntryOrientation(0,pos)
 		
-'''
-wdt = WDTFile()#.read("AlliancePVPBarracks.wdt")
-wdt.mphd.unsetTerrain()
-wdt.mphd.setTerrain()
-wdt.checkTile(0,0)
-wdt.write("blah.wdt")
-'''
+
+#wdt = WDTFile().read("AlliancePVPBarracks.wdt")
+#wdt.mphd.unsetTerrain()
+#wdt.mphd.setTerrain()
+#wdt.checkTile(0,0)
+#wdt.write("blah.wdt")
