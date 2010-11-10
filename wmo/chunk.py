@@ -22,11 +22,11 @@ class WChunk: #Chunk Basic Class for World Data (like adt,wmo etc.)
 		ret += temp
 		return ret
 		
-	def unpackData(self,f):
-		pass
+	def unpackData(self,f): #Dummy Method, overwrite!
+		self.temp = f.read(self.size)
 		
-	def packData(self):
-		return 0	
+	def packData(self): #Dummy Method, overwrite!		
+		return self.temp	
 		
 		
 class MVER(WChunk):
@@ -48,19 +48,20 @@ class FilenameChunk(WChunk):
 		self.filenames = []
 		
 	def unpackData(self,f):
-		pos = 1
-		temp = f.read(1)
-		tstr = str(temp)
+		pos = 0
+		tstr = ""
 		print self.size
 		while(pos < self.size):			
 			pos += 1
+			temp = f.read(1)
+			tstr += temp
 			while(temp != "\0"):
 				temp = f.read(1)
 				tstr += temp
 				pos += 1
 			self.filenames.append(tstr)
 			tstr = ""
-		#print self.filenames
+		print self.filenames
 		
 	def packData(self):
 		ret = ""
@@ -72,7 +73,37 @@ class FilenameChunk(WChunk):
 			ret += i
 		return ret
 
+class EntryChunk(WChunk):
 
+	def __init__(self,magic,entrytype):
+		self.magic = magic
+		self.size = 0
+		self.nEntries = 0
+		self.entries = []
+		self.Entry = entrytype
+	def unpackData(self,f):
+		self.nEntries = self.size / self.Entry.entrySize
+		print self.nEntries
+		print self.size
+		self.entries = []
+		for i in xrange(self.nEntries):
+			self.entries.append(self.Entry().unpack(f))
+			
+	def packData(self):
+		ret = ""
+		for i in xrange(self.nEntries):
+			ret += self.entries[i].pack()
+		return ret
+
+	def addEntry(self):
+		self.nEntries += 1
+		self.entries.append(self.Entry())
+		
+	def delEntry(self, entrie = 0):
+		if (self.nEntries > entrie):
+			del(self.entries[entrie])
+			self.nEntries -= 1
+		
 class WoWFile:	
 	def __init__(self):
 		pass

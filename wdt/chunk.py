@@ -72,7 +72,35 @@ class FilenameChunk(WChunk):
 			ret += i
 		return ret
 
+class EntryChunk(WChunk):
 
+	def __init__(self,magic,entrytype):
+		self.magic = magic
+		self.size = 0
+		self.nEntries = 0
+		self.entries = []
+		self.Entry = entrytype
+	def unpackData(self,f):
+		self.nEntries = self.size / self.Entry.entrySize
+		self.entries = []
+		for i in xrange(self.nEntries):
+			self.entries.append(self.Entry().unpack(f))
+			
+	def packData(self):
+		ret = ""
+		for i in xrange(self.nEntries):
+			ret += self.entries[i].pack()
+		return ret
+
+	def addEntry(self):
+		self.nEntries += 1
+		self.entries.append(self.Entry())
+		
+	def delEntry(self, entrie = 0):
+		if (self.nEntries > entrie):
+			del(self.entries[entrie])
+			self.nEntries -= 1
+		
 class WoWFile:	
 	def __init__(self):
 		pass

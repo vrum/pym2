@@ -203,3 +203,23 @@ class Bounds:
 		ret += struct.pack("f",self.Radius)
 		return ret
 	
+
+class Color:
+	def __init__(self):
+		self.alpha = 0
+		self.red = 0
+		self.green = 0
+		self.blue = 0
+	def unpack(self,f):
+		self.alpha, = struct.unpack("b",f.read(1))
+		self.red, = struct.unpack("b",f.read(1))
+		self.green, = struct.unpack("b",f.read(1))
+		self.blue, = struct.unpack("b",f.read(1))
+		return self
+	def pack(self):
+		ret = struct.pack("b",self.alpha)
+		ret += struct.pack("b",self.red)
+		ret += struct.pack("b",self.green)
+		ret += struct.pack("b",self.blue)
+		return ret
+		

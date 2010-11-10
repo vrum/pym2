@@ -16,91 +16,71 @@ class MWMO(FilenameChunk):
 			return self.filenames[0]
 		else:
 			return ""
-		
-class MODF(WChunk):
-	class WmoEntry:
-		def __init__(self):
-			self.index = 0
-			self.unique = 0
-			self.position = Vec3()
-			self.orientation = Vec3()
-			self.minExtends = Vec3()
-			self.maxExtends = Vec3()
-			self.flags = 0
-			self.doodadset = 0
-			self.nameset = 0
-			self.pad = 0
-			
-		def unpack(self,f):
-			self.index, = struct.unpack("i",f.read(4))
-			self.unique, = struct.unpack("i",f.read(4))
-			self.position.unpack(f)
-			self.orientation.unpack(f)
-			self.minExtends.unpack(f)
-			self.maxExtends.unpack(f)
-			self.flags, = struct.unpack("h",f.read(2))
-			self.doodadset, = struct.unpack("h",f.read(2))
-			self.nameset, = struct.unpack("h",f.read(2))
-			self.pad, = struct.unpack("h",f.read(2))
-			return self
-			
-		def pack(self):
-			ret = struct.pack("i",self.index)
-			ret += struct.pack("i",self.unique)
-			ret += self.position.pack()
-			ret += self.orientation.pack()
-			ret += self.minExtends.pack()
-			ret += self.maxExtends.pack()
-			ret += struct.pack("h",self.flags)
-			ret += struct.pack("h",self.doodadset)
-			ret += struct.pack("h",self.nameset)
-			ret += struct.pack("h",self.pad)
-			return ret
-			
-		def setPosition(self,pos):
-			self.position = pos
-			
-		def setOrientation(self,ori):
-			self.orientation = ori
-			
-		def getPosition(self):
-			return self.position
-			
-		def getOrientation(self):
-			return self.orientation
-			
-		def setFlags(self,flags):
-			self.flags = flags
-			
-		def setDoodadSet(self,dds):
-			self.doodadset = dds
-			
-		def setNameSet(self,nms):
-			self.nameset = nms
-			
-		def setIndex(self,ind):
-			self.index = ind
-		
+class MODFEntry:
+	entrySize = 64
 	def __init__(self):
-		self.magic = 1297040454
-		self.size = 0
-		self.nEntries = 0
-		self.entries = []
-		
-	def unpackData(self,f):
-		self.nEntries = self.size / 64
-		for i in xrange(self.nEntries):
-			self.entries.append(self.WmoEntry().unpack(f))
+		self.index = 0
+		self.unique = 0
+		self.position = Vec3()
+		self.orientation = Vec3()
+		self.minExtends = Vec3()
+		self.maxExtends = Vec3()
+		self.flags = 0
+		self.doodadset = 0
+		self.nameset = 0
+		self.pad = 0
 			
-	def packData(self):
-		ret = ""
-		for i in xrange(self.nEntries):
-			ret += self.entries[i].pack()
-		return ret
-	def addEntry(self):
-		self.nEntries += 1
-		self.entries.append(self.WmoEntry())
+	def unpack(self,f):
+		self.index, = struct.unpack("i",f.read(4))
+		self.unique, = struct.unpack("i",f.read(4))
+		self.position.unpack(f)
+		self.orientation.unpack(f)
+		self.minExtends.unpack(f)
+		self.maxExtends.unpack(f)
+		self.flags, = struct.unpack("h",f.read(2))
+		self.doodadset, = struct.unpack("h",f.read(2))
+		self.nameset, = struct.unpack("h",f.read(2))
+		self.pad, = struct.unpack("h",f.read(2))
+		return self
 		
+	def pack(self):
+		ret = struct.pack("i",self.index)
+		ret += struct.pack("i",self.unique)
+		ret += self.position.pack()
+		ret += self.orientation.pack()
+		ret += self.minExtends.pack()
+		ret += self.maxExtends.pack()
+		ret += struct.pack("h",self.flags)
+		ret += struct.pack("h",self.doodadset)
+		ret += struct.pack("h",self.nameset)
+		ret += struct.pack("h",self.pad)
+		return ret
+		
+	def setPosition(self,pos):
+		self.position = pos
+			
+	def setOrientation(self,ori):
+		self.orientation = ori
+			
+	def getPosition(self):
+		return self.position
+			
+	def getOrientation(self):
+		return self.orientation
+			
+	def setFlags(self,flags):
+		self.flags = flags
+			
+	def setDoodadSet(self,dds):
+		self.doodadset = dds
+			
+	def setNameSet(self,nms):
+		self.nameset = nms
+			
+	def setIndex(self,ind):
+		self.index = ind
+		
+class MODF(EntryChunk):		
 	def setEntryPosition(self,entry,pos):
 		try:
 			self.entries[entry].setPosition(pos)
@@ -232,7 +212,7 @@ class WDTFile(WoWFile):
 		self.mphd = MPHD()
 		self.main = MAIN()
 		self.mwmo = MWMO()
-		self.modf = MODF()
+		self.modf = MODF(1297040454,MODFEntry)
 		self.modf.addEntry()
 		
 	def readData(self,f):
@@ -305,8 +285,8 @@ class WDTFile(WoWFile):
 		self.modf.setEntryOrientation(0,pos)
 		
 
-#wdt = WDTFile().read("AlliancePVPBarracks.wdt")
-#wdt.mphd.unsetTerrain()
+wdt = WDTFile().read("AlliancePVPBarracks.wdt")
+wdt.mphd.unsetTerrain()
 #wdt.mphd.setTerrain()
 #wdt.checkTile(0,0)
-#wdt.write("blah.wdt")
+wdt.write("blah.wdt")
