@@ -1,5 +1,6 @@
 from chunk import *
 from wmo_root import *
+from wmo_group import *
 
 
 class WMOFile(WoWFile):
@@ -23,8 +24,8 @@ class WMOFile(WoWFile):
 			self.modn = FilenameChunk(1297040462)
 			self.modd = WChunk()
 			self.mfog = WChunk()
-		else:
-			pass
+		else: #group
+			self.mogp = MOGP() #the other chunks are subchunks of mogp ;)
 			
 	
 		
@@ -48,7 +49,7 @@ class WMOFile(WoWFile):
 			self.modd.unpack(f)
 			self.mfog.unpack(f)
 		else:
-			pass
+			self.mogp.unpack(f)
 			
 		
 	def writeData(self,f):
@@ -71,12 +72,12 @@ class WMOFile(WoWFile):
 			f.write(self.modd.pack())
 			f.write(self.mfog.pack())
 		else:
-			pass
+			f.write(self.mogp.pack())
 			
 		return f
 			
 			
-r = WMOFile()
-r.read("D:\\temp\\wowdaten\\World\\wmo\\cameron.wmo")
-r.write("Blah.wmo")
+r = WMOFile(False)
+r.read("D:\\temp\\wowdaten\\World\\wmo\\cameron_000.wmo")
+r.write("Blah_000.wmo")
 			

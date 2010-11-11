@@ -16,7 +16,7 @@ class WChunk: #Chunk Basic Class for World Data (like adt,wmo etc.)
 		
 	def pack(self):
 		temp = self.packData()
-		self.size = len(temp)		
+		self.size = len(temp)
 		ret = struct.pack("i",self.magic)
 		ret += struct.pack("i",self.size)
 		ret += temp
