@@ -32,12 +32,12 @@ class MOGP(WChunk):
 		self.unk2 = 0
 		self.mopy = WChunk()
 		self.movi = WChunk()
-		self.movt = WChunk()
+		self.movt = EntryChunk(1297045076, Vec3)
 		self.monr = WChunk()
-		self.motv = WChunk()
+		self.motv = EntryChunk(1297044566, Vec2)
 		self.moba = WChunk()
 		self.molr = WChunk()
-		self.modr = WChunk()
+		self.modr = EntryChunk(1297040466, Lookup)
 		self.mobn = WChunk()
 		self.mobr = WChunk()
 		self.mpbv = WChunk()
@@ -145,3 +145,9 @@ class MOGP(WChunk):
 		return ret
 		
 		
+	def addDoodadRef(self, ref):
+		dref = Lookup()
+		if not(self.flags & WMO_DOODADS):
+			self.flags |= WMO_DOODADS
+		dref.Id = ref
+		self.modr.addEntry(dref)

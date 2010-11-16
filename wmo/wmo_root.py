@@ -126,3 +126,120 @@ class MOGIEntry:
 		ret += self.maxExtends.pack()
 		ret += struct.pack("i",self.name)
 		return ret
+		
+		
+class MODDEntry:
+	entrySize = 40
+	def __init__(self):
+		self.nameIndex = 0
+		self.pos = Vec3()
+		self.ori = Vec3()
+		self.oriw = 0.0
+		self.scale = 0.0
+		self.col = Color()
+	def unpack(self,f):
+		self.nameIndex, = struct.unpack("i", f.read(4))
+		self.pos.unpack(f)
+		self.ori.unpack(f)
+		self.oriw, = struct.unpack("f",f.read(4))
+		self.scale, = struct.unpack("f", f.read(4))
+		self.col.unpack(f)
+		return self
+	def pack(self):
+		ret = struct.pack("i", self.nameIndex)
+		ret += self.pos.pack()
+		ret += self.ori.pack()
+		ret += struct.pack("f", self.oriw)
+		ret += struct.pack("f", self.scale)
+		ret += self.col.pack()
+		return ret
+		
+class MOLTEntry:
+	entrySize = 48
+	def __init__(self):
+		self.flags = 0
+		self.color = Color()
+		self.pos = Vec3()
+		self.unk1 = Vec3()
+		self.unk2 = Vec3()
+		self.unk3 = 0.0
+
+	def unpack(self,f):
+		self.flags, = struct.unpack("i", f.read(4))
+		self.color.unpack(f)
+		self.pos.unpack(f)
+		self.unk1.unpack(f)
+		self.unk2.unpack(f)
+		self.unk3, = struct.unpack("f", f.read(4))
+		return self
+		
+	def pack(self):
+		ret = struct.pack("i", self.flags)
+		ret += self.color.pack()
+		ret += self.pos.pack()
+		ret += self.unk1.pack()
+		ret += self.unk2.pack()
+		ret += struct.pack("f", self.unk3)
+		return ret
+		
+class MODSEntry:
+	entrySize = 32
+	def __init__(self):
+		self.name = ""
+		self.firstDoodad = 0
+		self.nDoodads = 0
+		self.nulls = 0
+	def unpack(self,f):
+		self.name = f.read(20)
+		self.firstDoodad, = struct.unpack("i", f.read(4))
+		self.nDoodads, = struct.unpack("i", f.read(4))
+		self.nulls, = struct.unpack("i", f.read(4))
+		return self
+	def pack(self):
+		while (len(self.name) < 20):
+			self.name += "\0"
+		ret = self.name[0::20]
+		ret += struct.pack("i", self.firstDoodad)
+		ret += struct.pack("i", self.nDoodads)
+		ret += struct.pack("i", self.nulls)
+		return ret
+		
+class MFOGEntry:
+	entrySize = 48
+	def __init__(self):
+		self.flags = 0
+		self.pos = Vec3()
+		self.innerRadius = 0.0
+		self.outerRadius = 0.0
+		self.end = 0.0
+		self.start = 0.0
+		self.color = Color()
+		self.unk1 = 0.0
+		self.unk2 = 0.0
+		self.color2 = Color()
+	
+	def unpack(self,f):
+		self.flags, = struct.unpack("i", f.read(4))
+		self.pos.unpack(f)
+		self.innerRadius, = struct.unpack("f", f.read(4))
+		self.outerRadius, = struct.unpack("f", f.read(4))
+		self.end, = struct.unpack("f", f.read(4))
+		self.start, = struct.unpack("f", f.read(4))
+		self.color.unpack(f)
+		slef.unk1, = struct.unpack("f", f.read(4))
+		self.unk2, = struct.unpack("f", f.read(4))
+		self.color2.unpack(f)
+		return self
+		
+	def pack(self):
+		ret = struct.pack("i", self.flags)
+		ret += self.pos.pack()
+		ret += struct.pack("f", self.innerRadius)
+		ret += struct.pack("f", self.outerRadius)
+		ret += struct.pack("f", self.end)
+		ret += struct.pack("f", self.start)
+		ret += self.color.pack()
+		ret += struct.pack("f", self.unk1)
+		ret += struct.pack("f", self.unk2)
+		ret += self.color2.pack()
+		return ret

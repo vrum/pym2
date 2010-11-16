@@ -50,7 +50,6 @@ class FilenameChunk(WChunk):
 	def unpackData(self,f):
 		pos = 0
 		tstr = ""
-		print self.size
 		while(pos < self.size):			
 			pos += 1
 			temp = f.read(1)
@@ -61,7 +60,8 @@ class FilenameChunk(WChunk):
 				pos += 1
 			self.filenames.append(tstr)
 			tstr = ""
-		print self.filenames
+		#print len(self.filenames)
+		#print self.filenames
 		
 	def packData(self):
 		ret = ""
@@ -83,8 +83,6 @@ class EntryChunk(WChunk):
 		self.Entry = entrytype
 	def unpackData(self,f):
 		self.nEntries = self.size / self.Entry.entrySize
-		print self.nEntries
-		print self.size
 		self.entries = []
 		for i in xrange(self.nEntries):
 			self.entries.append(self.Entry().unpack(f))

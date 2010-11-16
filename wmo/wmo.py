@@ -13,16 +13,16 @@ class WMOFile(WoWFile):
 			self.momt = EntryChunk(1297042772,MOMTEntry)
 			self.mogn = FilenameChunk(1297041230)
 			self.mogi = EntryChunk(1297041225, MOGIEntry)
-			self.mosb = WChunk()
+			self.mosb = WChunk() #not used anymore
 			self.mopv = WChunk()
 			self.mopt = WChunk()
 			self.mopr = WChunk()
 			self.movv = WChunk()
 			self.movb = WChunk()
-			self.molt = WChunk()
-			self.mods = WChunk()
+			self.molt = EntryChunk(1297042516, MOLTEntry)
+			self.mods = EntryChunk(1297040467, MODSEntry)
 			self.modn = FilenameChunk(1297040462)
-			self.modd = WChunk()
+			self.modd = EntryChunk(1297040452, MODDEntry)
 			self.mfog = WChunk()
 		else: #group
 			self.mogp = MOGP() #the other chunks are subchunks of mogp ;)
@@ -55,6 +55,10 @@ class WMOFile(WoWFile):
 	def writeData(self,f):
 		f.write(self.mver.pack())
 		if(self.root):
+			self.mohd.nTextures = len(self.motx.filenames)
+			self.mohd.nLights = self.molt.nEntries
+			self.mohd.nDoodads = self.modd.nEntries + self.mohd.nGroups
+			self.mohd.nModels = len(self.modn.filenames)
 			f.write(self.mohd.pack())
 			f.write(self.motx.pack())
 			f.write(self.momt.pack())
@@ -77,7 +81,7 @@ class WMOFile(WoWFile):
 		return f
 			
 			
-r = WMOFile(False)
-r.read("D:\\temp\\wowdaten\\World\\wmo\\cameron_000.wmo")
-r.write("Blah_000.wmo")
+r = WMOFile(True)
+r.read("D:\\temp\\wowdaten\\World\\wmo\\cameron.wmo")
+r.write("Blah.wmo")
 			

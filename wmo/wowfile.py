@@ -44,6 +44,7 @@ def WriteBlock(f,chunk,block):
 	
 	
 class Lookup:
+	entrySize = 2
 	def __init__(self):
 		self.Id = 0
 	def unpack(self,f):
@@ -77,6 +78,7 @@ class Triangle:
 		return struct.pack("3H",self.indices[0],self.indices[1],self.indices[2])
 		
 class Vec3:
+	entrySize = 12
 	def __init__(self,x = 0.0,y = 0.0, z = 0.0):
 		self.x = float(x)
 		self.y = float(y)
@@ -115,6 +117,7 @@ class Vec3:
 		return ret
 		
 class Vec2:
+	entrySize = 8
 	def __init__(self):
 		self.x	= 0
 		self.y	= 0
