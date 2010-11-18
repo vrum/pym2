@@ -16,17 +16,17 @@ class WChunk: #Chunk Basic Class for World Data (like adt,wmo etc.)
 		
 	def pack(self):
 		temp = self.packData()
-		self.size = len(temp)		
+		self.size = len(temp)
 		ret = struct.pack("i",self.magic)
 		ret += struct.pack("i",self.size)
 		ret += temp
 		return ret
 		
-	def unpackData(self,f):
-		pass
+	def unpackData(self,f): #Dummy Method, overwrite!
+		self.temp = f.read(self.size)
 		
-	def packData(self):
-		return 0	
+	def packData(self): #Dummy Method, overwrite!		
+		return self.temp	
 		
 		
 class MVER(WChunk):
@@ -48,18 +48,19 @@ class FilenameChunk(WChunk):
 		self.filenames = []
 		
 	def unpackData(self,f):
-		pos = 1
-		temp = f.read(1)
-		tstr = str(temp)
-		#print self.size
+		pos = 0
+		tstr = ""
 		while(pos < self.size):			
 			pos += 1
+			temp = f.read(1)
+			tstr += temp
 			while(temp != "\0"):
 				temp = f.read(1)
 				tstr += temp
 				pos += 1
 			self.filenames.append(tstr)
 			tstr = ""
+		#print len(self.filenames)
 		#print self.filenames
 		
 	def packData(self):

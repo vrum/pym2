@@ -85,16 +85,19 @@ class WDTEditor(QtGui.QMainWindow):
 		self.oriA.setGeometry(QtCore.QRect(10, 150, 62, 22))
 		self.oriA.setMaximum(360.0)
 		self.oriA.setObjectName("oriA")
+		self.oriA.setRange(-360, 360)
 		
 		self.oriB = QtGui.QDoubleSpinBox(self.wmoTab)
 		self.oriB.setGeometry(QtCore.QRect(80, 150, 62, 22))
 		self.oriB.setMaximum(360.0)
 		self.oriB.setObjectName("oriB")
+		self.oriB.setRange(-360, 360)
 		
 		self.oriC = QtGui.QDoubleSpinBox(self.wmoTab)
 		self.oriC.setGeometry(QtCore.QRect(150, 150, 62, 22))
 		self.oriC.setMaximum(360.0)
 		self.oriC.setObjectName("oriC")
+		self.oriC.setRange(-360, 360)
 		
 		self.label_2 = QtGui.QLabel(self.wmoTab)
 		self.label_2.setGeometry(QtCore.QRect(10, 60, 61, 16))
@@ -155,9 +158,11 @@ class WDTEditor(QtGui.QMainWindow):
 		self.menuFile.addAction(self.actionSave)
 		self.menuFile.addAction(self.actionClose)
 		self.menubar.addAction(self.menuFile.menuAction())
+		
+		self.tabWidget.setCurrentWidget(self.terrTab)
 
 		self.retranslateUi(MainWindow)
-		self.tabWidget.setCurrentIndex(1)
+		self.tabWidget.setCurrentIndex(0)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.MainWindow = MainWindow
 
@@ -270,6 +275,12 @@ class WDTEditor(QtGui.QMainWindow):
 		pos.y = float(self.yPos.text())
 		pos.z = float(self.zPos.text())
 		self.wdt.setWMOPosition(pos)
+		
+		ori = Vec3()
+		ori.x = self.oriA.value()
+		ori.y = self.oriB.value()
+		ori.z = self.oriC.value()
+		self.wdt.setWMOOrientation(ori)
 			
 		self.wdt.write(filename)
 			
