@@ -78,3 +78,262 @@ class MCINEntry:
 		ret += struct.pack("i", self.flags)
 		ret += struct.pack("i", self.aId)
 		return ret
+		
+class MODFEntry:
+	entrySize = 64
+	def __init__(self):
+		self.index = 0
+		self.unique = 0
+		self.position = Vec3()
+		self.orientation = Vec3()
+		self.minExtends = Vec3()
+		self.maxExtends = Vec3()
+		self.flags = 0
+		self.doodadset = 0
+		self.nameset = 0
+		self.pad = 0
+			
+	def unpack(self,f):
+		self.index, = struct.unpack("i",f.read(4))
+		self.unique, = struct.unpack("i",f.read(4))
+		self.position.unpack(f)
+		self.orientation.unpack(f)
+		self.minExtends.unpack(f)
+		self.maxExtends.unpack(f)
+		self.flags, = struct.unpack("h",f.read(2))
+		self.doodadset, = struct.unpack("h",f.read(2))
+		self.nameset, = struct.unpack("h",f.read(2))
+		self.pad, = struct.unpack("h",f.read(2))
+		return self
+		
+	def pack(self):
+		ret = struct.pack("i",self.index)
+		ret += struct.pack("i",self.unique)
+		ret += self.position.pack()
+		ret += self.orientation.pack()
+		ret += self.minExtends.pack()
+		ret += self.maxExtends.pack()
+		ret += struct.pack("h",self.flags)
+		ret += struct.pack("h",self.doodadset)
+		ret += struct.pack("h",self.nameset)
+		ret += struct.pack("h",self.pad)
+		return ret
+		
+	def setPosition(self,pos):
+		self.position = pos
+			
+	def setOrientation(self,ori):
+		self.orientation = ori
+			
+	def getPosition(self):
+		return self.position
+			
+	def getOrientation(self):
+		return self.orientation
+			
+	def setFlags(self,flags):
+		self.flags = flags
+		
+	def getFlags(self):
+		return self.flags
+		
+	def setUnique(self, uId):
+		self.unique = uId
+		
+	def getUnique(self):
+		return self.unique
+			
+	def setIndex(self,ind):
+		self.index = ind
+		
+	def getIndex(self):
+		return self.index
+			
+	def setDoodadSet(self,dds):
+		self.doodadset = dds
+		
+	def getDoodadSet(self):
+		return self.doodadset
+			
+	def setNameSet(self,nms):
+		self.nameset = nms
+		
+	def getNameSet(self):
+		return self.nameset
+		
+class MDDFEntry:
+	entrySize = 36
+	def __init__(self):
+		self.index = 0
+		self.unique = 0
+		self.position = Vec3()
+		self.rotation = Vec3()
+		self.scale = 0
+		self.flags = 0
+			
+	def unpack(self,f):
+		self.index, = struct.unpack("i",f.read(4))
+		self.unique, = struct.unpack("i",f.read(4))
+		self.position.unpack(f)
+		self.rotation.unpack(f)
+		self.scale, = struct.unpack("h",f.read(2))
+		self.flags, = struct.unpack("h",f.read(2))
+		return self
+		
+	def pack(self):
+		ret = struct.pack("i",self.index)
+		ret += struct.pack("i",self.unique)
+		ret += self.position.pack()
+		ret += self.rotation.pack()
+		ret += struct.pack("h",self.scale)
+		ret += struct.pack("h",self.flags)
+		return ret
+		
+	def setPosition(self,pos):
+		self.position = pos
+			
+	def setRotation(self,rot):
+		self.rotation = rot
+			
+	def getPosition(self):
+		return self.position
+			
+	def getRotation(self):
+		return self.rotation
+			
+	def setFlags(self,flags):
+		self.flags = flags
+		
+	def getFlags(self):
+		return self.flags
+		
+	def setUnique(self, uId):
+		self.unique = uId
+		
+	def getUnique(self):
+		return self.unique
+			
+	def setIndex(self,ind):
+		self.index = ind
+		
+	def getIndex(self):
+		return self.index
+		
+	def setScale(self, scale):
+		self.scale = scale
+	
+	def getScale(self):
+		return self.scale
+		
+		
+class MCNK(WChunk):
+	def __init__(self):
+		self.flags = 0
+		self.indexX = 0
+		self.indexY = 0
+		self.nLayers = 0
+		self.nDoodadRefs = 0
+		self.ofsMCVT = 0
+		self.ofsMCNR = 0
+		self.ofsMCLY = 0
+		self.ofsMCRF = 0
+		self.ofsMCAL = 0
+		self.sizeMCAL = 0
+		self.ofsMCSH = 0
+		self.sizeMCSH = 0
+		self.areaId = 0
+		self.nMapObjRefs = 0
+		self.holes = 0
+		self.lowQualTexMap = [0,0,0,0,0,0]
+		self.predTex = 0
+		self.noEffect = 0
+		self.ofsMCSE = 0
+		self.sizeMCSE = 0
+		self.ofsMCLQ = 0
+		self.sizeMCLQ = 0
+		self.pos = Vec3()
+		self.ofsMCCV = 0
+		self.pad1 = 0
+		self.pad2 = 0
+		
+		
+	def unpackData(self,f):
+		self.flags, = struct.unpack("i", f.read(4))
+		self.indexX, = struct.unpack("i", f.read(4))
+		self.indexY, = struct.unpack("i", f.read(4))
+		self.nLayers, = struct.unpack("i", f.read(4))
+		self.nDoodadRefs, = struct.unpack("i", f.read(4))
+		self.ofsMCVT, = struct.unpack("i", f.read(4))
+		self.ofsMCNR, = struct.unpack("i", f.read(4))
+		self.ofsMCLY, = struct.unpack("i", f.read(4))
+		self.ofsMCRF, = struct.unpack("i", f.read(4))
+		self.ofsMCAL, = struct.unpack("i", f.read(4))
+		self.sizeMCAL, = struct.unpack("i", f.read(4))
+		self.ofsMCSH, = struct.unpack("i", f.read(4))
+		self.sizeMCSH, = struct.unpack("i", f.read(4))
+		self.areaId, = struct.unpack("i", f.read(4))
+		self.nMapObjRefs, = struct.unpack("i", f.read(4))
+		self.holes, = struct.unpack("i", f.read(4))
+		self.lowQualTexMap = struct.unpack("6i", f.read(24))
+		self.ofsMCSE, = struct.unpack("i", f.read(4))
+		self.sizeMCSE, = struct.unpack("i", f.read(4))
+		self.ofsMCLQ, = struct.unpack("i", f.read(4))
+		self.sizeMCLQ, = struct.unpack("i", f.read(4))
+		self.pos.unpack(f)
+		self.ofsMCCV, = struct.unpack("i", f.read(4))
+		self.pad1, = struct.unpack("i", f.read(4))
+		self.pad2, = struct.unpack("i", f.read(4))
+		
+	def packData(self,f):
+		ret += struct.pack("i", self.flags)
+		ret += struct.pack("i", self.indexX)
+		ret += struct.pack("i", self.indexY)
+		ret += struct.pack("i", self.nLayers)
+		ret += struct.pack("i", self.nDoodadRefs)
+		ret += struct.pack("i", self.ofsMCVT)
+		ret += struct.pack("i", self.ofsMCNR)
+		ret += struct.pack("i", self.ofsMCLY)
+		ret += struct.pack("i", self.ofsMCRF)
+		ret += struct.pack("i", self.ofsMCAL)
+		ret += struct.pack("i", self.sizeMCAL)
+		ret += struct.pack("i", self.ofsMCSH)
+		ret += struct.pack("i", self.sizeMCSH)
+		ret += struct.pack("i", self.areaId)
+		ret += struct.pack("i", self.nMapObjRefs)
+		ret += struct.pack("i", self.holes)
+		ret += struct.pack("6i", self.lowQualTexMap[0], self.lowQualTexMap[1], self.lowQualTexMap[2], self.lowQualTexMap[3], self.lowQualTexMap[4], self.lowQualTexMap[5])
+		ret += struct.pack("i", self.ofsMCSE)
+		ret += struct.pack("i", self.sizeMCSE)
+		ret += struct.pack("i", self.ofsMCLQ)
+		ret += struct.pack("i", self.sizeMCLQ)
+		ret += self.pos.pack()
+		ret += struct.pack("i", self.ofsMCCV)
+		ret += struct.pack("i", self.pad1)
+		ret += struct.pack("i", self.pad2)
+		return ret
+		
+		
+class MCLYEntry:
+	entrySize = 16
+	def __init__(self):
+		self.textureId = 0
+		self.flags = 0
+		self.ofsMCAL = 0
+		self.effectId = 0
+		self.pad = 0
+	def unpack(self,f):
+		self.textureId, = struct.unpack("i", f.read(4))
+		self.flags, = struct.unpack("i", f.read(4))
+		self.ofsMCAL, = struct.unpack("i", f.read(4))
+		self.effectId, = struct.unpack("h", f.read(2))
+		self.pad, = struct.unpack("h", f.read(2))
+		return self
+	def pack(self):
+		ret = struct.pack("i", self.textureId)
+		ret += struct.pack("i", self.flags)
+		ret += struct.pack("i", self.ofsMCAL)
+		ret += struct.pack("h", self.effectId)
+		ret += struct.pack("h", self.pad)
+		return ret
+		
+		

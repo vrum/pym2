@@ -53,6 +53,15 @@ class Lookup:
 	def pack(self):
 		return struct.pack("h",self.Id)
 	
+class Reference:
+	entrySize = 4
+	def __init__(self):
+		self.Id = 0
+	def unpack(self,f):
+		self.Id, = struct.unpack("i", f.read(4))
+		return self
+	def pack(self):
+		return struct.pack("i", f.read(4))
 
 class Chunk:
 	def __init__(self):
@@ -208,6 +217,7 @@ class Bounds:
 	
 
 class Color:
+	entrySize = 4
 	def __init__(self):
 		self.alpha = 0
 		self.red = 0
