@@ -255,6 +255,16 @@ class MCNK(WChunk):
 		self.ofsMCCV = 0
 		self.pad1 = 0
 		self.pad2 = 0
+		self.mcvt = WChunk()
+		self.mccv = WChunk()
+		self.mcnr = WChunk()
+		self.mcly = WChunk()
+		self.mcrf = WChunk()
+		self.mcsh = WChunk()
+		self.mcal = WChunk()
+		self.mclq = WChunk()
+		self.mcse = WChunk()
+		
 		
 		
 	def unpackData(self,f):
@@ -283,6 +293,15 @@ class MCNK(WChunk):
 		self.ofsMCCV, = struct.unpack("i", f.read(4))
 		self.pad1, = struct.unpack("i", f.read(4))
 		self.pad2, = struct.unpack("i", f.read(4))
+		self.mcvt.unpack(f)
+		self.mccv.unpack(f)
+		self.mcnr.unpack(f)
+		self.mcly.unpack(f)
+		self.mcrf.unpack(f)
+		self.mcsh.unpack(f)
+		self.mcal.unpack(f)
+		self.mclq.unpack(f)
+		self.mcse.unpack(f)
 		
 	def packData(self,f):
 		ret += struct.pack("i", self.flags)
@@ -310,6 +329,15 @@ class MCNK(WChunk):
 		ret += struct.pack("i", self.ofsMCCV)
 		ret += struct.pack("i", self.pad1)
 		ret += struct.pack("i", self.pad2)
+		ret += self.mcvt.pack()
+		ret += self.mccv.pack()
+		ret += self.mcnr.pack()
+		ret += self.mcly.pack()
+		ret += self.mcrf.pack()
+		ret += self.mcsh.pack()
+		ret += self.mcal.pack()
+		ret += self.mclq.pack()
+		ret += self.mcse.pack()
 		return ret
 		
 		
