@@ -1,6 +1,15 @@
 from chunk import *
 from wowfile import *
 
+MCNK_HAS_SHADOWS = 0x1
+MCNK_IMPASSABLE = 0x2
+MCNK_RIVER = 0x4
+MCNK_OCEAN = 0x8
+MCNK_MAGMA = 0x10
+MCNK_SLIME = 0x20
+MCNK_HAS_VERTEX_COLORS = 0x40
+MCNK_TBC = 0x8000
+
 class MHDR(WChunk):
 	def __init__(self):
 		self.flags = 0
@@ -258,6 +267,10 @@ class MCNK(WChunk):
 		self.mcvt = WChunk()
 		self.mccv = WChunk()
 		self.mcnr = WChunk()
+		self.pad3 = 0
+		self.pad4 = 0
+		self.pad5 = 0
+		self.pad6 = 0
 		self.mcly = WChunk()
 		self.mcrf = WChunk()
 		self.mcsh = WChunk()
@@ -294,17 +307,29 @@ class MCNK(WChunk):
 		self.pad1, = struct.unpack("i", f.read(4))
 		self.pad2, = struct.unpack("i", f.read(4))
 		self.mcvt.unpack(f)
-		self.mccv.unpack(f)
+		if (self.flags & MCNK_HAS_VERTEX_COLORS):
+			#print "MCCV"
+			self.mccv.unpack(f)
 		self.mcnr.unpack(f)
+		self.pad3, = struct.unpack("b", f.read(1))
+		self.pad4, = struct.unpack("i", f.read(4))
+		self.pad5, = struct.unpack("i", f.read(4))
+		self.pad6, = struct.unpack("i", f.read(4))
 		self.mcly.unpack(f)
 		self.mcrf.unpack(f)
-		self.mcsh.unpack(f)
+		if (self.flags & MCNK_HAS_SHADOWS):
+			#print "MCSH"
+			self.mcsh.unpack(f)
 		self.mcal.unpack(f)
-		self.mclq.unpack(f)
-		self.mcse.unpack(f)
+		if (self.ofsMCLQ != 0):
+			#print "MCLQ"
+			self.mclq.unpack(f)
+		if (self.ofsMCSE != 0):
+			#print "MCSE"
+			self.mcse.unpack(f)
 		
-	def packData(self,f):
-		ret += struct.pack("i", self.flags)
+	def packData(self):
+		ret = struct.pack("i", self.flags)
 		ret += struct.pack("i", self.indexX)
 		ret += struct.pack("i", self.indexY)
 		ret += struct.pack("i", self.nLayers)
@@ -330,14 +355,22 @@ class MCNK(WChunk):
 		ret += struct.pack("i", self.pad1)
 		ret += struct.pack("i", self.pad2)
 		ret += self.mcvt.pack()
-		ret += self.mccv.pack()
+		if (self.flags & MCNK_HAS_VERTEX_COLORS):
+			ret += self.mccv.pack()
 		ret += self.mcnr.pack()
+		ret += struct.pack("b", self.pad3)
+		ret += struct.pack("i", self.pad4)
+		ret += struct.pack("i", self.pad5)
+		ret += struct.pack("i", self.pad6)
 		ret += self.mcly.pack()
 		ret += self.mcrf.pack()
-		ret += self.mcsh.pack()
+		if (self.flags & MCNK_HAS_SHADOWS):
+			ret += self.mcsh.pack()
 		ret += self.mcal.pack()
-		ret += self.mclq.pack()
-		ret += self.mcse.pack()
+		if (self.ofsMCLQ != 0):
+			ret += self.mclq.pack()
+		if (self.ofsMCSE != 0):
+			ret += self.mcse.pack()
 		return ret
 		
 		

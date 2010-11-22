@@ -61,7 +61,7 @@ class Reference:
 		self.Id, = struct.unpack("i", f.read(4))
 		return self
 	def pack(self):
-		return struct.pack("i", f.read(4))
+		return struct.pack("i", self.Id)
 
 class Chunk:
 	def __init__(self):

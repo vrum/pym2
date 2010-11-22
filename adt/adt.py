@@ -17,7 +17,7 @@ class ADTFile(WoWFile):
 		self.mh2o = WChunk()
 		self.mcnk = []
 		self.mfbo = WChunk()
-		self.mtfx = WChunk()
+		self.mtfx = EntryChunk(1297368664, Reference)
 		
 	def readData(self,f):
 		self.mver.unpack(f)
@@ -41,8 +41,28 @@ class ADTFile(WoWFile):
 		
 		
 	def writeData(self,f):
+		ret = self.mver.pack()
+		ret += self.mhdr.pack()
+		ret += self.mcin.pack()
+		ret += self.mtex.pack()
+		ret += self.mmdx.pack()
+		ret += self.mmid.pack()
+		ret += self.mwmo.pack()
+		ret += self.mwid.pack()
+		ret += self.mddf.pack()
+		ret += self.modf.pack()
+		if(self.mhdr.ofsMH2O != 0):
+			ret += self.mh2o.pack()
+		for i in range(256):
+			ret += self.mcnk[i].pack()
+		if(self.mhdr.ofsMFBO != 0):
+			ret += self.mfbo.pack()
+		if(self.mhdr.ofsMTFX != 0):
+			ret += self.mtfx.pack()
+		f.write(ret)
 		return f
 		
 adt = ADTFile()
 adt.read("Azeroth_31_49.adt")
 print adt.mcnk[0].pos
+adt.write("Test.adt")
