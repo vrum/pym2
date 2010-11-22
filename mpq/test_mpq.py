@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import ctypes
+from ctypes import *
 import os
 
 #temp, delete later
@@ -10,7 +10,7 @@ CREATE_ALWAYS = 2
 class StormLib:
 	def __init__(self):
 		if os.name == "posix":
-			stormlib = ctypes.cdll.LoadLibrary("StormLib/libStorm.so")
+			stormlib = cdll.LoadLibrary("StormLib/libStorm.so")
 
 			self.CreateFile = getattr(stormlib,"_Z10CreateFilePKcjjPvjjS1_")
 			self.DeleteFile = getattr(stormlib,"_Z10DeleteFilePKc")
@@ -58,7 +58,7 @@ class StormLib:
 			self.SFileSetDataCompression = getattr(stormlib,"_Z23SFileSetDataCompressionj")
 			self.SFileUpdateFileAttributes = getattr(stormlib,"_Z25SFileUpdateFileAttributesPvPKc")
 		elif os.name == "nt":
-			stormlib = ctypes.cdll.LoadLibrary("StormLib/StormLib.dll")
+			stormlib = windll.LoadLibrary("StormLib/StormLib.dll")
 			
 			
 			self.SFileOpenArchive = getattr(stormlib,"SFileOpenArchive")
@@ -122,5 +122,61 @@ class StormLib:
 	
 
 
+storm = StormLib()
 
-s = StormLib()
+
+class MPQ:
+	def __init__(self):
+		self.hmpq = c_void_p()
+		self.hfile = c_void_p()
+		
+	def createArchive(self,filename):
+		return storm.SFileCreateArchive(filename, 0x00010100, 0x8000, byref(self.hmpq))
+		
+	def openArchive(self, filename):
+		return storm.SFileOpenArchive(filename, 0, 0, byref(self.hmpq))
+		
+	def closeArchive(self):
+		storm.SFileCloseArchive(self.hmpq)
+		
+	def createFile(self, name, filesize):
+		storm.SFileCreateFile(self.hmpq, name, None, filesize, 	0, 0x00000200, byref(self.hfile))
+		
+	def writeFile(self, f):
+		storm.SFileWriteFile(self.hfile, byref(f), len(f), 0x01)
+		
+	def addFile(self, filename, name_in_archive, always_add = True):
+		if ((storm.SFileAddFileEx(self.hmpq, filename, name_in_archive, 0x00000100, 0, 0) == 0) & always_add):
+			storm.SFileRemoveFile(self.hmpq, name_in_archive, 000000)
+			return storm.SFileAddFileEx(self.hmpq, filename, name_in_archive, 0x00000100, 0, 0)
+		else:
+			return 0
+	
+	def getLocalPaths(self, path):	
+		ret = []
+		for i in os.listdir(path):
+			if (os.path.isfile(path+"\\"+i)):
+				ret.append(path+"\\"+i)
+			elif(os.path.isdir(path+"\\"+i)):
+				ret.extend(self.getLocalPaths(path+"\\"+i))
+		return ret
+			
+	def addDirectory(self, path):
+		if (path[-1] == "\\"):
+			for i in self.getLocalPaths(path[:-1]):
+				print i
+				self.addFile(i, i[len(path)::])
+		else:
+			for i in self.getLocalPaths(path):
+				print i
+				self.addFile(i, i[len(path)+1::])
+			
+		
+		
+		
+s = MPQ()
+if(s.createArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ") == 0):
+	s.openArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ")
+print s.addDirectory("D:\\makempq\\")
+s.closeArchive()
+
