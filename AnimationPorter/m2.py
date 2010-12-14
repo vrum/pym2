@@ -1136,6 +1136,7 @@ def CreateAnimFileName(a_name,anim,animfile):
 		
 class M2File:
 	def __init__(self,filename):
+		self.filename = filename
 		f = open(filename,"r+b")
 		self.hdr = M2Header()
 		self.hdr.unpack(f)

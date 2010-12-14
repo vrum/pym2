@@ -4,6 +4,14 @@
 
 from PyQt4 import QtCore, QtGui
 import sys
+if sys.version_info < (3,0):
+	import ConfigParser as configparser
+	#import _winreg as winreg
+else:
+	import configparser
+	#import winreg
+import os
+
 
 from wowfile import *
 from wdt import *
@@ -11,7 +19,14 @@ from wdt import *
 class WDTEditor(QtGui.QMainWindow):
 	def __init__(self): 
 		QtGui.QMainWindow.__init__(self) 
-		self.setupUi(self)		
+		self.setupUi(self)	
+		self.config = configparser.ConfigParser()
+		try:
+			self.config.read("WDTEditor.ini")
+		except:
+			print "WDTEditor.ini could not be read!"
+		self.foundWoW = False
+		self.wowDir = ""
 		self.getLastDir()
 		self.wdt = WDTFile()
 		
@@ -184,19 +199,36 @@ class WDTEditor(QtGui.QMainWindow):
 		self.actionClose.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
 	
 	def getLastDir(self):
-		conf = open("WDTEditor.conf","a+")
-		path = conf.readline()
-		conf.close()
-		if len(path) > 2:
-			self.lastDir = path
-		else:
+		try:
+			self.lastDir = self.config.get("Path", "LastDir")
+		except:
 			self.lastDir = QtCore.QDir.currentPath()
 			
 	def saveLastDir(self):
-		conf = open("WDTEditor.conf","w+")
-		conf.write(self.lastDir)
-		conf.close()	
+		try:
+			if self.config.has_section("Path"):
+				self.config.set("Path", "LastDir", self.lastDir)
+			else:
+				self.config.add_section("Path")
+				self.config.set("Path", "LastDir", self.lastDir)
+			conf = open("WDTEditor.ini","w+")
+			self.config.write(conf)
+			conf.close()
+		except:
+			print "oO"
 
+	def getWoWDir(self):
+		
+		try:
+			self.wowDir = self.config.get("Path", "WoWDir")
+			self.foundWoW = True
+		except:
+			if os.name == "nt":
+				print "Could not get WoWDir :("
+				#toDo: read registry
+			else:
+				print "Could not get WoWDir :("
+			
 	
 	def openFile(self):
 		filename = QtGui.QFileDialog().getOpenFileName(self,"Open File",self.lastDir)

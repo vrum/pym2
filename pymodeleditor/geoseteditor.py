@@ -118,6 +118,13 @@ class GeosetEditor(QtGui.QDialog):
 		self.scaleButton.setGeometry(QtCore.QRect(80, 370, 122, 27))
 		self.scaleButton.setObjectName("scaleButton")
 		self.connect(self.scaleButton, QtCore.SIGNAL("clicked()"), self.rescaleGeoset)
+		
+
+		self.duplicateIcon = QtGui.QIcon("Icons/edit-add.png")
+		self.duplicateButton = QtGui.QPushButton(self.duplicateIcon,"Duplicate Geoset",self)
+		self.duplicateButton.setGeometry(QtCore.QRect(200, 370, 122, 27))
+		self.duplicateButton.setObjectName("duplicateButton")
+		self.connect(self.duplicateButton, QtCore.SIGNAL("clicked()"), self.duplicateGeoset)
 
 		self.retranslateUi(Dialog)
 		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), Dialog.accept)
@@ -164,6 +171,42 @@ class GeosetEditor(QtGui.QDialog):
 		
 		self.GlView.setModel(self.m2,self.skin,self.comboBox.currentIndex())
 
+	
+	def duplicateGeoset(self):
+		mesh = Mesh()
+		mesh.mesh_id		= self.skin.mesh[self.comboBox.currentIndex()].mesh_id
+		mesh.vert_offset	= self.skin.mesh[self.comboBox.currentIndex()].vert_offset
+		mesh.num_verts		= self.skin.mesh[self.comboBox.currentIndex()].num_verts
+		mesh.tri_offset		= self.skin.mesh[self.comboBox.currentIndex()].tri_offset
+		mesh.num_tris		= self.skin.mesh[self.comboBox.currentIndex()].num_tris
+		mesh.num_bones		= self.skin.mesh[self.comboBox.currentIndex()].num_bones
+		mesh.start_bone		= self.skin.mesh[self.comboBox.currentIndex()].start_bone
+		mesh.unknown		= self.skin.mesh[self.comboBox.currentIndex()].unknown
+		mesh.rootbone		= self.skin.mesh[self.comboBox.currentIndex()].rootbone
+		mesh.bound		= self.skin.mesh[self.comboBox.currentIndex()].bound
+		self.skin.mesh.append(mesh)
+		for i in self.skin.texunit:
+			if (i.submesh == self.comboBox.currentIndex()):
+				mat = Material()
+				mat.flags         = i.flags
+				mat.shading	   = i.shading
+				mat.submesh       = self.skin.header.Submeshes.count
+				mat.submesh2      = self.skin.header.Submeshes.count
+				mat.color         = i.color
+				mat.renderflag    = i.renderflag
+				mat.texunit 	  = i.texunit
+				mat.mode          = i.mode
+				mat.texture       = i.texture
+				mat.texunit2      = i.texunit2
+				mat.transparency  = i.transparency
+				mat.animation      = i.animation
+				self.skin.texunit.append(mat)
+				self.skin.header.TextureUnits.count += 1
+		self.comboBox.addItem(str(self.skin.header.Submeshes.count)+": "+GeosetName(self.skin.mesh[self.skin.header.Submeshes.count].mesh_id))		
+		self.skin.header.Submeshes.count += 1
+			
+				
+	
 	def changeEdit(self):
 		self.saveOld()
 		self.last = self.comboBox.currentIndex()

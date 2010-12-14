@@ -28,8 +28,10 @@ class Node(QtGui.QTreeWidgetItem):
 class AnimPorter(QtGui.QDialog):
 	def __init__(self): 
 		QtGui.QDialog.__init__(self) 
-		self.setupUi(self)
+		self.setupUi(self)	
+		self.getLastDir()
 	def setupUi(self, Form):
+		self.lastDir = QtCore.QDir.currentPath()
 		Form.setObjectName("Form")
 		Form.resize(700, 650)
 		self.treeM1 = QtGui.QTreeWidget(Form)
@@ -108,27 +110,55 @@ class AnimPorter(QtGui.QDialog):
 		self.portallButton.setText(QtGui.QApplication.translate("Form", "Port All Animations", None, QtGui.QApplication.UnicodeUTF8))
 		self.pushButton.setText(QtGui.QApplication.translate("Form", "Add Animation", None, QtGui.QApplication.UnicodeUTF8))
 
+	def getLastDir(self):
+		conf = open("AnimPorter.conf","a+")
+		path = conf.readline()
+		conf.close()
+		if len(path) > 2:
+			self.lastDir = path
+		else:
+			self.lastDir = QtCore.QDir.currentPath()
+			
+	def saveLastDir(self):
+		conf = open("AnimPorter.conf","w+")
+		conf.write(self.lastDir)
+		conf.close()	
 
 	def openModel1(self):
-		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",QtCore.QDir.currentPath())
+		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",self.lastDir)
 		self.m1 = M2File(openname)
 		skinname = openname[0:len(openname)-3]+"00.skin"
 		self.skin = SkinFile(skinname)
 		self.updateTree(self.m1,self.treeM1)
 		self.updateAnimBox(self.m1,self.animsm1Box)
+		
+		openname = str(openname)
+		last = openname.rfind("/")
+		self.lastDir = openname[0:last]		
+		self.saveLastDir()
 
 
 	def saveModel1(self):
-		savename = QtGui.QFileDialog().getSaveFileName(self,"Save File",QtCore.QDir.currentPath())
+		savename = QtGui.QFileDialog().getSaveFileName(self,"Save File",self.lastDir)
 		self.m1.write(savename)
 		skinname = savename[0:len(savename)-3]+"00.skin"
 		self.skin.write(skinname)
+		
+		savename = str(savename)
+		last = savename.rfind("/")
+		self.lastDir = savename[0:last]		
+		self.saveLastDir()
 
 	def openModel2(self):
-		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",QtCore.QDir.currentPath())
+		openname = QtGui.QFileDialog().getOpenFileName(self,"Open File",self.lastDir)
 		self.m2 = M2File(openname)
 		self.updateTree(self.m2,self.treeM2)
 		self.updateAnimBox(self.m2,self.animsm2Box)
+		
+		openname = str(openname)
+		last = openname.rfind("/")
+		self.lastDir = openname[0:last]		
+		self.saveLastDir()
 
 	def getBones(self):
 		t= self.bonesM1.toPlainText().split("\n")

@@ -30,16 +30,16 @@ class MOGP(WChunk):
 		self.wmoGroupId = 0
 		self.unk1 = 0
 		self.unk2 = 0
-		self.mopy = WChunk()
-		self.movi = WChunk()
+		self.mopy = EntryChunk(1297043545, MOPYEntry)
+		self.movi = EntryChunk(1297045065, Triangle)
 		self.movt = EntryChunk(1297045076, Vec3)
-		self.monr = WChunk()
+		self.monr = EntryChunk(1297043026, Vec3)
 		self.motv = EntryChunk(1297044566, Vec2)
 		self.moba = WChunk()
-		self.molr = WChunk()
+		self.molr = EntryChunk(1297042514, Lookup)
 		self.modr = EntryChunk(1297040466, Lookup)
 		self.mobn = WChunk()
-		self.mobr = WChunk()
+		self.mobr = EntryChunk(1297039954, Lookup)
 		self.mpbv = WChunk()
 		self.mpbp = WChunk()
 		self.mpbi = WChunk()
@@ -151,3 +151,17 @@ class MOGP(WChunk):
 			self.flags |= WMO_DOODADS
 		dref.Id = ref
 		self.modr.addEntry(dref)
+
+class MOPYEntry:
+	entrySize = 2
+	def __init__(self):
+		self.flags = 0
+		self.matId = 0
+	def unpack(self,f):
+		self.flags, = struct.unpack("B", f.read(1))
+		self.matId, = struct.unpack("B", f.read(1))
+		return self
+	def pack(self):
+		ret = struct.pack("B", self.flags)
+		ret += struct.pack("B", self.matId)
+		return ret

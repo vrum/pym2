@@ -145,6 +145,10 @@ class MPQ:
 	def writeFile(self, f):
 		storm.SFileWriteFile(self.hfile, byref(f), len(f), 0x01)
 		
+	def openFile(self, filename):
+		storm.SFileOpenFileEx(self.hfile, filename, 0, byref(self.hfile))
+		return self.hfile
+		
 	def addFile(self, filename, name_in_archive, always_add = True):
 		if ((storm.SFileAddFileEx(self.hmpq, filename, name_in_archive, 0x00000100, 0, 0) == 0) & always_add):
 			storm.SFileRemoveFile(self.hmpq, name_in_archive, 000000)

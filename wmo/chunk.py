@@ -81,6 +81,7 @@ class EntryChunk(WChunk):
 		self.nEntries = 0
 		self.entries = []
 		self.Entry = entrytype
+		
 	def unpackData(self,f):
 		self.nEntries = self.size / self.Entry.entrySize
 		self.entries = []
@@ -96,6 +97,10 @@ class EntryChunk(WChunk):
 	def addEntry(self):
 		self.nEntries += 1
 		self.entries.append(self.Entry())
+		
+	def addEntry(self, entry):
+		self.nEntries += 1
+		self.entries.append(entry)
 		
 	def delEntry(self, entrie = 0):
 		if (self.nEntries > entrie):

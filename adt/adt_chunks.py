@@ -12,6 +12,8 @@ MCNK_TBC = 0x8000
 
 class MHDR(WChunk):
 	def __init__(self):
+		self.magic = 0
+		self.size = 0
 		self.flags = 0
 		self.ofsMCIN = 0
 		self.ofsMTEX = 0
@@ -237,6 +239,8 @@ class MDDFEntry:
 		
 class MCNK(WChunk):
 	def __init__(self):
+		self.magic = 0
+		self.size = 0
 		self.flags = 0
 		self.indexX = 0
 		self.indexY = 0
@@ -264,16 +268,16 @@ class MCNK(WChunk):
 		self.ofsMCCV = 0
 		self.pad1 = 0
 		self.pad2 = 0
-		self.mcvt = WChunk()
-		self.mccv = WChunk()
-		self.mcnr = WChunk()
+		self.mcvt = EntryChunk(1296258644, HeightValue)
+		self.mccv = EntryChunk(1296253782, Color)
+		self.mcnr = EntryChunk(1296256594, ADTNormal)
 		self.pad3 = 0
 		self.pad4 = 0
 		self.pad5 = 0
 		self.pad6 = 0
-		self.mcly = WChunk()
-		self.mcrf = WChunk()
-		self.mcsh = WChunk()
+		self.mcly = EntryChunk(1296256089, MCLYEntry)
+		self.mcrf = EntryChunk(1296257606, Reference)
+		self.mcsh = MCSH()
 		self.mcal = WChunk()
 		self.mclq = WChunk()
 		self.mcse = WChunk()
@@ -329,6 +333,33 @@ class MCNK(WChunk):
 			self.mcse.unpack(f)
 		
 	def packData(self):
+		self.ofsMCVT = 0x88 
+		ret1 = self.mcvt.pack()
+		if (self.flags & MCNK_HAS_VERTEX_COLORS):
+			self.ofsMCCV = 0x88 + len(ret1)
+			ret1 += self.mccv.pack()
+		self.ofsMCNR = 0x88  + len(ret1)
+		ret1 += self.mcnr.pack()
+		ret1 += struct.pack("b", self.pad3)
+		ret1 += struct.pack("i", self.pad4)
+		ret1 += struct.pack("i", self.pad5)
+		ret1 += struct.pack("i", self.pad6)
+		self.ofsMCLY = 0x88  + len(ret1)
+		ret1 += self.mcly.pack()
+		self.ofsMCRF = 0x88  + len(ret1)
+		ret1 += self.mcrf.pack()
+		if (self.flags & MCNK_HAS_SHADOWS):
+			self.ofsMCSH = 0x88  + len(ret1)
+			ret1 += self.mcsh.pack()
+		self.ofsMCAL = 0x88  + len(ret1)
+		ret1 += self.mcal.pack()
+		if (self.ofsMCLQ != 0):
+			self.ofsMCLQ = 0x88  + len(ret1)
+			ret1 += self.mclq.pack()
+		if (self.ofsMCSE != 0):
+			self.ofsMCSE = 0x88  + len(ret1)
+			ret1 += self.mcse.pack()
+		
 		ret = struct.pack("i", self.flags)
 		ret += struct.pack("i", self.indexX)
 		ret += struct.pack("i", self.indexY)
@@ -354,23 +385,7 @@ class MCNK(WChunk):
 		ret += struct.pack("i", self.ofsMCCV)
 		ret += struct.pack("i", self.pad1)
 		ret += struct.pack("i", self.pad2)
-		ret += self.mcvt.pack()
-		if (self.flags & MCNK_HAS_VERTEX_COLORS):
-			ret += self.mccv.pack()
-		ret += self.mcnr.pack()
-		ret += struct.pack("b", self.pad3)
-		ret += struct.pack("i", self.pad4)
-		ret += struct.pack("i", self.pad5)
-		ret += struct.pack("i", self.pad6)
-		ret += self.mcly.pack()
-		ret += self.mcrf.pack()
-		if (self.flags & MCNK_HAS_SHADOWS):
-			ret += self.mcsh.pack()
-		ret += self.mcal.pack()
-		if (self.ofsMCLQ != 0):
-			ret += self.mclq.pack()
-		if (self.ofsMCSE != 0):
-			ret += self.mcse.pack()
+		ret += ret1
 		return ret
 		
 		
@@ -397,4 +412,59 @@ class MCLYEntry:
 		ret += struct.pack("h", self.pad)
 		return ret
 		
+class MCSH(WChunk):
+	def __init__(self):			
+		self.magic = 0
+		self.size = 0
+		self.data = []
+		self.sh = [0x1, 0x2 ,0x4 ,0x8 ,0x10 ,0x20 ,0x40 ,0x80]
+		
+	def unpackData(self,f):
+		for i in range(64):
+			tb = []
+			for j in range(8):
+				shb, = struct.unpack("B", f.read(1))
+				for n in range(8):
+					tb.append( (shb & self.sh[n]) == self.sh[n])
+			self.data.append(tb)
+			
+			
+	def packData(self):
+		ret = ""
+		for i in self.data:
+			tb = 0
+			c = 0
+			for j in i:
+				if (j == True):
+					tb |= self.sh[c]
+				c += 1
+				if( c == 8):
+					ret += struct.pack("B", tb)
+					tb = 0
+					c = 0
+		return ret
+		
+
+		
+		
+		
+class MH2O(WChunk):
+	def __init__(self):
+		pass
+	
+class MH2OInfo:
+	def __init__(self):
+		self.ofsInfo = 0
+		self.nLayers = 0
+		self.ofsMask = 0
+	def unpack(self,f):
+		self.ofsInfo, = struct.unpack("i", f.read(4))
+		self.nLayers, = struct.unpack("i", f.read(4))
+		self.ofsMask, = struct.unpack("i", f.read(4))
+		
+	def pack(self):
+		ret = struct.pack("i", self.ofsInfo)
+		ret += struct.pack("i", self.nLayers)
+		ret += struct.pack("i", self.ofsMask)
+		return ret
 		

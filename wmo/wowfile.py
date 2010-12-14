@@ -67,6 +67,7 @@ class Chunk:
 		return ret
 		
 class Triangle:
+	entrySize = 6
 	def __init__(self):
 		self.indices	= (0,0,0)
 	def __str__(self):

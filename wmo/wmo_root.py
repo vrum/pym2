@@ -198,7 +198,7 @@ class MODSEntry:
 	def pack(self):
 		while (len(self.name) < 20):
 			self.name += "\0"
-		ret = self.name[0::20]
+		ret = self.name[0:20]
 		ret += struct.pack("i", self.firstDoodad)
 		ret += struct.pack("i", self.nDoodads)
 		ret += struct.pack("i", self.nulls)

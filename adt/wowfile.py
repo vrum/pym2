@@ -224,15 +224,41 @@ class Color:
 		self.green = 0
 		self.blue = 0
 	def unpack(self,f):
-		self.alpha, = struct.unpack("b",f.read(1))
-		self.red, = struct.unpack("b",f.read(1))
-		self.green, = struct.unpack("b",f.read(1))
-		self.blue, = struct.unpack("b",f.read(1))
+		self.alpha, = struct.unpack("B",f.read(1))
+		self.red, = struct.unpack("B",f.read(1))
+		self.green, = struct.unpack("B",f.read(1))
+		self.blue, = struct.unpack("B",f.read(1))
 		return self
 	def pack(self):
-		ret = struct.pack("b",self.alpha)
-		ret += struct.pack("b",self.red)
-		ret += struct.pack("b",self.green)
-		ret += struct.pack("b",self.blue)
+		ret = struct.pack("B",self.alpha)
+		ret += struct.pack("B",self.red)
+		ret += struct.pack("B",self.green)
+		ret += struct.pack("B",self.blue)
 		return ret
 		
+class HeightValue:
+	entrySize = 4
+	def __init__(self):
+		self.value = 0
+	def unpack(self,f):
+		self.value, = struct.unpack("f", f.read(4))
+		return self
+	def pack(self):
+		return struct.pack("f", self.value)
+		
+class ADTNormal:
+	entrySize = 3
+	def __init__(self):
+		self.x = 0
+		self.y = 0
+		self.z = 0
+	def unpack(self,f):
+		self.x, = struct.unpack("b", f.read(1))
+		self.y, = struct.unpack("b", f.read(1))
+		self.z, = struct.unpack("b", f.read(1))
+		return self
+	def pack(self):
+		ret = struct.pack("b", self.x)
+		ret += struct.pack("b", self.y)
+		ret += struct.pack("b", self.z)
+		return ret

@@ -82,6 +82,14 @@ class WMOFile(WoWFile):
 			
 			
 r = WMOFile(True)
-r.read("D:\\temp\\wowdaten\\World\\wmo\\cameron.wmo")
-r.write("Blah.wmo")
+r.read("KL_Tanaris_GoblinBld_C.wmo")
+for i in r.momt.entries:
+	i.flags1 |= 0x1
+r.write("D:\makempq\World\wmo\Kalimdor\Buildings\GoblinHut\KL_Tanaris_GoblinBld_C.wmo")
+g1 = WMOFile(False)
+g1.read("KL_Tanaris_GoblinBld_C_000.wmo")
+g1.write("D:\makempq\World\wmo\Kalimdor\Buildings\GoblinHut\KL_Tanaris_GoblinBld_C_000.wmo")
+g2 = WMOFile(False)
+g2.read("KL_Tanaris_GoblinBld_C_001.wmo")
+g2.write("D:\makempq\World\wmo\Kalimdor\Buildings\GoblinHut\KL_Tanaris_GoblinBld_C_001.wmo")
 			
