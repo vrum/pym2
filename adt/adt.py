@@ -77,13 +77,5 @@ class ADTFile(WoWFile):
 		f.write(ret)
 		return f
 		
-adt = ADTFile()
-adt.read("Kalimdor_1_1..adt")
-for i in adt.mcnk:
-	for j in i.mcly.entries:
-		j.flags |= 0x4
-		j.flags |= 0x20
-		j.flags |= 0x40
-		j.flags |= 0x80
-		j.flags |= 0x400
-adt.write("Kalimdor_1_1.adt")
+
+

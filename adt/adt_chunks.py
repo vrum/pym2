@@ -10,6 +10,8 @@ MCNK_SLIME = 0x20
 MCNK_HAS_VERTEX_COLORS = 0x40
 MCNK_TBC = 0x8000
 
+bitmap = [0x1, 0x2 ,0x4 ,0x8 ,0x10 ,0x20 ,0x40 ,0x80]
+
 class MHDR(WChunk):
 	def __init__(self):
 		self.magic = 0
@@ -417,7 +419,6 @@ class MCSH(WChunk):
 		self.magic = 0
 		self.size = 0
 		self.data = []
-		self.sh = [0x1, 0x2 ,0x4 ,0x8 ,0x10 ,0x20 ,0x40 ,0x80]
 		
 	def unpackData(self,f):
 		for i in range(64):
@@ -425,7 +426,7 @@ class MCSH(WChunk):
 			for j in range(8):
 				shb, = struct.unpack("B", f.read(1))
 				for n in range(8):
-					tb.append( (shb & self.sh[n]) == self.sh[n])
+					tb.append( (shb & bitmap[n]) == bitmap[n])
 			self.data.append(tb)
 			
 			
@@ -436,7 +437,7 @@ class MCSH(WChunk):
 			c = 0
 			for j in i:
 				if (j == True):
-					tb |= self.sh[c]
+					tb |= bitmap[c]
 				c += 1
 				if( c == 8):
 					ret += struct.pack("B", tb)
@@ -452,7 +453,7 @@ class MH2O(WChunk):
 	def __init__(self):
 		pass
 	
-class MH2OInfo:
+class MH2OHeader:
 	def __init__(self):
 		self.ofsInfo = 0
 		self.nLayers = 0
@@ -461,6 +462,7 @@ class MH2OInfo:
 		self.ofsInfo, = struct.unpack("i", f.read(4))
 		self.nLayers, = struct.unpack("i", f.read(4))
 		self.ofsMask, = struct.unpack("i", f.read(4))
+		return self
 		
 	def pack(self):
 		ret = struct.pack("i", self.ofsInfo)
@@ -468,3 +470,84 @@ class MH2OInfo:
 		ret += struct.pack("i", self.ofsMask)
 		return ret
 		
+class MH2OInfo:
+	def __init__(self):
+		self.liquidType = 0
+		self.flags = 0
+		self.highHeight = 0
+		self.lowHeight = 0
+		self.xOffset = 0
+		self.yOffset = 0
+		self.width = 0
+		self.height = 0
+		self.ofsRender = 0
+		self.ofsHeightmap = 0
+	def unpack(self,f):
+		self.liquidType, = struct.unpack("h", f.read(2))
+		self.flags, = struct.unpack("h", f.read(2))
+		self.highHeight, = struct.unpack("f", f.read(4))
+		self.lowHeight, = struct.unpack("f", f.read(4))
+		self.xOffset, = struct.unpack("b", f.read(1))
+		self.yOffset, = struct.unpack("b", f.read(1))
+		self.width, = struct.unpack("b", f.read(1))
+		self.height, = struct.unpack("b", f.read(1))
+		self.ofsRender, = struct.unpack("i", f.read(4))
+		self.ofsHeightmap, = struct.unpack("i", f.read(4))
+		return self
+		
+	def pack(self):
+		ret = struct.pack("h", self.liquidType)
+		ret += struct.pack("h", self.flags)
+		ret += struct.pack("f", self.highHeight)
+		ret += struct.pack("f", self.lowHeight)
+		ret += struct.pack("b", self.xOffset)
+		ret += struct.pack("b", self.yOffset)
+		ret += struct.pack("b", self.width)
+		ret += struct.pack("b", self.height)
+		ret += struct.pack("i", self.ofsRender)
+		ret += struct.pack("i", self.ofsHeightmap)
+		return ret
+		
+class MH2OHeight:
+	def __init__(self):
+		self.heightMap = []
+		self.transparency = []
+	def unpack(self,f,size):
+		for i in range(size):
+			tmp = struct.unpack("f", f.read(4))
+			self.heightMap.append(tmp)
+		for i in range(size):
+			tmp = struct.unpack("b", f.read(1))
+			self.transparency.append(tmp)
+		return self
+		
+	def pack(self):
+		ret = ""
+		for i in self.heightMap:
+			ret += struct.pack("f", i)
+		for i in self.transparency:
+			ret += struct.pack("b", i)
+		return ret
+		
+class MH2ORender:
+	def __init__(self):
+		self.render = []
+	def unpack(self,f):
+		for i in range(8):
+			tmp = struct.unpack("B", f.read(1))
+			for j in range(8):
+				self.render.append( (tmp & bitmap[n]) == bitmap[n])
+				
+		return self
+	def pack(self):
+		ret = ""
+		tb = 0
+		for i in self.render:	
+			if (i == True):
+				tb |= bitmap[c]
+				c += 1
+			if( c == 8):
+				ret += struct.pack("B", tb)
+				tb = 0
+				c = 0	
+		return ret
