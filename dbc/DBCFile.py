@@ -13,6 +13,8 @@ class DBCLoc:
 		self.Languages = []
 		for i in range(16):
 			t, = ReadInt(f)
+			print i
+			print sDict[t]
 			self.Languages.append(sDict[t])
 		self.LocMask, = ReadInt(f)
 		return self

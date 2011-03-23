@@ -14,7 +14,7 @@ class ADTFile(WoWFile):
 		self.mwid = EntryChunk(1297566020, Reference)
 		self.mddf = EntryChunk(1296319558, MDDFEntry)
 		self.modf = EntryChunk(1297040454, MODFEntry)
-		self.mh2o = WChunk()
+		self.mh2o = WChunk()#MH2O()
 		self.mcnk = []
 		self.mfbo = WChunk()
 		self.mtfx = EntryChunk(1297368664, Reference)

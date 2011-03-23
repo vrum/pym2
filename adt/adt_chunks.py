@@ -423,9 +423,9 @@ class MCSH(WChunk):
 	def unpackData(self,f):
 		for i in range(64):
 			tb = []
-			for j in range(8):
+			for j in xrange(8):
 				shb, = struct.unpack("B", f.read(1))
-				for n in range(8):
+				for n in xrange(8):
 					tb.append( (shb & bitmap[n]) == bitmap[n])
 			self.data.append(tb)
 			
@@ -451,8 +451,63 @@ class MCSH(WChunk):
 		
 class MH2O(WChunk):
 	def __init__(self):
-		pass
-	
+		self.magic = 0
+		self.size = 0
+		self.info = []
+	def unpackData(self,f):
+		start = f.tell()
+		hdr = []
+		for i in xrange(256):
+			hdr.append(MH2OHeader().unpack(f))
+			self.info.append(MH2OChunk())
+		for i in xrange(256):
+			if(hdr[i].nLayers > 0):
+				self.info[i].nLayers = hdr[i].nLayers
+				f.seek(start+hdr[i].ofsInfo)
+				for n in range(hdr[i].nLayers):
+					self.info[i].info.append(MH2OInfo().unpack(f))
+				f.seek(start+hdr[i].ofsMask)
+				for n in range(hdr[i].nLayers):
+					self.info[i].render.append(MH2ORender().unpack(f))					
+				for n in range(hdr[i].nLayers):
+					inf = self.info[i].info[n]
+					f.seek(start+inf.ofsHeightmap)
+					sz = inf.width*inf.height
+					self.info[i].height.append(MH2OHeight().unpack(f,sz))
+		
+		s = open("test.txt","wb")
+		for i in xrange(256):
+			s.write("Chunk: "+str(i)+"\n")
+			s.write(str(self.info[i]))
+		s.close()
+		f.seek(start+self.size)
+	def packData(self):
+		return ""
+		
+class MH2OChunk:
+	def __init__(self):
+		self.nLayers = 0
+		self.info = []
+		self.render = []
+		self.mask = []
+		self.height = []
+		
+	def __str__(self):
+		ret = ""
+		for i in range(self.nLayers):
+			ret += "Layer: "+str(i)+"\n"
+			ret += "LiquidType: "+str(self.info[i].liquidType)
+			ret += "Flags: "+str(self.info[i].flags)
+			ret += "\t highHeight: "+str(self.info[i].highHeight)
+			ret += "\t lowHeight: "+str(self.info[i].lowHeight)+"\n"
+			ret += "xOffset: "+ str(self.info[i].xOffset) 
+			ret += "\t yOffset"+ str(self.info[i].yOffset) 
+			ret += "\t Width: " + str(self.info[i].width)   
+			ret += "\t Height: "+str(self.info[i].height)  + "\n"
+			ret += "Rendermask:\n"
+			ret += str(self.render[i])
+		return ret
+		
 class MH2OHeader:
 	def __init__(self):
 		self.ofsInfo = 0
@@ -532,11 +587,20 @@ class MH2OHeight:
 class MH2ORender:
 	def __init__(self):
 		self.render = []
+		
+	def __str__(self):
+		ret = ""
+		for i in xrange(8):
+			for j in xrange(8):
+				ret +=  "1" if(self.render[i*8+j]) else "0"
+				ret += "  "
+			ret += "\n"
+		return ret
 	def unpack(self,f):
-		for i in range(8):
-			tmp = struct.unpack("B", f.read(1))
-			for j in range(8):
-				self.render.append( (tmp & bitmap[n]) == bitmap[n])
+		for i in xrange(8):
+			tmp, = struct.unpack("B", f.read(1))
+			for j in xrange(8):
+				self.render.append( (tmp & bitmap[j]) == bitmap[j])
 				
 		return self
 	def pack(self):
@@ -551,3 +615,6 @@ class MH2ORender:
 				tb = 0
 				c = 0	
 		return ret
+		
+	
+		

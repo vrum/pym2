@@ -128,7 +128,7 @@ storm = StormLib()
 class MPQ:
 	def __init__(self):
 		self.hmpq = c_void_p()
-		self.hfile = c_void_p()
+		self.hfile = create_string_buffer(255)
 		
 	def createArchive(self,filename):
 		return storm.SFileCreateArchive(filename, 0x00010100, 0x8000, byref(self.hmpq))
@@ -146,7 +146,8 @@ class MPQ:
 		storm.SFileWriteFile(self.hfile, byref(f), len(f), 0x01)
 		
 	def openFile(self, filename):
-		storm.SFileOpenFileEx(self.hfile, filename, 0, byref(self.hfile))
+		if(storm.SFileOpenFileEx(self.hmpq, filename, 0, self.hfile) == 0):
+			print "Wait! The file was not found!"
 		return self.hfile
 		
 	def addFile(self, filename, name_in_archive, always_add = True):
@@ -177,10 +178,20 @@ class MPQ:
 			
 		
 		
-		
+#World\wmo\Kalimdor\Buildings\GoblinHut\KL_Tanaris_GoblinBld_C.wmo		
+
 s = MPQ()
-if(s.createArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ") == 0):
-	s.openArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ")
-print s.addDirectory("D:\\makempq\\")
+s.openArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ")
+#if(s.createArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ") == 0):
+#	s.openArchive("D:\\Programmierung\\Python\\PyM2\\mpq\\patch-z.MPQ")
+#print s.addDirectory("D:\\makempq\\")
+s.openFile("World\\wmo\\Kalimdor\\Buildings\\GoblinHut\\KL_Tanaris_GoblinBld_C.wmo")
+p = cast(pointer(s.hfile),c_char_p)
+print s.hfile
+f = open("test.wmo","wb+")
+print dir(s.hfile)#.contents)
+print s.hfile#.contents.raw
+f.write(s.hfile.raw)
+f.close()
 s.closeArchive()
 
