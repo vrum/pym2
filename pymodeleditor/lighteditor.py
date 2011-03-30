@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'LightEdit.ui'
-#
-# Created: Sun Sep 26 02:12:22 2010
-#      by: PyQt4 UI code generator 4.7.3
-#
-# WARNING! All changes made in this file will be lost!
+
 
 from PyQt4 import QtCore, QtGui
 from animeditor import AnimEditor
+from animcoloreditor import AnimColorEditor
 import m2
 
 KeyBoneTypes = {-1:"None", 0 :"ArmL", 1: "ArmR", 2 :"ShoulderL", 3 :"ShoulderR", 4: "SpineLow", 5: "Waist", 6: "Head", 7 :"Jaw", 8: "IndexFingerR", 9: "MiddleFingerR", 10: "PinkyFingerR", 11:"RingFingerR", 12 :"ThumbR", 13 :"IndexFingerL", 14 :"MiddleFingerL", 15 :"PinkyFingerL", 16: "RingFingerL", 17: "ThumbL", 18: "$BTH", 19: "$CSR", 20: "$CSL", 21: "_Breath", 22 :"_Name", 23 :"_NameMount", 24 :"$CHD", 25 :"$CCH", 26 :"Root", 27 :"Wheel1", 28 :"Wheel2", 29 :"Wheel3", 30 :"Wheel4", 31 :"Wheel5", 32: "Wheel6", 33: "Wheel7", 34: "Wheel8" }
@@ -75,37 +71,37 @@ class LightEditor(QtGui.QDialog):
 		self.label.setObjectName("label")
 		
 		self.ambientColorButton = QtGui.QPushButton(Dialog)
-		self.ambientColorButton.setGeometry(QtCore.QRect(150, 60, 75, 23))
+		self.ambientColorButton.setGeometry(QtCore.QRect(150, 60, 80, 30))
 		self.ambientColorButton.setObjectName("ambientColorButton")
 		self.connect(self.ambientColorButton, QtCore.SIGNAL("clicked()"), self.editAmbientColor)
 		
 		self.ambientIntButton = QtGui.QPushButton(Dialog)
-		self.ambientIntButton.setGeometry(QtCore.QRect(240, 60, 75, 23))
+		self.ambientIntButton.setGeometry(QtCore.QRect(240, 60, 80, 30))
 		self.ambientIntButton.setObjectName("ambientIntButton")
 		self.connect(self.ambientIntButton, QtCore.SIGNAL("clicked()"), self.editAmbientIntensity)
 		
 		self.diffuseColorButton = QtGui.QPushButton(Dialog)
-		self.diffuseColorButton.setGeometry(QtCore.QRect(150, 100, 75, 23))
+		self.diffuseColorButton.setGeometry(QtCore.QRect(150, 100, 80, 30))
 		self.diffuseColorButton.setObjectName("diffuseColorButton")
 		self.connect(self.diffuseColorButton, QtCore.SIGNAL("clicked()"), self.editDiffuseColor)
 		
 		self.diffuseIntButton = QtGui.QPushButton(Dialog)
-		self.diffuseIntButton.setGeometry(QtCore.QRect(240, 100, 75, 23))
+		self.diffuseIntButton.setGeometry(QtCore.QRect(240, 100, 80, 30))
 		self.diffuseIntButton.setObjectName("diffuseIntButton")
 		self.connect(self.diffuseIntButton, QtCore.SIGNAL("clicked()"), self.editDiffuseIntensity)
 		
 		self.attStartButton = QtGui.QPushButton(Dialog)
-		self.attStartButton.setGeometry(QtCore.QRect(150, 140, 75, 23))
+		self.attStartButton.setGeometry(QtCore.QRect(150, 140, 80, 30))
 		self.attStartButton.setObjectName("attStartButton")
 		self.connect(self.attStartButton, QtCore.SIGNAL("clicked()"), self.editAttenuationStart)
 		
 		self.attEndButton = QtGui.QPushButton(Dialog)
-		self.attEndButton.setGeometry(QtCore.QRect(240, 140, 75, 23))
+		self.attEndButton.setGeometry(QtCore.QRect(240, 140, 80, 30))
 		self.attEndButton.setObjectName("attEndButton")
 		self.connect(self.attEndButton, QtCore.SIGNAL("clicked()"), self.editAttenuationEnd)
 		
 		self.enabledButton = QtGui.QPushButton(Dialog)
-		self.enabledButton.setGeometry(QtCore.QRect(10, 200, 75, 23))
+		self.enabledButton.setGeometry(QtCore.QRect(10, 200, 80, 30))
 		self.enabledButton.setObjectName("enabledButton")
 		self.connect(self.enabledButton, QtCore.SIGNAL("clicked()"), self.editEnabled)
 
@@ -191,7 +187,7 @@ class LightEditor(QtGui.QDialog):
 
 	def editAmbientColor(self):		
 		temp = self.lightList.currentIndex()
-		self.AmbColEditor = AnimEditor()
+		self.AmbColEditor = AnimColorEditor()
 		self.AmbColEditor.setAnimBlock(self.m2.lights[temp].AmbientCol,self.m2.gSequ)
 		self.AmbColEditor.show()
 		self.connect(self.AmbColEditor,QtCore.SIGNAL("AnimBlockEdited()"),self.setAmbientColor)
@@ -211,7 +207,7 @@ class LightEditor(QtGui.QDialog):
 
 	def editDiffuseColor(self):		
 		temp = self.lightList.currentIndex()
-		self.DiffColEditor = AnimEditor()
+		self.DiffColEditor = AnimColorEditor()
 		self.DiffColEditor.setAnimBlock(self.m2.lights[temp].DiffuseCol,self.m2.gSequ)
 		self.DiffColEditor.show()
 		self.connect(self.DiffColEditor,QtCore.SIGNAL("AnimBlockEdited()"),self.setDiffuseColor)

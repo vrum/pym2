@@ -27,6 +27,7 @@ from geoseteditor import *
 from lighteditor import *
 from sequenceeditor import *
 from thingseditor import *
+from coloreditor import *
 
 
 class PyModelEditor(object):
@@ -158,6 +159,12 @@ class PyModelEditor(object):
 		self.thingsButton.setObjectName("thingsButton")
 		self.connect(self.thingsButton, QtCore.SIGNAL("clicked()"), self.editThings)
 
+
+		self.colorButton = QtGui.QPushButton(Form)
+		self.colorButton.setGeometry(QtCore.QRect(10, 620, 132, 28))
+		self.colorButton.setObjectName("colorButton")
+		self.connect(self.colorButton, QtCore.SIGNAL("clicked()"), self.editColors)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -175,6 +182,7 @@ class PyModelEditor(object):
 		self.lightButton.setText(QtGui.QApplication.translate("Form", "Edit Lights", None, QtGui.QApplication.UnicodeUTF8))
 		self.sequenceButton.setText(QtGui.QApplication.translate("Form", "Edit Sequences", None, QtGui.QApplication.UnicodeUTF8))
 		self.thingsButton.setText(QtGui.QApplication.translate("Form", "Edit Things", None, QtGui.QApplication.UnicodeUTF8))
+		self.colorButton.setText(QtGui.QApplication.translate("Form", "Edit Colors", None, QtGui.QApplication.UnicodeUTF8))
 
 		
 	def getLastDir(self):
@@ -333,5 +341,16 @@ class PyModelEditor(object):
 
 	def setThings(self):
 		self.m2 = self.thingEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
+
+
+	def editColors(self):
+		self.colorEditor = ColorEditor()
+		self.colorEditor.setModel(self.m2,self.skin)
+		self.colorEditor.show()
+		QtCore.QObject.connect(self.colorEditor, QtCore.SIGNAL("accepted()"), self.setColors)
+
+	def setColors(self):
+		self.m2 = self.colorEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 

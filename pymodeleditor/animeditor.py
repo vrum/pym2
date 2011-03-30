@@ -196,7 +196,6 @@ class Ui_AnimEditor(object):
 
 			
 	def addAnimSub(self):
-		self.animCombo.addItem(str(self.animblock.nKeys))
 		self.animblock.nKeys += 1
 		keysub = AnimSub()
 		keysub.type = self.animblock.type
@@ -227,6 +226,8 @@ class Ui_AnimEditor(object):
 		timesub.nEntries = 1
 		timesub.values.append(0)
 		self.animblock.TimeSubs.append(timesub)
+		
+		self.animCombo.addItem(str(self.animblock.nKeys-1))
 
 	def close_now(self):
 		self.hide()
