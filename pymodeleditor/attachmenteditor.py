@@ -4,14 +4,8 @@
 from PyQt4 import QtCore, QtGui
 from animeditor import AnimEditor
 import m2
+from stuff import *
 
-
-attachment_types = { 0:"Mountpoint/Left Wrist", 1:"Right Palm", 2:"Left Palm", 3:"Right Elbow", 4:"Left Elbow", 5:"Right Shoulder", 6:"Left Shoulder",
-7:"Right Knee", 8:"Left Knee", 9:"Unk1",10:"Unk2",11:"Helmet",12:"Back",13:"Unk3",14:"Unk4",15:"Bust1",16:"Bust2",17:"Breath",18:"Name",19:"Ground",
-20:"Top of Head",21:"Left Palm 2", 22:"Right Palm 2",23:"Unk5",24:"Unk6",25:"Unk7",26:"Right Back Sheath",27:"Left Back Sheath",28:"Middle Back Sheath",
-29:"Belly",30:"Left Back",31:"Right Back",32:"Left Hip Sheath",33:"Right Hip Sheath",34:"Bust3",35:"Right Palm 3",36:"Unk8",37:"demolishervehicle1",
-38:"demolishervehicle2",39:"vehicle seat 1",40:"vehicle seat 2",41:"vehicle seat 3",42:"vehicle seat 4",43:"Unk9",44:"Unk10",45:"Unk11",46:"Unk12",
-47:"Unk13",48:"Unk14",49:"Unk15"}
 
 
 
@@ -116,9 +110,10 @@ class AttachmentEditor(QtGui.QDialog):
 		self.comboBox.setCurrentIndex(i)
 		self.changeEdit()
 
-	def addAttachment(self):
+	def addAttachment(self,parbone = 0):
 		att = m2.Attachment()
 		att.Enabled.type = m2.DATA_INT
+		att.bone = parbone
 		lu = m2.Lookup()
 		lu.Id = self.m2.hdr.attachments.count
 		self.m2.attach_lookup.append(lu)

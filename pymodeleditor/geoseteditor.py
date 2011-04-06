@@ -4,11 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from glView import *
-
-GeosetTypes = { "00" : "Hairstyles/Root", "01" : "Facial1", "02" : "Facial2", "03" : "Facial3",
-"04" : "Bracers", "05" : "Boots", "06" : "Unknown1", "07" : "Ears", "08" : "Wristbands", "09" : "Kneepads",
-"10" : "Unknown2", "11" : "Pants", "12" : "Tabard", "13" : "Trousers/Kilt", "14" : "Unknown3",
-"15" : "Cape", "16" : "Unknown4", "17" : "Eyeglows", "18" : "Belt" } 
+from stuff import *
 
 def GeosetName(Id):		
 	s = str(Id)#Convert the GeosetId to a string

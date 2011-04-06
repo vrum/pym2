@@ -4,8 +4,7 @@
 from PyQt4 import QtCore, QtGui
 from animeditor import AnimEditor
 import m2
-
-KeyBoneTypes = {-1:"None", 0 :"ArmL", 1: "ArmR", 2 :"ShoulderL", 3 :"ShoulderR", 4: "SpineLow", 5: "Waist", 6: "Head", 7 :"Jaw", 8: "IndexFingerR", 9: "MiddleFingerR", 10: "PinkyFingerR", 11:"RingFingerR", 12 :"ThumbR", 13 :"IndexFingerL", 14 :"MiddleFingerL", 15 :"PinkyFingerL", 16: "RingFingerL", 17: "ThumbL", 18: "$BTH", 19: "$CSR", 20: "$CSL", 21: "_Breath", 22 :"_Name", 23 :"_NameMount", 24 :"$CHD", 25 :"$CCH", 26 :"Root", 27 :"Wheel1", 28 :"Wheel2", 29 :"Wheel3", 30 :"Wheel4", 31 :"Wheel5", 32: "Wheel6", 33: "Wheel7", 34: "Wheel8" }
+from stuff import *
 
 
 class BoneEditor(QtGui.QDialog):
@@ -140,8 +139,9 @@ class BoneEditor(QtGui.QDialog):
 		self.comboBox.setCurrentIndex(i)
 		self.changeEdit()
 	
-	def addBone(self):
+	def addBone(self,parbone = -1):
 		b = m2.Bone()
+		b.parent = parbone
 		b.translation.type = m2.DATA_VEC3
 		b.scaling.type = m2.DATA_VEC3
 		b.rotation.type = m2.DATA_QUAT

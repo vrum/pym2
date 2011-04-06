@@ -6,15 +6,8 @@ from PyQt4 import QtCore, QtGui
 from attachmenteditor import *
 from boneeditor import *
 from lighteditor import *
-
-KeyBoneTypes = { 0 :"ArmL", 1: "ArmR", 2 :"ShoulderL", 3 :"ShoulderR", 4: "SpineLow", 5: "Waist", 6: "Head", 7 :"Jaw", 8: "IndexFingerR", 9: "MiddleFingerR", 10: "PinkyFingerR", 11:"RingFingerR", 12 :"ThumbR", 13 :"IndexFingerL", 14 :"MiddleFingerL", 15 :"PinkyFingerL", 16: "RingFingerL", 17: "ThumbL", 18: "$BTH", 19: "$CSR", 20: "$CSL", 21: "_Breath", 22 :"_Name", 23 :"_NameMount", 24 :"$CHD", 25 :"$CCH", 26 :"Root", 27 :"Wheel1", 28 :"Wheel2", 29 :"Wheel3", 30 :"Wheel4", 31 :"Wheel5", 32: "Wheel6", 33: "Wheel7", 34: "Wheel8" }
-
-attachment_types = { 0:"Mountpoint/Left Wrist", 1:"Right Palm", 2:"Left Palm", 3:"Right Elbow", 4:"Left Elbow", 5:"Right Shoulder", 6:"Left Shoulder",
-7:"Right Knee", 8:"Left Knee", 9:"Unk1",10:"Unk2",11:"Helmet",12:"Back",13:"Unk3",14:"Unk4",15:"Bust1",16:"Bust2",17:"Breath",18:"Name",19:"Ground",
-20:"Top of Head",21:"Left Palm 2", 22:"Right Palm 2",23:"Unk5",24:"Unk6",25:"Unk7",26:"Right Back Sheath",27:"Left Back Sheath",28:"Middle Back Sheath",
-29:"Belly",30:"Left Back",31:"Right Back",32:"Left Hip Sheath",33:"Right Hip Sheath",34:"Bust3",35:"Right Palm 3",36:"Unk8",37:"demolishervehicle1",
-38:"demolishervehicle2",39:"vehicle seat 1",40:"vehicle seat 2",41:"vehicle seat 3",42:"vehicle seat 4",43:"Unk9",44:"Unk10",45:"Unk11",46:"Unk12",
-47:"Unk13",48:"Unk14",49:"Unk15"}
+from particleeditor import *
+from stuff import *
 
 class Node(QtGui.QTreeWidgetItem):
 	def setId(self,i):
@@ -202,6 +195,8 @@ class BoneView(QtGui.QDialog):
 			self.editAttachments()
 		elif self.treeWidget.currentItem().NodeType == "Light":
 			self.editLights()
+		elif self.treeWidget.currentItem().NodeType == "Particle":
+			self.editParticles()
 
 	def editAttachments(self):
 		self.attEditor = AttachmentEditor()
@@ -234,6 +229,17 @@ class BoneView(QtGui.QDialog):
 
 	def setLights(self):
 		self.m2 = self.lightEditor.m2
+		self.updateTree()
+
+	def editParticles(self):
+		self.particleEditor = ParticleEditor()
+		self.particleEditor.setModel(self.m2,self.skin)
+		self.particleEditor.show()
+		self.particleEditor.setCurrentEditing(self.treeWidget.currentItem().Id)
+		QtCore.QObject.connect(self.particleEditor, QtCore.SIGNAL("accepted()"), self.setParticles)
+
+	def setParticles(self):
+		self.m2 = self.particleEditor.m2
 		self.updateTree()
 		
 def iterateThroughChildren(item,Id):

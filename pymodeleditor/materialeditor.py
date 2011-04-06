@@ -1,23 +1,9 @@
 
 
-# Form implementation generated from reading ui file 'Material.ui'
-#
-# Created: Sun Jun  6 19:48:55 2010
-#      by: PyQt4 UI code generator 4.4.4
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt4 import QtCore, QtGui
 import skin
+from stuff import *
 
-TextureTypes = { 0 : "Hardcoded" , 1 : "Body/Clothes" , 2 : "Items", 3 : "ArmorReflect?", 6 : "Hair/Beard",
-8 : "Tauren fur", 9 : "Inventory Art 1", 10 : "quillboarpinata", 11 : "Skin for creatures or gameobjects 1",
-12 : "Skin for creatures or gameobjects 2" ,13 : "Skin for creatures or gameobjects 3", 14 : "Inventory Art 2"} 
-
-GeosetTypes = { "00" : "Hairstyles", "01" : "Facial1", "02" : "Facial2", "03" : "Facial3",
-"04" : "Bracers", "05" : "Boots", "06" : "Unknown1", "07" : "Ears", "08" : "Wristbands", "09" : "Kneepads",
-"10" : "Unknown2", "11" : "Pants", "12" : "Tabard", "13" : "Trousers/Kilt", "14" : "Unknown3",
-"15" : "Cape", "16" : "Unknown4", "17" : "Eyeglows", "18" : "Belt" } 
 
 class MaterialEditor(QtGui.QDialog):
 	def __init__(self): 

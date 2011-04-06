@@ -6,10 +6,7 @@ from PyQt4 import QtCore, QtGui
 from animeditor import AnimEditor
 from animcoloreditor import AnimColorEditor
 import m2
-
-KeyBoneTypes = {-1:"None", 0 :"ArmL", 1: "ArmR", 2 :"ShoulderL", 3 :"ShoulderR", 4: "SpineLow", 5: "Waist", 6: "Head", 7 :"Jaw", 8: "IndexFingerR", 9: "MiddleFingerR", 10: "PinkyFingerR", 11:"RingFingerR", 12 :"ThumbR", 13 :"IndexFingerL", 14 :"MiddleFingerL", 15 :"PinkyFingerL", 16: "RingFingerL", 17: "ThumbL", 18: "$BTH", 19: "$CSR", 20: "$CSL", 21: "_Breath", 22 :"_Name", 23 :"_NameMount", 24 :"$CHD", 25 :"$CCH", 26 :"Root", 27 :"Wheel1", 28 :"Wheel2", 29 :"Wheel3", 30 :"Wheel4", 31 :"Wheel5", 32: "Wheel6", 33: "Wheel7", 34: "Wheel8" }
-
-LightTypes = {0:"Directional Light",1:"Point Light"}
+from stuff import *
 
 class LightEditor(QtGui.QDialog):
 	def __init__(self): 
@@ -144,8 +141,9 @@ class LightEditor(QtGui.QDialog):
 		self.changeEdit()
 		
 		
-	def addLight(self):
+	def addLight(self,parbone = 0):
 		l = m2.Light()
+		l.Bone = parbone
 		l.AmbientCol.type = m2.DATA_VEC3
 		l.AmbientInt.type = m2.DATA_FLOAT
 		l.DiffuseCol.type = m2.DATA_VEC3

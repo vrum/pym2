@@ -1,11 +1,5 @@
 #! /usr/bin/python
 
-# Form implementation generated from reading ui file 'Test.ui'
-#
-# Created: Wed May 19 12:19:34 2010
-#      by: PyQt4 UI code generator 4.4.4
-#
-# WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui, QtOpenGL
 
@@ -28,6 +22,7 @@ from lighteditor import *
 from sequenceeditor import *
 from thingseditor import *
 from coloreditor import *
+from particleeditor import *
 
 
 class PyModelEditor(object):
@@ -165,6 +160,12 @@ class PyModelEditor(object):
 		self.colorButton.setObjectName("colorButton")
 		self.connect(self.colorButton, QtCore.SIGNAL("clicked()"), self.editColors)
 
+
+		self.particleButton = QtGui.QPushButton(Form)
+		self.particleButton.setGeometry(QtCore.QRect(140, 620, 132, 28))
+		self.particleButton.setObjectName("particleButton")
+		self.connect(self.particleButton, QtCore.SIGNAL("clicked()"), self.editParticles)
+
 		self.retranslateUi(Form)
 		QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -183,6 +184,7 @@ class PyModelEditor(object):
 		self.sequenceButton.setText(QtGui.QApplication.translate("Form", "Edit Sequences", None, QtGui.QApplication.UnicodeUTF8))
 		self.thingsButton.setText(QtGui.QApplication.translate("Form", "Edit Things", None, QtGui.QApplication.UnicodeUTF8))
 		self.colorButton.setText(QtGui.QApplication.translate("Form", "Edit Colors", None, QtGui.QApplication.UnicodeUTF8))
+		self.particleButton.setText(QtGui.QApplication.translate("Form", "Edit Particles", None, QtGui.QApplication.UnicodeUTF8))
 
 		
 	def getLastDir(self):
@@ -352,5 +354,16 @@ class PyModelEditor(object):
 
 	def setColors(self):
 		self.m2 = self.colorEditor.m2
+		self.Gl.setModel(self.m2,self.skin)
+
+
+	def editParticles(self):
+		self.particleEditor = ParticleEditor()
+		self.particleEditor.setModel(self.m2,self.skin)
+		self.particleEditor.show()
+		QtCore.QObject.connect(self.particleEditor, QtCore.SIGNAL("accepted()"), self.setParticles)
+
+	def setParticles(self):
+		self.m2 = self.particleEditor.m2
 		self.Gl.setModel(self.m2,self.skin)
 

@@ -1,12 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import m2
+from stuff import *
 
-tex_type = { 0 : 0, 1 : 1, 2:2, 3:3, 4:6, 5:8,6:9,7:10,8:11,9:12,10:13,11:14}
-type_tex = { 0 : 0, 1 : 1, 2:2, 3:3, 6:4,8:5,9:6,10:7,11:8,12:9,13:10,14:11}
-
-TextureTypes = { 0 : "Hardcoded" , 1 : "Body/Clothes" , 2 : "Items", 3 : "ArmorReflect?", 6 : "Hair/Beard",
-8 : "Tauren fur", 9 : "Inventory Art 1", 10 : "quillboarpinata", 11 : "Skin for creatures or gameobjects 1",
-12 : "Skin for creatures or gameobjects 2" ,13 : "Skin for creatures or gameobjects 3", 14 : "Inventory Art 2"} 
 
 class TextureEditor(QtGui.QDialog):
 	def __init__(self): 
@@ -108,11 +103,7 @@ class TextureEditor(QtGui.QDialog):
 		if (self.last == -1):
 			return
 		name = str(self.lineEdit.text())
-		name.encode("cp1252")
-		if len(name) == 0:
-			name = "\0"
-		if name[len(name)-1] != "\0":
-				name += "\0"
+		name = makeZeroTerminated(name)
 		self.m2.textures[self.last].name = name
 		self.m2.textures[self.last].len_name = len(name) 
 		self.m2.textures[self.last].type = tex_type[self.typeBox.currentIndex()]
