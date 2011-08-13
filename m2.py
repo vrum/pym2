@@ -1121,6 +1121,7 @@ class M2File:
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
 		self.trans_lookup 	= ReadBlock(f,hdr.trans_lookup,Lookup)
 		self.uv_anim_lookup 	= ReadBlock(f,hdr.uv_anim_lookup,Lookup)
+		self.hdr.bounding_triangles.count /= 3
 		self.bounding_triangles = ReadBlock(f,hdr.bounding_triangles,Triangle)
 		self.bounding_vertices	= ReadBlock(f,hdr.bounding_vertices,Vec3)
 		self.bounding_normals	= ReadBlock(f,hdr.bounding_normals,Vec3)
@@ -1215,6 +1216,7 @@ class M2File:
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)
 		WriteBlock(f,self.hdr.trans_lookup,self.trans_lookup)
 		WriteBlock(f,self.hdr.uv_anim_lookup,self.uv_anim_lookup)
+		self.hdr.bounding_triangles.count *= 3
 		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)
 		WriteBlock(f,self.hdr.bounding_vertices,self.bounding_vertices)
 		WriteBlock(f,self.hdr.bounding_normals,self.bounding_normals)
