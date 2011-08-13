@@ -134,8 +134,6 @@ class MaterialEditor(QtGui.QDialog):
 		self.skin = skin
 		for i in range(len(self.skin.texunit)):
 			self.chooseBox.addItem(str(i))
-		if len(self.skin.texunit) != 0:
-			self.lastchoice = 0
 
 		for i in range(len(self.skin.mesh)):
 			temp = str(self.skin.mesh[i].mesh_id)
@@ -174,7 +172,9 @@ class MaterialEditor(QtGui.QDialog):
 		for i in range(len(self.m2.tex_units)):
 			self.texunitChoose.addItem(str(i) + ": " + str(self.m2.tex_units[i].Id))
 
-		self.changeEdit()
+		if len(self.skin.texunit) != 0:
+			self.lastchoice = -1
+			self.changeEdit()
 		
 
 		
@@ -202,8 +202,8 @@ class MaterialEditor(QtGui.QDialog):
 	def saveOld(self):
 		if self.lastchoice == -1:
 			return
-
-		tu = self.skin.texunit[self.lastchoice]
+			
+		tu = skin.Material()
 
 		if self.checkBox.checkState() == 0:
 			tu.flags = 0x10

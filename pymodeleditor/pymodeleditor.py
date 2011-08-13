@@ -282,7 +282,7 @@ class PyModelEditor(object):
 		QtCore.QObject.connect(self.matEditor, QtCore.SIGNAL("accepted()"), self.setMaterials)
 
 	def setMaterials(self):
-		self.skin.texunit = self.matEditor.skin.texunit
+		self.skin = self.matEditor.skin
 		self.Gl.setModel(self.m2,self.skin)
 
 

@@ -73,12 +73,12 @@ class BoundsEditor(QtGui.QDialog):
 		
 	def finalizeMe(self):
 		self.bounds.Radius = float(self.lineEdit.text())
-		self.bounds.minimumExtend.x = float(self.minX.text())
-		self.bounds.minimumExtend.y = float(self.minY.text())
-		self.bounds.minimumExtend.z = float(self.minZ.text())
-		self.bounds.maximumExtend.x = float(self.maxX.text())
-		self.bounds.maximumExtend.y = float(self.maxY.text())
-		self.bounds.maximumExtend.z = float(self.maxZ.text())
+		self.bounds.minExtends.x = float(self.minX.text())
+		self.bounds.minExtends.y = float(self.minY.text())
+		self.bounds.minExtends.z = float(self.minZ.text())
+		self.bounds.maxExtends.x = float(self.maxX.text())
+		self.bounds.maxExtends.y = float(self.maxY.text())
+		self.bounds.maxExtends.z = float(self.maxZ.text())
 		self.accept()
 		
 		
@@ -86,9 +86,9 @@ class BoundsEditor(QtGui.QDialog):
 	def setBounds(self,bounds):
 		self.bounds = bounds
 		self.lineEdit.setText(str(self.bounds.Radius))
-		self.minX.setText(str(self.bounds.minimumExtend.x))
-		self.minY.setText(str(self.bounds.minimumExtend.y))
-		self.minZ.setText(str(self.bounds.minimumExtend.z))
-		self.maxX.setText(str(self.bounds.maximumExtend.x))
-		self.maxY.setText(str(self.bounds.maximumExtend.y))
-		self.maxZ.setText(str(self.bounds.maximumExtend.z))
+		self.minX.setText(str(self.bounds.minExtends.x))
+		self.minY.setText(str(self.bounds.minExtends.y))
+		self.minZ.setText(str(self.bounds.minExtends.z))
+		self.maxX.setText(str(self.bounds.maxExtends.x))
+		self.maxY.setText(str(self.bounds.maxExtends.y))
+		self.maxZ.setText(str(self.bounds.maxExtends.z))
