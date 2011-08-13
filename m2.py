@@ -50,8 +50,8 @@ class M2Header:
 		self.tex_units      = Chunk()
 		self.trans_lookup   = Chunk()
 		self.uv_anim_lookup = Chunk()
-		self.vbox	= Bounds()
 		self.bound	= Bounds()
+		self.vbox	= Bounds()
 		self.bounding_triangles = Chunk()
 		self.bounding_vertices = Chunk()
 		self.bounding_normals = Chunk()
@@ -90,8 +90,8 @@ class M2Header:
 		self.tex_units.unpack(f)
 		self.trans_lookup.unpack(f)
 		self.uv_anim_lookup.unpack(f)
-		self.vbox.unpack(f)
 		self.bound.unpack(f)
+		self.vbox.unpack(f)
 		self.bounding_triangles.unpack(f)
 		self.bounding_vertices.unpack(f)
 		self.bounding_normals.unpack(f)
@@ -129,8 +129,8 @@ class M2Header:
 		ret += self.tex_units.pack()
 		ret += self.trans_lookup.pack()
 		ret += self.uv_anim_lookup.pack()
-		ret += self.vbox.pack()
 		ret += self.bound.pack()
+		ret += self.vbox.pack()
 		ret += self.bounding_triangles.pack()
 		ret += self.bounding_vertices.pack()
 		ret += self.bounding_normals.pack()
@@ -151,15 +151,15 @@ class Vertex:
 		self.pos        = Vec3()
 		self.bweights   = (0,0,0,0)
 		self.bindices   = (0,0,0,0)
-		self.normal     = Vec3()
+		self.normal     = (0,0,0)
 		self.uv         = (0,0)
 		self.unk         = (0,0)
 		
 	def unpack(self,f):
-		self.pos.unpack(f)
+		self.pos        = Vec3().unpack(f)
 		self.bweights   = struct.unpack("4B",f.read(4))
 		self.bindices   = struct.unpack("4B",f.read(4))
-		self.normal.unpack(f)
+		self.normal     = struct.unpack("3f",f.read(12))
 		self.uv         = struct.unpack("2f",f.read(8))
 		self.unk         = struct.unpack("2f",f.read(8))
 		return self
@@ -167,7 +167,7 @@ class Vertex:
 		ret = self.pos.pack()
 		ret += struct.pack("4B",self.bweights[0],self.bweights[1],self.bweights[2],self.bweights[3])
 		ret += struct.pack("4B",self.bindices[0],self.bindices[1],self.bindices[2],self.bindices[3])
-		ret += self.normal.pack()
+		ret += struct.pack("3f",self.normal[0],self.normal[1],self.normal[2])
 		ret += struct.pack("2f",self.uv[0],self.uv[1])
 		ret += struct.pack("2f",self.unk[0],self.unk[1])
 		return ret
@@ -233,79 +233,59 @@ class AnimSub:
 			oldpos = f.tell()
 			f.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):	
-				for i in xrange(self.nEntries):					
-					temp = Quat()		
-					temp.unpack(f)	
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_VEC3):
-				for i in xrange(self.nEntries):
-					temp = Vec3()	
-					temp.unpack(f)	
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_INT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_INT):
 					temp, = struct.unpack("i",f.read(4))
 					self.values.append(temp)
-			elif(type == DATA_SHORT):			
-				for i in xrange(self.nEntries):
+				elif(type == DATA_SHORT):
 					temp, = struct.unpack("h",f.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):	
-				for i in xrange(self.nEntries):
-					temp = Vec2()		
-					temp.unpack(f)	
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_VEC9):		
-				for i in xrange(self.nEntries):
-					temp = Vec9()	
-					temp.unpack(f)	
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(f)
 					self.values.append(temp)
-			elif(type == DATA_FLOAT):			
-				for i in xrange(self.nEntries):
+				elif(type == DATA_FLOAT):
 					temp, = struct.unpack("f",f.read(4))
 					self.values.append(temp)
-			else:
-				pass
+				else:
+					pass
 			f.seek(oldpos)
 		else:
 			file = open(animfile[1],"r+b")			
 			file.seek(self.ofsEntries)
 			self.values = []
-			if(type == DATA_QUAT):			
-				for i in xrange(self.nEntries):
-					temp = Quat()		
-					temp.unpack(file)
+			for i in xrange(self.nEntries):
+				if(type == DATA_QUAT):
+					temp = Quat().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC3):				
-				for i in xrange(self.nEntries):
-					temp = Vec3()	
-					temp.unpack(file)
+				elif(type == DATA_VEC3):
+					temp = Vec3().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_INT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_INT):
 					temp, = struct.unpack("i",file.read(4))
 					self.values.append(temp)
-			elif(type == DATA_SHORT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_SHORT):
 					temp, = struct.unpack("h",file.read(2))
 					self.values.append(temp)
-			elif(type == DATA_VEC2):			
-				for i in xrange(self.nEntries):
-					temp = Vec2()		
-					temp.unpack(file)
+				elif(type == DATA_VEC2):
+					temp = Vec2().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_VEC9):				
-				for i in xrange(self.nEntries):
-					temp = Vec9()	
-					temp.unpack(file)
+				elif(type == DATA_VEC9):
+					temp = Vec9().unpack(file)
 					self.values.append(temp)
-			elif(type == DATA_FLOAT):
-				for i in xrange(self.nEntries):
+				elif(type == DATA_FLOAT):
 					temp, = struct.unpack("f",file.read(4))
 					self.values.append(temp)
-			else:
-				pass
+				else:
+					pass
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.nEntries)
@@ -323,6 +303,7 @@ class AnimBlock:
 		self.ofsKeys	= 0		
 		self.KeySubs = []
 		self.type = DATA_INT
+		
 
 		
 	def unpack(self,f,type,animfiles):
@@ -383,10 +364,10 @@ class Bone:
 		self.flags,	= struct.unpack("i",f.read(4))
 		self.parent,	= struct.unpack("h",f.read(2))
 		self.unk	= struct.unpack("3h",f.read(6))
-		self.translation.unpack(f,DATA_VEC3,animfiles)
-		self.rotation.unpack(f,DATA_QUAT,animfiles)
-		self.scaling.unpack(f,DATA_VEC3,animfiles)
-		self.pivot.unpack(f)
+		self.translation= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT,animfiles)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.pivot	= Vec3().unpack(f)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.KeyBoneId)
@@ -408,8 +389,8 @@ class Attachment:
 	def unpack(self,f,animfiles):
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.bone,	= struct.unpack("i",f.read(4))
-		self.pos.unpack(f)
-		self.Enabled.unpack(f,DATA_INT,animfiles)
+		self.pos	= Vec3().unpack(f)
+		self.Enabled	= AnimBlock().unpack(f,DATA_INT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Id)
@@ -462,9 +443,9 @@ class UVAnimation:
 		self.rotation	= AnimBlock()
 		self.scaling	= AnimBlock()
 	def unpack(self,f,animfiles):
-		self.translation.unpack(f,DATA_VEC3,animfiles)
-		self.rotation.unpack(f,DATA_QUAT,animfiles)
-		self.scaling.unpack(f,DATA_VEC3,animfiles)	
+		self.translation= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.rotation	= AnimBlock().unpack(f,DATA_QUAT,animfiles)
+		self.scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)	
 		return self
 	def pack(self):
 		ret = self.translation.pack()
@@ -477,8 +458,8 @@ class Color:
 		self.color = AnimBlock()
 		self.alpha = AnimBlock()
 	def unpack(self,f,animfiles):
-		self.color.unpack(f,DATA_VEC3,animfiles)
-		self.alpha.unpack(f,DATA_SHORT,animfiles)	
+		self.color = AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT,animfiles)	
 		return self
 	def pack(self):
 		ret = self.color.pack()
@@ -489,7 +470,7 @@ class Transparency:
 	def __init__(self):
 		self.alpha = AnimBlock()
 	def unpack(self,f,animfiles):
-		self.alpha.unpack(f,DATA_SHORT,animfiles)	
+		self.alpha = AnimBlock().unpack(f,DATA_SHORT,animfiles)	
 		return self
 	def pack(self):
 		return self.alpha.pack()
@@ -512,7 +493,7 @@ class Event:
 		self.Id,	= struct.unpack("i",f.read(4))
 		self.Data,	= struct.unpack("i",f.read(4))
 		self.Bone,	= struct.unpack("i",f.read(4))
-		self.Pos.unpack(f)
+		self.Pos	= Vec3().unpack(f)
 		self.interpolation,= struct.unpack("h",f.read(2))
 		self.gsequ,	= struct.unpack("h",f.read(2))
 		self.nTimes,	= struct.unpack("i",f.read(4))
@@ -552,14 +533,14 @@ class Light:
 	def unpack(self,f,animfiles):
 		self.Type,	= struct.unpack("h",f.read(2))
 		self.Bone,	= struct.unpack("h",f.read(2))
-		self.Pos.unpack(f)
-		self.AmbientCol.unpack(f,DATA_VEC3,animfiles)
-		self.AmbientInt.unpack(f,DATA_FLOAT,animfiles)
-		self.DiffuseCol.unpack(f,DATA_VEC3,animfiles)
-		self.DiffuseInt.unpack(f,DATA_FLOAT,animfiles)
-		self.AttStart.unpack(f,DATA_FLOAT,animfiles)
-		self.AttEnd.unpack(f,DATA_FLOAT,animfiles)
-		self.Enabled.unpack(f,DATA_INT,animfiles)
+		self.Pos	= Vec3().unpack(f)
+		self.AmbientCol	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.AmbientInt	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.DiffuseCol	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
+		self.DiffuseInt	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.AttStart	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.AttEnd	= AnimBlock().unpack(f,DATA_FLOAT,animfiles)
+		self.Enabled	= AnimBlock().unpack(f,DATA_INT,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("h",self.Type)
@@ -627,7 +608,7 @@ class FakeAnim:
 
 class Particle:
 	def __init__(self):
-		self.Id	= 0
+		self.Id	= -1
 		self.flags1	= 0
 		self.flags2	= 0
 		self.Pos	= Vec3()
@@ -920,11 +901,11 @@ class Camera:
 		self.FOV,	= struct.unpack("f",f.read(4))
 		self.FarClip,	= struct.unpack("f",f.read(4))
 		self.NearClip,	= struct.unpack("f",f.read(4))
-		self.TransPos.unpack(f,DATA_VEC9,animfiles)
-		self.Pos.unpack(f)
-		self.TransTar.unpack(f,DATA_VEC9,animfiles)
-		self.Target.unpack(f)
-		self.Scaling.unpack(f,DATA_VEC3,animfiles)
+		self.TransPos	= AnimBlock().unpack(f,DATA_VEC9,animfiles)
+		self.Pos	= Vec3().unpack(f)
+		self.TransTar	= AnimBlock().unpack(f,DATA_VEC9,animfiles)
+		self.Target	= Vec3().unpack(f)
+		self.Scaling	= AnimBlock().unpack(f,DATA_VEC3,animfiles)
 		return self
 	def pack(self):
 		ret = struct.pack("i",self.Type)
@@ -959,58 +940,46 @@ def WriteAnimBlock(f,block,animfiles):
 	
 		for i in xrange(block.nTimes):
 			if (animfiles[i][0] == False ):
-				block.TimeSubs[i].ofsEntries = f.tell()					
-				if(block.TimeSubs[i].type == DATA_QUAT):
-					for j in block.TimeSubs[i].values:
-						f.write(j.pack())						
-				elif(block.TimeSubs[i].type == DATA_VEC3):
-					for j in block.TimeSubs[i].values:
+				block.TimeSubs[i].ofsEntries = f.tell()	
+				for j in block.TimeSubs[i].values:
+					if(block.TimeSubs[i].type == DATA_QUAT):
 						f.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_INT):
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC3):
+						f.write(j.pack())
+					elif(block.TimeSubs[i].type == DATA_INT):
 						f.write(struct.pack("i",j))
-				elif(block.TimeSubs[i].type == DATA_SHORT):
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_SHORT):
 						f.write(struct.pack("h",j))
-				elif(block.TimeSubs[i].type == DATA_VEC2):
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC2):
 						f.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_VEC9):
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC9):
 						f.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_FLOAT):
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_FLOAT):
 						f.write(struct.pack("f",j))
-				else:
-					pass
+					else:
+						pass
 				FillLine(f)
 			else:
 				file = open(animfiles[i][1],"a+b")	
 				file.seek(0,SEEK_END)
 				block.TimeSubs[i].ofsEntries = file.tell()	
-				if(block.TimeSubs[i].type == DATA_QUAT):					
-					for j in block.TimeSubs[i].values:
+				for j in block.TimeSubs[i].values:
+					if(block.TimeSubs[i].type == DATA_QUAT):
 						file.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_VEC3):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC3):
 						file.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_INT):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_INT):
 						file.write(struct.pack("i",j))
-				elif(block.TimeSubs[i].type == DATA_SHORT):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_SHORT):
 						file.write(struct.pack("h",j))
-				elif(block.TimeSubs[i].type == DATA_VEC2):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC2):
 						file.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_VEC9):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_VEC9):
 						file.write(j.pack())
-				elif(block.TimeSubs[i].type == DATA_FLOAT):				
-					for j in block.TimeSubs[i].values:
+					elif(block.TimeSubs[i].type == DATA_FLOAT):
 						file.write(struct.pack("f",j))
-				else:
-					pass
+					else:
+						pass
 				FillLine(file)
 	
 	
@@ -1021,58 +990,45 @@ def WriteAnimBlock(f,block,animfiles):
 		for i in xrange(block.nKeys):
 			if (animfiles[i][0] == False ):
 				block.KeySubs[i].ofsEntries = f.tell()	
-				
-				if(block.KeySubs[i].type == DATA_QUAT):
-					for j in block.KeySubs[i].values:
+				for j in block.KeySubs[i].values:
+					if(block.KeySubs[i].type == DATA_QUAT):
 						f.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_VEC3):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC3):
 						f.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_INT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_INT):
 						f.write(struct.pack("i",j))
-				elif(block.KeySubs[i].type == DATA_SHORT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_SHORT):
 						f.write(struct.pack("h",j))
-				elif(block.KeySubs[i].type == DATA_VEC2):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC2):
 						f.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_VEC9):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC9):
 						f.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_FLOAT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_FLOAT):
 						f.write(struct.pack("f",j))
-				else:	
-					pass
+					else:	
+						pass
 				FillLine(f)
 			else:
 				file = open(animfiles[i][1],"a+b")	
 				file.seek(0,SEEK_END)
-				block.KeySubs[i].ofsEntries = file.tell()
-				if(block.KeySubs[i].type == DATA_QUAT):	
-					for j in block.KeySubs[i].values:
+				block.KeySubs[i].ofsEntries = file.tell()	
+				for j in block.KeySubs[i].values:
+					if(block.KeySubs[i].type == DATA_QUAT):
 						file.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_VEC3):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC3):
 						file.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_INT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_INT):
 						file.write(struct.pack("i",j))
-				elif(block.KeySubs[i].type == DATA_SHORT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_SHORT):
 						file.write(struct.pack("h",j))
-				elif(block.KeySubs[i].type == DATA_VEC2):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC2):
 						file.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_VEC9):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_VEC9):
 						file.write(j.pack())
-				elif(block.KeySubs[i].type == DATA_FLOAT):
-					for j in block.KeySubs[i].values:
+					elif(block.KeySubs[i].type == DATA_FLOAT):
 						file.write(struct.pack("f",j))
-				else:
-					pass
+					else:
+						pass
 				FillLine(file)
 			
 		oldpos = f.tell()
@@ -1165,8 +1121,6 @@ class M2File:
 		self.tex_units		= ReadBlock(f,hdr.tex_units,Lookup)
 		self.trans_lookup 	= ReadBlock(f,hdr.trans_lookup,Lookup)
 		self.uv_anim_lookup 	= ReadBlock(f,hdr.uv_anim_lookup,Lookup)
-		#This was a big bug, fine I found it --Tig :)
-		self.hdr.bounding_triangles.count /= 3;
 		self.bounding_triangles = ReadBlock(f,hdr.bounding_triangles,Triangle)
 		self.bounding_vertices	= ReadBlock(f,hdr.bounding_vertices,Vec3)
 		self.bounding_normals	= ReadBlock(f,hdr.bounding_normals,Vec3)
@@ -1261,9 +1215,7 @@ class M2File:
 		WriteBlock(f,self.hdr.tex_units,self.tex_units)
 		WriteBlock(f,self.hdr.trans_lookup,self.trans_lookup)
 		WriteBlock(f,self.hdr.uv_anim_lookup,self.uv_anim_lookup)
-		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)		
-		#This was a big bug, fine I found it --Tig :)
-		self.hdr.bounding_triangles.count *= 3;
+		WriteBlock(f,self.hdr.bounding_triangles,self.bounding_triangles)
 		WriteBlock(f,self.hdr.bounding_vertices,self.bounding_vertices)
 		WriteBlock(f,self.hdr.bounding_normals,self.bounding_normals)
 		

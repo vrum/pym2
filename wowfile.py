@@ -55,7 +55,7 @@ class Lookup:
 		return struct.pack("h",self.Id)
 	
 
-class Chunk: #m2 and skin chunks!
+class Chunk:
 	def __init__(self):
 		self.count     = 0
 		self.offset    = 0
@@ -189,14 +189,17 @@ class Quat:
 		
 class Bounds:
 	def __init__(self):
-		self.BoundingBox	= (0,0,0,0,0,0)
+		self.minExtends = Vec3()
+		self.maxExtends = Vec3()
 		self.Radius		= 0
 	def unpack(self,f):
-		self.BoundingBox	= struct.unpack("6f",f.read(24))
+		self.minExtends.unpack(f)
+		self.maxExtends.unpack(f)
 		self.Radius,		= struct.unpack("f",f.read(4))
 		return self
 	def pack(self):
-		ret = struct.pack("6f",self.BoundingBox[0],self.BoundingBox[1],self.BoundingBox[2],self.BoundingBox[3],self.BoundingBox[4],self.BoundingBox[5])
+		ret = self.minExtends.pack()
+		ret += self.maxExtends.pack()
 		ret += struct.pack("f",self.Radius)
 		return ret
 	
