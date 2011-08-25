@@ -103,7 +103,7 @@ class LightEditor(QtGui.QDialog):
 		self.connect(self.enabledButton, QtCore.SIGNAL("clicked()"), self.editEnabled)
 
 		self.retranslateUi(Dialog)
-		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), Dialog.accept)
+		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), Dialog.finalizeMe)
 		QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), Dialog.reject)
 		QtCore.QMetaObject.connectSlotsByName(Dialog)
 

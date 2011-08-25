@@ -236,6 +236,7 @@ class ParticleEditor(QtGui.QDialog):
 			else:
 				self.boneBox.addItem("Bone: "+str(i-1)+" "+KeyBoneTypes[self.m2.bones[i-1].KeyBoneId])
 				
+		self.last = -1
 		self.changeEdit()
 		
 		
@@ -257,6 +258,8 @@ class ParticleEditor(QtGui.QDialog):
 		
 		self.chooseBox.addItem(str(self.m2.hdr.particle_emitters.count))
 		self.m2.hdr.particle_emitters.count += 1
+		if(self.last == -1):
+			changeEdit()
 
 	def saveOld(self):
 		if (self.last == -1):
@@ -288,6 +291,8 @@ class ParticleEditor(QtGui.QDialog):
 			
 	def changeEdit(self):
 		self.saveOld()
+		if(self.chooseBox.count() == 0):
+			return
 		self.last = self.chooseBox.currentIndex()
 		p = self.m2.particle_emitters[self.last]
 		self.boneBox.setCurrentIndex(p.bone+1)
