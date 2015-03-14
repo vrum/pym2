@@ -1,0 +1,1 @@
+Python Scripting Library for accessing M2 files, used in WoW for Models and Effects.
